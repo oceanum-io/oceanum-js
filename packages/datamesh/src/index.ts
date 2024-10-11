@@ -1,1 +1,2 @@
-export * from "./lib/connector.ts";
+export * from "./lib/connector";
+export * from "./lib/datasource";

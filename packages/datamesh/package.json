@@ -1,13 +1,11 @@
 {
   "name": "@oceanum/datamesh",
   "version": "0.0.1",
-  "scripts": {
-    "test": "node index.js"
-  },
-  "private": true,
+  "scripts": {},
   "dependencies": {
     "@types/geojson": "^7946.0.14",
     "@zarrita/core": "^0.0.3",
+    "@zarrita/storage": "^0.0.2",
     "dayjs": "^1.11.13"
   },
   "main": "./dist/index.js",

@@ -1,4 +1,4 @@
-import { Geometry } from "@types/geojson";
+import { Geometry } from "geojson";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 
@@ -106,7 +106,7 @@ export interface Datasource {
   /**
    * Schema information for the data source.
    */
-  dataschema: Schema;
+  schema: Schema;
 
   /**
    * Coordinate mappings for the data source.
