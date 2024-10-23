@@ -1,4 +1,4 @@
-import { assertType, test } from "vitest";
+import { assertType, test, expect } from "vitest";
 import { Datasource } from "../lib/datasource";
 import Connector from "../lib/connector";
 import { datameshTest } from "./fixtures";

@@ -1,23 +1,23 @@
 import { Datasource } from "./datasource";
-import { GeoFilter, Query, Stage, TimeFilter } from "./query";
+import { IQuery, Stage } from "./query";
+import { Dataset, DatameshStore } from "./datamodel";
 
 /**
  * Datamesh connector class.
  *
  * All datamesh operations are methods of this class.
  */
-class Connector {
+export class Connector {
   private _token: string;
   private _proto: string;
   private _host: string;
   private _authHeaders: Record<string, string>;
   private _gateway: string;
-  private _cachedir: string;
 
   /**
    * Datamesh connector constructor
    *
-   * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN.
+   * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN if defined else $DATAMESH_TOKEN
    * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
    * @param gateway - URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
    * @param user - Organisation user name for the datamesh connection. Defaults to None.
@@ -25,10 +25,9 @@ class Connector {
    * @throws {Error} - If a valid token is not provided.
    */
   constructor(
-    token: string | null = process.env.DATAMESH_TOKEN || null,
-    service: string = process.env.DATAMESH_SERVICE ||
-      "https://datamesh.oceanum.io",
-    gateway: string | null = process.env.DATAMESH_GATEWAY ||
+    token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
+    service = process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io",
+    gateway = process.env.DATAMESH_GATEWAY ||
       "https://gateway.datamesh.oceanum.io"
   ) {
     if (!token) {
@@ -105,7 +104,7 @@ class Connector {
    */
   private async metadataRequest(
     datasourceId = "",
-    params: Record<string, any> = {}
+    params = {} as Record<string, string>
   ): Promise<Response> {
     const url = new URL(
       `${this._proto}//${this._host}/datasource/${datasourceId}`
@@ -139,15 +138,12 @@ class Connector {
   async dataRequest(
     datasourceId: string,
     dataFormat = "application/json"
-  ): Promise<string> {
-    const tmpfile = `${this._cachedir}/${datasourceId}`;
+  ): Promise<Blob> {
     const response = await fetch(`${this._gateway}/data/${datasourceId}`, {
       headers: { Accept: dataFormat, ...this._authHeaders },
     });
     await this.validateResponse(response);
-    const fs = require("fs");
-    fs.writeFileSync(tmpfile, await response.buffer());
-    return tmpfile;
+    return response.blob();
   }
 
   /**
@@ -156,20 +152,16 @@ class Connector {
    * @param query - The query to stage.
    * @returns The staged response.
    */
-  private async stageRequest(query: Query): Promise<Stage> {
+  private async stageRequest(query: IQuery): Promise<Stage | null> {
     const data = JSON.stringify(query);
     const response = await fetch(`${this._gateway}/oceanql/stage/`, {
       method: "POST",
-      headers: this._authHeaders,
+      headers: { "Content-Type": "application/json", ...this._authHeaders },
       body: data,
     });
     if (response.status >= 400) {
-      try {
-        const errorJson = await response.json();
-        throw new Error(errorJson.detail);
-      } catch {
-        throw new Error(`Datamesh server error: ${await response.text()}`);
-      }
+      const errorJson = await response.json();
+      throw new Error(errorJson.detail);
     } else if (response.status === 204) {
       return null;
     } else {
@@ -185,64 +177,15 @@ class Connector {
    * @param cacheTimeout - The cache timeout for the query. Defaults to 0.
    * @returns The response from the server.
    */
-  async query(query: Query): Promise<any> {
+  async query(query: IQuery): Promise<Dataset<DatameshStore> | null> {
     const stage = await this.stageRequest(query);
     if (!stage) {
       console.warn("No data found for query");
       return null;
     }
-
-    const transferFormat =
-      stage.container === "Dataset"
-        ? "application/x-netcdf4"
-        : "application/parquet";
-    const headers = { Accept: transferFormat, ...this._authHeaders };
-    const response = await fetch(`${this._gateway}/oceanql/`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(query),
-    });
-    if (response.status >= 400) {
-      try {
-        const errorJson = await response.json();
-        throw new Error(errorJson.detail);
-      } catch {
-        throw new Error(`Datamesh server error: ${await response.text()}`);
-      }
-    }
-    const fs = require("fs");
-    const tmpfile = require("os").tmpdir() + `/query_${Date.now()}`;
-    fs.writeFileSync(tmpfile, await response.buffer());
-    return tmpfile;
-  }
-
-  /**
-   * Get datamesh catalog.
-   *
-   * @param search - Search string for filtering datasources.
-   * @param timefilter - Time filter for the catalog.
-   * @param geofilter - Spatial filter for the catalog.
-   * @returns The datamesh catalog.
-   */
-  async getCatalog(
-    search: string | null = null,
-    timefilter: TimeFilter = null,
-    geofilter: GeoFilter = null
-  ): Promise<Datasource[]> {
-    const searchQuery: Record<string, string> = {};
-    if (search) {
-      searchQuery["search"] = search;
-    }
-    if (timefilter) {
-      searchQuery["in_trange"] = `${timefilter.start || ""}Z,${
-        timefilter.end || ""
-      }Z`;
-    }
-    if (geofilter) {
-      searchQuery["geom_intersects"] = geofilter;
-    }
-    const meta = await this.metadataRequest("", searchQuery);
-    return meta.json();
+    const url = `${this._gateway}/zarr/${stage.qhash}`;
+    const dataset = await Dataset.zarr(url, this._authHeaders);
+    return dataset;
   }
 
   /**
@@ -273,40 +216,17 @@ class Connector {
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}
-  ): Promise<Dataset> {
+  ): Promise<Dataset<DatameshStore> | null> {
     const query = { datasource: datasourceId, parameters };
     const stage = await this.stageRequest(query);
     if (!stage) {
       console.warn("No data found for query");
       return null;
     }
-
-    if (stage.container === "Dataset" || useDask) {
-      // Assuming use of a library like xarray for dataset handling
-      const ZarrClient = require("zarr-js"); // Example client for handling Zarr datasets
-      const mapper = new ZarrClient(this, datasourceId, parameters);
-      const xarray = require("xarray");
-      return xarray.openZarr(mapper, {
-        consolidated: true,
-        decodeCoords: "all",
-        maskAndScale: true,
-      });
-    } else if (stage.container === "GeoDataFrame") {
-      const tmpfile = await this.dataRequest(
-        datasourceId,
-        "application/parquet"
-      );
-      const geopandas = require("geopandas");
-      return geopandas.readParquet(tmpfile);
-    } else if (stage.container === "DataFrame") {
-      const tmpfile = await this.dataRequest(
-        datasourceId,
-        "application/parquet"
-      );
-      const pandas = require("pandas");
-      return pandas.readParquet(tmpfile);
-    }
+    const dataset = await Dataset.zarr(
+      `${this._gateway}/zarr/${stage.qhash}`,
+      this._authHeaders
+    );
+    return dataset;
   }
 }
-
-export default Connector;

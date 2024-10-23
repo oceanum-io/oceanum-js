@@ -9,13 +9,15 @@
       "request": "launch",
       "name": "Debug Current Test File",
       "autoAttachChildProcesses": true,
-      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "skipFiles": ["<node_internals>/**"], //, "**/node_modules/**"],
       "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
       "args": ["run", "${relativeFile}"],
       "smartStep": true,
       "console": "integratedTerminal",
       "env": {
         "DATAMESH_TOKEN": "aa54ff999abf474c0c1584fb6e97134249c3e437"
+        // "DATAMESH_GATEWAY": "http://localhost:8000",
+        // "DATAMESH_SERVICE": "https://datamesh.oceanum.tech"
       }
     }
   ]

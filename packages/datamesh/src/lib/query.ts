@@ -1,6 +1,8 @@
+import { Feature } from "geojson";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { Feature } from "geojson";
+
+dayjs.extend(duration);
 
 /**
  * GeoFilterType enum representing types of geofilters.
@@ -73,58 +75,87 @@ enum Container {
 }
 
 /**
- * GeoFilter interface representing a spatial subset or interpolation.
+ * GeoFilter type representing a spatial subset or interpolation.
  */
-interface GeoFilter {
+export type GeoFilter = {
   type: GeoFilterType;
   geom: Array<number[]> | Feature;
   interp?: GeoFilterInterp;
   resolution?: number;
   alltouched?: boolean;
-}
+};
 
 /**
- * LevelFilter interface representing a vertical subset or interpolation.
+ * LevelFilter type representing a vertical subset or interpolation.
  */
-interface LevelFilter {
+type LevelFilter = {
   type: LevelFilterType;
   levels: Array<number | null>;
   interp?: LevelFilterInterp;
-}
+};
 
 /**
- * TimeFilter interface representing a temporal subset or interpolation.
+ * TimeFilter type representing a temporal subset or interpolation.
  */
-interface TimeFilter {
-  type: TimeFilterType;
-  times: Array<Date | null>;
+export type TimeFilter = {
+  type?: TimeFilterType;
+  times: Array<Date | dayjs.Dayjs | duration.Duration | string>;
   resolution?: string;
   resample?: ResampleType;
-}
+};
+
+const stringifyTime = (
+  t: Date | dayjs.Dayjs | duration.Duration | string
+): string => {
+  if (t instanceof Date) {
+    return dayjs(t as Date).toISOString();
+  } else if (t instanceof dayjs) {
+    return (t as dayjs.Dayjs).toISOString();
+  } else if (t instanceof dayjs.duration) {
+    return (t as duration.Duration).toISOString();
+  } else {
+    try {
+      return dayjs.duration(t as string).toISOString();
+    } catch {
+      return dayjs(t as string).toISOString();
+    }
+  }
+};
+
+const timeFilterValidate = (timefilter: TimeFilter): TimeFilter => {
+  const times = timefilter.times.map((t) => stringifyTime(t));
+
+  return {
+    type: timefilter.type || TimeFilterType.Range,
+    times,
+    resolution: timefilter.resolution,
+    resample: timefilter.resample,
+  };
+};
 
 /**
- * Aggregate interface representing aggregation operations.
+ * Aggregate type representing aggregation operations.
  */
-interface Aggregate {
+type Aggregate = {
   operations: AggregateOps[];
   spatial?: boolean;
   temporal?: boolean;
-}
+};
 
 /**
- * CoordSelector interface representing coordinate selection.
+ * CoordSelector type representing coordinate selection.
  */
-interface CoordSelector {
+type CoordSelector = {
   coord: string;
   values: Array<string | number>;
-}
+};
 
 /**
  * Query interface representing a Datamesh query.
  */
-interface Query {
+export interface IQuery {
   datasource: string;
-  parameters?: Record<string, any>;
+  parameters?: Record<string, number | string | number[] | string[]>;
   description?: string;
   variables?: string[];
   timefilter?: TimeFilter;
@@ -140,7 +171,7 @@ interface Query {
 /**
  * Stage interface representing the result of staging a query.
  */
-interface Stage {
+export type Stage = {
   query: Query;
   qhash: string;
   formats: string[];
@@ -149,23 +180,57 @@ interface Stage {
   coordmap: Record<string, string>;
   container: Container;
   sig: string;
-}
-
-export {
-  GeoFilterType,
-  GeoFilterInterp,
-  LevelFilterInterp,
-  TimeFilterType,
-  LevelFilterType,
-  ResampleType,
-  AggregateOps,
-  Container,
-  GeoFilter,
-  LevelFilter,
-  TimeFilter,
-  Aggregate,
-  Function,
-  CoordSelector,
-  Query,
-  Stage,
 };
+
+/**
+ * Query class representing a Datamesh query.
+ */
+export class Query implements IQuery {
+  datasource: string;
+  parameters?: Record<string, number | string | number[] | string[]>;
+  description?: string;
+  variables?: string[];
+  timefilter?: TimeFilter;
+  geofilter?: GeoFilter;
+  levelfilter?: LevelFilter;
+  coordfilter?: CoordSelector[];
+  crs?: string | number;
+  aggregate?: Aggregate;
+  limit?: number;
+  id?: string;
+
+  constructor(query: IQuery) {
+    this.datasource = query.datasource;
+    this.parameters = query.parameters;
+    this.description = query.description;
+    this.variables = query.variables;
+    this.timefilter = query.timefilter && timeFilterValidate(query.timefilter);
+    this.geofilter = query.geofilter;
+    this.levelfilter = query.levelfilter;
+    this.coordfilter = query.coordfilter;
+    this.crs = query.crs;
+    this.aggregate = query.aggregate;
+    this.limit = query.limit;
+    this.id = query.id;
+  }
+
+  /**
+   * Returns the query as a JSON object.
+   */
+  toJSON(): Record<string, unknown> {
+    return {
+      datasource: this.datasource,
+      parameters: this.parameters,
+      description: this.description,
+      variables: this.variables,
+      timefilter: this.timefilter,
+      geofilter: this.geofilter,
+      levelfilter: this.levelfilter,
+      coordfilter: this.coordfilter,
+      crs: this.crs,
+      aggregate: this.aggregate,
+      limit: this.limit,
+      id: this.id,
+    };
+  }
+}
