@@ -4,4 +4,11 @@
 
 # @oceanum/datamesh
 
-## Packages
+## Classes
+
+- [Connector](classes/Connector.md)
+
+## Type Aliases
+
+- [Datasource](type-aliases/Datasource.md)
+- [Schema](type-aliases/Schema.md)

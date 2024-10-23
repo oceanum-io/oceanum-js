@@ -20,7 +20,6 @@ export class Connector {
    * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN if defined else $DATAMESH_TOKEN
    * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
    * @param gateway - URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
-   * @param user - Organisation user name for the datamesh connection. Defaults to None.
    *
    * @throws {Error} - If a valid token is not provided.
    */
@@ -132,7 +131,6 @@ export class Connector {
    *
    * @param datasourceId - The ID of the datasource to request.
    * @param dataFormat - The format of the requested data. Defaults to "application/json".
-   * @param cache - Whether to cache the response. Defaults to false.
    * @returns The path to the cached file.
    */
   async dataRequest(
@@ -173,8 +171,6 @@ export class Connector {
    * Execute a query to the datamesh.
    *
    * @param query - The query to execute.
-   * @param useDask - Whether to use Dask for execution. Defaults to false.
-   * @param cacheTimeout - The cache timeout for the query. Defaults to 0.
    * @returns The response from the server.
    */
   async query(query: IQuery): Promise<Dataset<DatameshStore> | null> {

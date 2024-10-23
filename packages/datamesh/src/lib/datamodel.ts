@@ -262,7 +262,7 @@ export class DataVar<
     if (_data.shape) {
       return unravel(_data.data, _data.shape, _data.stride);
     } else {
-      return _data;
+      return _data.data as Data;
     }
   }
 }
@@ -315,7 +315,7 @@ export class Dataset<S extends DatameshStore | TempStore> {
     parameters?: Record<string, string | number>,
     chunks?: string,
     downsample?: Record<string, number>
-  ): Dataset<DatameshStore> {
+  ): Promise<Dataset<DatameshStore>> {
     const store = await zarr.withConsolidated(
       new CachedHTTPStore(
         url,
@@ -334,7 +334,7 @@ export class Dataset<S extends DatameshStore | TempStore> {
       if (item.kind == "array") {
         const arr = await zarr.open(root.resolve(item.path), { kind: "array" });
         const array_dims = arr.attrs._ARRAY_DIMENSIONS as string[] | null;
-        const vid = item.path.split("/").pop();
+        const vid = item.path.split("/").pop() as string;
         data_vars[vid] = new DataVar<DataType, DatameshStore>(
           vid,
           array_dims || [],
@@ -361,7 +361,7 @@ export class Dataset<S extends DatameshStore | TempStore> {
    * Initializes an in memory Dataset instance from a data object.
    * @param datasource - An object containing id, dimensions, data variables, and attributes.
    */
-  static async init(datasource: Schema): Dataset<TempStore> {
+  static async init(datasource: Schema): Promise<Dataset<TempStore>> {
     const root = zarr.root(new Map());
     const ds = new Dataset(datasource.dims, {}, datasource.attrs || {}, root);
     for (const k in datasource.data_vars) {
