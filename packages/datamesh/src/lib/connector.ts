@@ -17,7 +17,7 @@ export class Connector {
   /**
    * Datamesh connector constructor
    *
-   * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN if defined else $DATAMESH_TOKEN
+   * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
    * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
    * @param gateway - URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
    *
