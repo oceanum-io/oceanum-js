@@ -32,18 +32,24 @@ jobs:
         run: |
           set -euo pipefail
           npm install --frozen-lockfile
-          
+
       - id: "build"
-        name: "Build documentation"
+        name: "Build typedoc documentation"
         run: |
           set -euo pipefail
           npm run build:docs
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
 
       - id: "upload-documentation"
         name: "Upload Pages artifact"
         uses: "actions/upload-pages-artifact@v3"
         with:
-          path: "docs/"
+          path: "./_site"
 
       - id: "deployment"
         name: "Deploy documentation to GitHub Pages"
