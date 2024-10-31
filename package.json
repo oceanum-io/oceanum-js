@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "docs": "typedoc --out docs"
+    "build:docs": "typedoc --out docs"
   },
   "private": true,
   "devDependencies": {
