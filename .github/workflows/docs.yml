@@ -32,11 +32,13 @@ jobs:
         run: |
           set -euo pipefail
           npm install --frozen-lockfile
+          
       - id: "build"
         name: "Build documentation"
         run: |
           set -euo pipefail
-          npm run build:doc
+          npm run build:docs
+
       - id: "upload-documentation"
         name: "Upload Pages artifact"
         uses: "actions/upload-pages-artifact@v3"
