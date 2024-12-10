@@ -38,4 +38,4 @@ Datatype of the variable.
 
 ## Defined in
 
-[datamodel.ts:33](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L33)
+[datamodel.ts:33](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L33)

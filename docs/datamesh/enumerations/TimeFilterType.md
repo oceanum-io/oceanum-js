@@ -16,7 +16,7 @@ TimeFilterType enum representing types of time filters.
 
 #### Defined in
 
-[query.ts:35](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L35)
+[query.ts:35](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L35)
 
 ***
 
@@ -26,7 +26,7 @@ TimeFilterType enum representing types of time filters.
 
 #### Defined in
 
-[query.ts:36](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L36)
+[query.ts:36](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L36)
 
 ***
 
@@ -36,4 +36,4 @@ TimeFilterType enum representing types of time filters.
 
 #### Defined in
 
-[query.ts:37](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L37)
+[query.ts:37](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L37)

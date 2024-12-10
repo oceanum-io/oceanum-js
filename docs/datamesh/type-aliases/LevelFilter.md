@@ -26,4 +26,4 @@ LevelFilter type representing a vertical subset or interpolation.
 
 ## Defined in
 
-[query.ts:91](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L91)
+[query.ts:91](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L91)

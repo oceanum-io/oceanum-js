@@ -34,7 +34,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:238](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L238)
+[datamodel.ts:238](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L238)
 
 ## Properties
 
@@ -44,7 +44,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:235](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L235)
+[datamodel.ts:235](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L235)
 
 ***
 
@@ -54,7 +54,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:234](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L234)
+[datamodel.ts:234](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L234)
 
 ***
 
@@ -64,7 +64,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:233](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L233)
+[datamodel.ts:233](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L233)
 
 ***
 
@@ -92,7 +92,7 @@ The zarr array associated with the data variable.
 
 #### Defined in
 
-[datamodel.ts:232](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L232)
+[datamodel.ts:232](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L232)
 
 ## Methods
 
@@ -116,4 +116,4 @@ A promise that resolves to the data of the zarr array.
 
 #### Defined in
 
-[datamodel.ts:258](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datamodel.ts#L258)
+[datamodel.ts:258](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L258)

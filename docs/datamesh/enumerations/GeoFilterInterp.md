@@ -16,7 +16,7 @@ GeoFilterInterp enum representing interpolation methods for geofilters.
 
 #### Defined in
 
-[query.ts:20](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L20)
+[query.ts:20](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L20)
 
 ***
 
@@ -26,4 +26,4 @@ GeoFilterInterp enum representing interpolation methods for geofilters.
 
 #### Defined in
 
-[query.ts:19](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L19)
+[query.ts:19](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L19)

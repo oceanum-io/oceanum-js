@@ -16,7 +16,7 @@ ResampleType enum representing types of resampling.
 
 #### Defined in
 
-[query.ts:52](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L52)
+[query.ts:52](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L52)
 
 ***
 
@@ -26,7 +26,7 @@ ResampleType enum representing types of resampling.
 
 #### Defined in
 
-[query.ts:53](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L53)
+[query.ts:53](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L53)
 
 ***
 
@@ -36,4 +36,4 @@ ResampleType enum representing types of resampling.
 
 #### Defined in
 
-[query.ts:54](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L54)
+[query.ts:54](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L54)

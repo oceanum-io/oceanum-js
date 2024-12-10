@@ -16,7 +16,7 @@ GeoFilterType enum representing types of geofilters.
 
 #### Defined in
 
-[query.ts:12](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L12)
+[query.ts:12](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L12)
 
 ***
 
@@ -26,4 +26,4 @@ GeoFilterType enum representing types of geofilters.
 
 #### Defined in
 
-[query.ts:11](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/query.ts#L11)
+[query.ts:11](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L11)
