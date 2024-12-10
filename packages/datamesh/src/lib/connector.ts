@@ -19,13 +19,14 @@ export class Connector {
    *
    * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
    * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
-   * @param gateway - URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
+   * @param gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
    *
    * @throws {Error} - If a valid token is not provided.
    */
   constructor(
     token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
     service = process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io",
+    // @ignore //
     gateway = process.env.DATAMESH_GATEWAY ||
       "https://gateway.datamesh.oceanum.io"
   ) {
@@ -133,7 +134,8 @@ export class Connector {
    * @param dataFormat - The format of the requested data. Defaults to "application/json".
    * @returns The path to the cached file.
    */
-  async dataRequest(
+  /** @ts-expect-error Not used at present*/
+  private async dataRequest(
     datasourceId: string,
     dataFormat = "application/json"
   ): Promise<Blob> {
@@ -173,7 +175,9 @@ export class Connector {
    * @param query - The query to execute.
    * @returns The response from the server.
    */
-  async query(query: IQuery): Promise<Dataset<DatameshStore> | null> {
+  async query(
+    query: IQuery
+  ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
     const stage = await this.stageRequest(query);
     if (!stage) {
       console.warn("No data found for query");
@@ -206,13 +210,12 @@ export class Connector {
    *
    * @param datasourceId - Unique datasource ID.
    * @param parameters - Additional datasource parameters.
-   * @param useDask - Whether to use Dask for loading. Defaults to false.
-   * @returns The datasource container.
+   * @returns The dataset.
    */
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}
-  ): Promise<Dataset<DatameshStore> | null> {
+  ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
     const query = { datasource: datasourceId, parameters };
     const stage = await this.stageRequest(query);
     if (!stage) {

@@ -6,7 +6,7 @@ import { get, set, Slice } from "@zarrita/indexing";
 
 import { Schema } from "./datasource";
 
-type ATypedArray =
+export type ATypedArray =
   | Int8Array
   | Int16Array
   | Int32Array
@@ -15,8 +15,8 @@ type ATypedArray =
   | Uint32Array
   | Float32Array
   | Float64Array;
-type Scalar = string | number | boolean;
-type NDArray =
+export type Scalar = string | number | boolean;
+export type NDArray =
   | Scalar[]
   | Scalar[][]
   | Scalar[][][]
@@ -25,7 +25,7 @@ type NDArray =
   | ATypedArray[][]
   | ATypedArray[][][]
   | ATypedArray[][][][];
-type Data = NDArray | ATypedArray | Scalar;
+export type Data = NDArray | ATypedArray | Scalar;
 
 /**
  * Represents a data variable.
@@ -57,11 +57,11 @@ const getShape = (a: Data) => {
   const dim = [] as number[];
   if (!isArray(a)) return dim;
   for (;;) {
-    // @ts-ignore: Scalar already returned
+    // @ts-expect-error: Scalar already returned
     dim.push(a.length);
-    // @ts-ignore: Scalar already returned
+    // @ts-expect-error: Scalar already returned
     if (isArray(a[0])) {
-      // @ts-ignore: Scalar already returned
+      // @ts-expect-error: Scalar already returned
       a = a[0];
     } else {
       break;
@@ -209,13 +209,16 @@ const flatten = (
   return rows;
 };
 
+/** @ignore */
 export type DatameshStore = Location<Listable<AsyncReadable>>;
+/** @ignore */
 export type TempStore = Location<Mutable>;
 
 /**
  * Represents a data variable within a dataset.
  */
 export class DataVar<
+  /** @ignore */
   DType extends DataType,
   S extends TempStore | DatameshStore
 > {
@@ -271,7 +274,7 @@ export class DataVar<
  * Represents a dataset with dimensions, data variables, and attributes.
  * Implements the DatasetApi interface.
  */
-export class Dataset<S extends DatameshStore | TempStore> {
+export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   /**
    * Creates an instance of Dataset.
    * @param dims - The dimensions of the dataset.
@@ -302,7 +305,7 @@ export class Dataset<S extends DatameshStore | TempStore> {
 
   /**
    * Creates a Dataset instance from a Zarr store.
-   * @param gateway - The URL of the datamesh gateway.
+   * @param url - The URL of the datamesh gateway.
    * @param authHeaders - The authentication headers.
    * @param parameters - Optional parameters for the request.
    * @param chunks - Optional chunking strategy.
@@ -406,7 +409,6 @@ export class Dataset<S extends DatameshStore | TempStore> {
    * @param dims - An array of dimension names corresponding to the data.
    * @param data - The data to be assigned, which can be a multi-dimensional array.
    * @param attrs - Optional. A record of attributes to be associated with the variable.
-   * @param dtype - The data type of the variable.
    * @param chunks - Optional. An array specifying the chunk sizes for the data.
    
    * @returns A promise that resolves when the data has been successfully assigned.

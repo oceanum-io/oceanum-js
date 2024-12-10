@@ -37,7 +37,8 @@ jobs:
         name: "Build typedoc documentation"
         run: |
           set -euo pipefail
-          npm run build:docs
+          npx nx run-many -t build:docs
+          
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1

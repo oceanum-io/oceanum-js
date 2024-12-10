@@ -2,7 +2,7 @@
 
 ***
 
-[@oceanum/datamesh](../packages.md) / Datasource
+[@oceanum/datamesh](../README.md) / Datasource
 
 # Type Alias: Datasource
 
@@ -14,7 +14,7 @@ Represents a data source.
 
 ### coordinates
 
-> **coordinates**: `Coordinates`
+> **coordinates**: [`Coordinates`](Coordinates.md)
 
 Coordinate mappings for the data source.
 
@@ -108,4 +108,4 @@ Start time for the data source.
 
 ## Defined in
 
-[datasource.ts:62](https://github.com/oceanum-io/oceanum-js/blob/9448ff9235fa530de87f8083974fe4591062d735/packages/datamesh/src/lib/datasource.ts#L62)
+[datasource.ts:59](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datasource.ts#L59)

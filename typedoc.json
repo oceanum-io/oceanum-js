@@ -1,6 +1,6 @@
 {
-  "plugin": ["typedoc-plugin-markdown"],
-  "out": "./docs",
+  
   "entryPoints": ["packages/*"],
-  "entryPointStrategy": "packages"
+  "entryPointStrategy": "packages",
+  "mergeReadme": true
 }

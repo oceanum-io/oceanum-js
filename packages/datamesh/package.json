@@ -1,7 +1,12 @@
 {
   "name": "@oceanum/datamesh",
-  "version": "0.0.1",
-  "scripts": {},
+  "version": "0.1.1",
+  "scripts": {
+    "build:docs": "typedoc"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@types/geojson": "^7946.0.14",
     "@types/object-hash": "^3.0.6",

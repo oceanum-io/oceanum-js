@@ -1,7 +1,7 @@
 import { assertType, test, expect } from "vitest";
 import { Dataset } from "../lib/datamodel";
 import { Connector } from "../lib/connector";
-import { dataset, datameshTest } from "./fixtures";
+import { datameshTest } from "./fixtures";
 
 test("datasource type", () => {
   const query: IQuery = {

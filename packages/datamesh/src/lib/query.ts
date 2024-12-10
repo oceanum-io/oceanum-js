@@ -7,7 +7,7 @@ dayjs.extend(duration);
 /**
  * GeoFilterType enum representing types of geofilters.
  */
-enum GeoFilterType {
+export enum GeoFilterType {
   Feature = "feature",
   Bbox = "bbox",
 }
@@ -15,7 +15,7 @@ enum GeoFilterType {
 /**
  * GeoFilterInterp enum representing interpolation methods for geofilters.
  */
-enum GeoFilterInterp {
+export enum GeoFilterInterp {
   Nearest = "nearest",
   Linear = "linear",
 }
@@ -23,7 +23,7 @@ enum GeoFilterInterp {
 /**
  * LevelFilterInterp enum representing interpolation methods for level filters.
  */
-enum LevelFilterInterp {
+export enum LevelFilterInterp {
   Nearest = "nearest",
   Linear = "linear",
 }
@@ -31,7 +31,7 @@ enum LevelFilterInterp {
 /**
  * TimeFilterType enum representing types of time filters.
  */
-enum TimeFilterType {
+export enum TimeFilterType {
   Range = "range",
   Series = "series",
   Trajectory = "trajectory",
@@ -40,7 +40,7 @@ enum TimeFilterType {
 /**
  * LevelFilterType enum representing types of level filters.
  */
-enum LevelFilterType {
+export enum LevelFilterType {
   Range = "range",
   Series = "series",
 }
@@ -48,7 +48,7 @@ enum LevelFilterType {
 /**
  * ResampleType enum representing types of resampling.
  */
-enum ResampleType {
+export enum ResampleType {
   Mean = "mean",
   Nearest = "nearest",
   Slinear = "linear",
@@ -57,7 +57,7 @@ enum ResampleType {
 /**
  * AggregateOps enum representing aggregation operations.
  */
-enum AggregateOps {
+export enum AggregateOps {
   Mean = "mean",
   Min = "min",
   Max = "max",
@@ -88,7 +88,7 @@ export type GeoFilter = {
 /**
  * LevelFilter type representing a vertical subset or interpolation.
  */
-type LevelFilter = {
+export type LevelFilter = {
   type: LevelFilterType;
   levels: Array<number | null>;
   interp?: LevelFilterInterp;
@@ -136,7 +136,7 @@ const timeFilterValidate = (timefilter: TimeFilter): TimeFilter => {
 /**
  * Aggregate type representing aggregation operations.
  */
-type Aggregate = {
+export type Aggregate = {
   operations: AggregateOps[];
   spatial?: boolean;
   temporal?: boolean;
@@ -145,7 +145,7 @@ type Aggregate = {
 /**
  * CoordSelector type representing coordinate selection.
  */
-type CoordSelector = {
+export type CoordSelector = {
   coord: string;
   values: Array<string | number>;
 };
@@ -171,6 +171,7 @@ export interface IQuery {
 /**
  * Stage interface representing the result of staging a query.
  */
+/** @ignore */
 export type Stage = {
   query: Query;
   qhash: string;

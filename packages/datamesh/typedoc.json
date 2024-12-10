@@ -1,3 +1,7 @@
 {
-  "entryPoints": ["src/index.ts"]
+  "plugin": ["typedoc-plugin-markdown", "../../ignore-type-params.js"],
+  "entryPoints": ["./src/index.ts"],
+  "readme": "./README.md",
+  "out": "../../docs/datamesh",
+  "mergeReadme": true
 }

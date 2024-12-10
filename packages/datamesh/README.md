@@ -1,11 +1,30 @@
-# datamesh
+# @oceanum/datamesh
 
-This library was generated with [Nx](https://nx.dev).
+A typescript library for interacting with the Oceanum.io Datamesh.
 
-## Building
+## Installation
 
-Run `nx build datamesh` to build the library.
+You can use this library in Node.js, Deno or browser code
 
-## Running unit tests
+```sh
+npm install @oceanum/datamesh
+```
 
-Run `nx test datamesh` to execute the unit tests via [Vitest](https://vitest.dev/).
+## Usage
+
+```javascript
+import { Connector } from "@oceanum/datamesh";
+
+//Instatiate the Datamesh Connector
+const datamesh=Connector("my_datamesh_token"); //Get your datamesh token from your Oceanum.io account
+
+//Define a datamesh query
+const query={
+    "datasource":"oceanum-sizing_giants"
+}
+
+//Get the data
+const data=await datamesh.query(query);
+```
+
+DO NOT put your Datamesh token directly into browser code. For use in an SPA, you can either forward your Datamesh request through a proxy or implement a token exchange. Read the [library documentation](https://oceanum-js.oceanum.io/) to learn more.

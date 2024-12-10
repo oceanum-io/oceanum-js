@@ -4,10 +4,7 @@ import duration from "dayjs/plugin/duration";
 
 import { DataVariable } from "./datamodel";
 
-/**
- * Represents a data variable.
- */
-enum Coordinate {
+export enum Coordinate {
   "Station" = "s", // locations assumed stationary, datasource multigeometry coordinate indexed by station coordinate
   "Ensemble" = "e",
   "Raster band" = "b",
@@ -27,7 +24,7 @@ enum Coordinate {
   "Coordinate_k" = "k",
 }
 
-type Coordinates = {
+export type Coordinates = {
   [key in Coordinate]?: string;
 };
 

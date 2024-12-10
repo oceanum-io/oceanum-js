@@ -2,7 +2,7 @@
 
 ***
 
-[@oceanum/datamesh](../packages.md) / Schema
+[@oceanum/datamesh](../README.md) / Schema
 
 # Type Alias: Schema
 
@@ -20,13 +20,13 @@ Attributes of the schema.
 
 ### coords?
 
-> `optional` **coords**: `Record`\<`string`, `DataVariable`\>
+> `optional` **coords**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
 
 Coordinates of the schema.
 
 ### data\_vars
 
-> **data\_vars**: `Record`\<`string`, `DataVariable`\>
+> **data\_vars**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
 
 Data variables of the schema.
 
@@ -38,4 +38,4 @@ Dimensions of the schema.
 
 ## Defined in
 
-[datasource.ts:37](https://github.com/oceanum-io/oceanum-js/blob/9448ff9235fa530de87f8083974fe4591062d735/packages/datamesh/src/lib/datasource.ts#L37)
+[datasource.ts:34](https://github.com/oceanum-io/oceanum-js/blob/2a3d0b3c7de398029b2a7ac8bdc8bdd7f540f7d6/packages/datamesh/src/lib/datasource.ts#L34)
