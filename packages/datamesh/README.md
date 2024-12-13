@@ -4,7 +4,7 @@ A typescript library for interacting with the Oceanum.io Datamesh.
 
 ## Installation
 
-You can use this library in Node.js, Deno or browser code
+You can use this library in Node.js, Deno or browser code (with the caveat below)
 
 ```sh
 npm install @oceanum/datamesh
@@ -27,4 +27,5 @@ const query={
 const data=await datamesh.query(query);
 ```
 
-DO NOT put your Datamesh token directly into browser code. For use in an SPA, you can either forward your Datamesh request through a proxy or implement a token exchange. Read the [library documentation](https://oceanum-js.oceanum.io/) to learn more.
+[!WARNING]
+DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh/reverse_proxy) to learn more.

@@ -19,7 +19,7 @@ export class Connector {
    *
    * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
    * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
-   * @param gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+   * @param _gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
    *
    * @throws {Error} - If a valid token is not provided.
    */
@@ -27,7 +27,7 @@ export class Connector {
     token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
     service = process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io",
     // @ignore //
-    gateway = process.env.DATAMESH_GATEWAY ||
+    _gateway = process.env.DATAMESH_GATEWAY ||
       "https://gateway.datamesh.oceanum.io"
   ) {
     if (!token) {
@@ -45,7 +45,7 @@ export class Connector {
       "X-DATAMESH-TOKEN": this._token,
     };
 
-    this._gateway = gateway || `${this._proto}//gateway.${this._host}`;
+    this._gateway = _gateway || `${this._proto}//gateway.${this._host}`;
 
     if (
       this._host.split(".").slice(-1)[0] !==

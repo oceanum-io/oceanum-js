@@ -386,11 +386,11 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    *
    * @example
    * ```typescript
-   * const dataframe = await instance.to_dataframe();
+   * const dataframe = await instance.asDataframe();
    * console.log(dataframe);
    * ```
    */
-  async to_dataframe(): Promise<Record<string, unknown>[]> {
+  async asDataframe(): Promise<Record<string, unknown>[]> {
     const data = {} as Record<string, DataVariable>;
     for (const k in this.data_vars) {
       data[k] = {
