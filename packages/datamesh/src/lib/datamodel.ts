@@ -1,10 +1,11 @@
-import { CachedHTTPStore } from "./zarr";
 import * as zarr from "@zarrita/core";
 import { Chunk, DataType, Listable, Location, TypedArray } from "@zarrita/core";
 import { Mutable, AsyncReadable } from "@zarrita/storage";
 import { get, set, Slice } from "@zarrita/indexing";
 
-import { Schema } from "./datasource";
+import { CachedHTTPStore } from "./zarr";
+import { Schema, Coordinates } from "./datasource";
+import { C } from "vitest/dist/reporters-yx5ZTtEV";
 
 export type ATypedArray =
   | Int8Array
@@ -281,12 +282,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param data_vars - The data variables of the dataset.
    * @param attrs - The attributes of the dataset.
    * @param root - The root group of the dataset.
+   * @param coordinates - The coordinates map of the dataset.
    */
   dims: Record<string, number>;
   data_vars: S extends TempStore
     ? Record<string, DataVar<DataType, TempStore>>
     : Record<string, DataVar<DataType, DatameshStore>>;
   attrs: Record<string, unknown>;
+  coordinates: Coordinates;
   root: S;
 
   constructor(
@@ -295,12 +298,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       ? Record<string, DataVar<DataType, TempStore>>
       : Record<string, DataVar<DataType, DatameshStore>>,
     attrs: Record<string, unknown>,
+    coordinates: Coordinates,
     root: S
   ) {
     this.data_vars = data_vars;
     this.dims = dims;
     this.attrs = attrs;
     this.root = root;
+    this.coordinates = coordinates;
   }
 
   /**
@@ -357,7 +362,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
           });
       }
     }
-    return new Dataset<DatameshStore>(dims, data_vars, group.attrs, root);
+    const coords = JSON.parse(group.attrs["_coordinates"]) as Coordinates;
+    return new Dataset<DatameshStore>(
+      dims,
+      data_vars,
+      group.attrs,
+      coords,
+      root
+    );
   }
 
   /**
@@ -366,7 +378,13 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    */
   static async init(datasource: Schema): Promise<Dataset<TempStore>> {
     const root = zarr.root(new Map());
-    const ds = new Dataset(datasource.dims, {}, datasource.attrs || {}, root);
+    const ds = new Dataset(
+      datasource.dims,
+      {},
+      datasource.attrs || {},
+      datasource.coordinates || {},
+      root
+    );
     for (const k in datasource.data_vars) {
       const { dims, attrs, data }: DataVariable = datasource.data_vars[k];
       await ds.assign(k, dims, data as Data, attrs);
@@ -399,7 +417,15 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       };
       data[k].data = (await this.data_vars[k].get()) as Data;
     }
-    return flatten(data, { ...this.dims }, []);
+    const df = flatten(data, { ...this.dims }, []);
+    if (this.coordinates.t) {
+      for (let i = 0; i < df.length; i++) {
+        df[i][this.coordinates.t] = new Date(
+          df[i][this.coordinates.t]
+        ).toISOString();
+      }
+    }
+    return df;
   }
 
   /**
@@ -409,6 +435,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param dims - An array of dimension names corresponding to the data.
    * @param data - The data to be assigned, which can be a multi-dimensional array.
    * @param attrs - Optional. A record of attributes to be associated with the variable.
+   * @param coordinates - Optional. A record of coordinates to be associated with the variable.
    * @param chunks - Optional. An array specifying the chunk sizes for the data.
    
    * @returns A promise that resolves when the data has been successfully assigned.
@@ -420,6 +447,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     dims: string[],
     data: Data,
     attrs?: Record<string, unknown>,
+    coordinates?: Coordinates,
     chunks?: number[]
   ): Promise<void> {
     const shape = getShape(data);
@@ -455,6 +483,12 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         stride: get_strides(shape),
       }
     );
-    this.data_vars[varid] = new DataVar(varid, dims, attrs || {}, arr);
+    this.data_vars[varid] = new DataVar(
+      varid,
+      dims,
+      attrs || {},
+      coordinates || {},
+      arr
+    );
   }
 }
