@@ -45,6 +45,7 @@ export class Connector {
       "X-DATAMESH-TOKEN": this._token,
     };
 
+    /* This is for testing  the gateway service is not always the same as the service domain */
     this._gateway = _gateway || `${this._proto}//gateway.${this._host}`;
 
     if (
