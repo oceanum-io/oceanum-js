@@ -491,9 +491,12 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
 
   /**
    * Converts the dataset into a GeoJSON Feature.
+   * @param geometry - Optional GeoJSON geometry to apply to all records, otherwise geometry column is required. Will override geometry column if present.
    *
    * @returns {Promise<FeatureCollection>} A promise that resolves to an array of records,
    * where each record represents a row in the dataframe.
+   *
+   * @throws Will throw an error if no geometry is found in data or as a parameter
    *
    * @remarks
    * This method iterates over the data variables, retrieves their dimensions and data,
@@ -505,18 +508,23 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * console.log(dataframe);
    * ```
    */
-  async asGeojson(): Promise<FeatureCollection> {
+  async asGeojson(geometry?: Geometry): Promise<FeatureCollection> {
+    if (!this.coordinates.g && !geom) {
+      throw new Error("No geometry found");
+    }
     const features = [];
     const df = await this.asDataframe();
     const encoder = new TextEncoder();
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
-      delete properties[this.coordinates.g];
-      const wkbBuffer = new Buffer(df[i][this.coordinates.g], "base64");
-      const geometry = wkx.Geometry.parse(wkbBuffer).toGeoJSON();
+      if (this.coordinates.g && !geometry) {
+        delete properties[this.coordinates.g];
+        const geom = new Buffer(df[i][this.coordinates.g], "base64");
+        geometry = wkx.Geometry.parse(geom).toGeoJSON();
+      }
       features.push({
         type: "Feature",
-        geometry: geometry,
+        geometry,
         properties,
       });
     }
