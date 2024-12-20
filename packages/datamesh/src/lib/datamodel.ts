@@ -508,7 +508,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * console.log(dataframe);
    * ```
    */
-  async asGeojson(geometry?: Geometry): Promise<FeatureCollection> {
+  async asGeojson(geom?: Geometry): Promise<FeatureCollection> {
     if (!this.coordinates.g && !geom) {
       throw new Error("No geometry found");
     }
@@ -517,10 +517,11 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     const encoder = new TextEncoder();
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
-      if (this.coordinates.g && !geometry) {
+      let geometry = geom;
+      if (!geometry && this.coordinates.g) {
         delete properties[this.coordinates.g];
-        const geom = new Buffer(df[i][this.coordinates.g], "base64");
-        geometry = wkx.Geometry.parse(geom).toGeoJSON();
+        const wkbbuffer = new Buffer(df[i][this.coordinates.g], "base64");
+        geometry = wkx.Geometry.parse(wkbbuffer).toGeoJSON();
       }
       features.push({
         type: "Feature",
