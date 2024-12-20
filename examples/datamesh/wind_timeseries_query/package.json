@@ -1,0 +1,14 @@
+{
+  "name": "@oceanum/wind_timeseries_query",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@oceanum/datamesh": "^0.0.1"
+  },
+  "type": "module",
+  "private": true,
+  "nx": {
+    "sourceRoot": "examples/datamesh/wind_timeseries_query",
+    "projectType": "application"
+  }
+}

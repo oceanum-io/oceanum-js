@@ -1,13 +1,18 @@
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
 import { Dataset, DatameshStore } from "./datamodel";
+import { measureTime } from "./observe";
+import { tableFromIPC } from "apache-arrow";
 
 /**
  * Datamesh connector class.
  *
  * All datamesh operations are methods of this class.
+ *
  */
+
 export class Connector {
+  static LAZY_LOAD_SIZE = 1e8;
   private _token: string;
   private _proto: string;
   private _host: string;
@@ -137,14 +142,14 @@ export class Connector {
    */
   /** @ts-expect-error Not used at present*/
   private async dataRequest(
-    datasourceId: string,
-    dataFormat = "application/json"
+    qhash: string,
+    dataFormat = "application/vnd.apache.arrow.file"
   ): Promise<Blob> {
-    const response = await fetch(`${this._gateway}/data/${datasourceId}`, {
+    const response = await fetch(`${this._gateway}/oceanql/${qhash}?f=arrow`, {
       headers: { Accept: dataFormat, ...this._authHeaders },
     });
     await this.validateResponse(response);
-    return response.blob();
+    return tableFromIPC(await response.arrayBuffer());
   }
 
   /**
@@ -153,6 +158,7 @@ export class Connector {
    * @param query - The query to stage.
    * @returns The staged response.
    */
+  @measureTime
   private async stageRequest(query: IQuery): Promise<Stage | null> {
     const data = JSON.stringify(query);
     const response = await fetch(`${this._gateway}/oceanql/stage/`, {
@@ -176,6 +182,7 @@ export class Connector {
    * @param query - The query to execute.
    * @returns The response from the server.
    */
+  @measureTime
   async query(
     query: IQuery
   ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
@@ -183,6 +190,12 @@ export class Connector {
     if (!stage) {
       console.warn("No data found for query");
       return null;
+    }
+    //For smaller dataframes use arrow for transport
+    if (stage.size < Connector.LAZY_LOAD_SIZE && stage.container != "dataset") {
+      const table = await this.dataRequest(stage.qhash);
+      const dataset = await Dataset.fromArrow(table, stage.coordkeys);
+      return dataset;
     }
     const url = `${this._gateway}/zarr/${stage.qhash}`;
     const dataset = await Dataset.zarr(url, this._authHeaders);
@@ -196,6 +209,7 @@ export class Connector {
    * @returns The datasource instance.
    * @throws {Error} - If the datasource cannot be found or is not authorized.
    */
+  @measureTime
   async getDatasource(datasourceId: string): Promise<Datasource> {
     const meta = await this.metadataRequest(datasourceId);
     const metaDict = await meta.json();
@@ -213,20 +227,13 @@ export class Connector {
    * @param parameters - Additional datasource parameters.
    * @returns The dataset.
    */
+  @measureTime
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}
   ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
     const query = { datasource: datasourceId, parameters };
-    const stage = await this.stageRequest(query);
-    if (!stage) {
-      console.warn("No data found for query");
-      return null;
-    }
-    const dataset = await Dataset.zarr(
-      `${this._gateway}/zarr/${stage.qhash}`,
-      this._authHeaders
-    );
+    const dataset = await this.query(query);
     return dataset;
   }
 }

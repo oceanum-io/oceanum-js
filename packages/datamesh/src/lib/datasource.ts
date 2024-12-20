@@ -4,25 +4,24 @@ import duration from "dayjs/plugin/duration";
 
 import { DataVariable } from "./datamodel";
 
-export enum Coordinate {
-  "Station" = "s", // locations assumed stationary, datasource multigeometry coordinate indexed by station coordinate
-  "Ensemble" = "e",
-  "Raster band" = "b",
-  "Category" = "c",
-  "Quantile" = "q",
-  "Season" = "n",
-  "Month" = "m",
-  "Time" = "t",
-  "Vertical coordinate" = "z",
-  "Horizontal northerly" = "y",
-  "Horizontal easterly" = "x",
-  "Geometry" = "g", // Abstract coordinate - a 2 or 3D geometry that defines a feature location
-  "Frequency" = "f", // spectra
-  "Direction" = "d", // spectra or stats
-  "Coordinate_i" = "i",
-  "Coordinate_j" = "j",
-  "Coordinate_k" = "k",
-}
+export type Coordinate =
+  | "s" // locations assumed stationary, datasource multigeometry coordinate indexed by station coordinate
+  | "e" // Ensemble
+  | "b" // Raster band
+  | "c" // Category
+  | "q" // Quantile
+  | "n" // Season
+  | "m" // Month
+  | "t" // Time
+  | "z" // Vertical coordinate
+  | "y" // Horizontal northerly
+  | "x" // Horizontal easterly
+  | "g" // Abstract coordinate - a 2 or 3D geometry that defines a feature location
+  | "f" // Frequency - spectra
+  | "d" // Direction - spectra or stats
+  | "i" // Coordinate_i
+  | "j" // Coordinate_j
+  | "k"; // Coordinate_k
 
 export type Coordinates = {
   [key in Coordinate]?: string;

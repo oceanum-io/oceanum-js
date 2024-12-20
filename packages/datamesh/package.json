@@ -13,9 +13,11 @@
     "@zarrita/core": "^0.1.0-next.15",
     "@zarrita/indexing": "^0.1.0-next.17",
     "@zarrita/storage": "^0.1.0-next.7",
+    "apache-arrow": "^18.1.0",
     "dayjs": "^1.11.13",
     "idb-keyval": "^6.2.1",
     "object-hash": "^3.0.0",
+    "wkx": "github:Rich-Harris/wkx#esm",
     "zarrita": "^0.4.0-next.17"
   },
   "type": "module",

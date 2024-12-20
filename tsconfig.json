@@ -9,6 +9,9 @@
   "references": [
     {
       "path": "./packages/datamesh"
+    },
+    {
+      "path": "./examples/datamesh/wind_timeseries_query"
     }
   ]
 }

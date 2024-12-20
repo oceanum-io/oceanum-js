@@ -133,10 +133,9 @@ export const datameshTest = test.extend({
       headers: HEADERS,
     });
   },
-  dataset: async ({}, use: Function) => {
+  dataset: async ({}, use: (ds: Dataset) => Promise<void>) => {
     // setup the fixture before each test function
-
-    let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test/", {
+    let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-ds/", {
       method: "PUT",
       headers: HEADERS,
       body: jsonify(dataset),
@@ -147,7 +146,7 @@ export const datameshTest = test.extend({
     const patch = jsonify({
       coordinates: { t: "time", x: "lon", y: "lat" },
     });
-    resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test/", {
+    resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-ds/", {
       method: "PATCH",
       headers: HEADERS,
       body: patch,
@@ -155,13 +154,140 @@ export const datameshTest = test.extend({
     if (resp.status !== 200) {
       throw new Error("Failed to register dataset");
     }
-    dataset.attrs = { id: "oceanum-js-test" };
+    dataset.attrs = { id: "oceanum-js-test-ds" };
 
     // use the fixture value
     await use(dataset);
 
     // cleanup the fixture after each test function
-    await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test", {
+    await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-ds", {
+      method: "DELETE",
+      headers: HEADERS,
+    });
+  },
+  dataframe: async ({}, use: (df: object) => Promise<void>) => {
+    // setup the fixture before each test function
+    const df = {
+      schema: {
+        fields: [
+          { name: "time", type: "datetime", tz: "UTC" },
+          { name: "temperature", type: "number" },
+          { name: "elevation", type: "number" },
+        ],
+        primaryKey: ["time"],
+        pandas_version: "1.4.0",
+      },
+      data: [
+        { time: "1970-01-01T00:00:00.000Z", temperature: 15.5, elevation: 100 },
+        { time: "1970-01-02T00:00:00.000Z", temperature: 15.8, elevation: 120 },
+        { time: "1970-01-03T00:00:00.000Z", temperature: 15.3, elevation: 110 },
+      ],
+    };
+
+    let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-df/", {
+      method: "PUT",
+      headers: HEADERS,
+      body: jsonify(df),
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to write dataframe");
+    }
+
+    const patch = jsonify({
+      coordinates: { t: "time" },
+      container: "dataframe",
+    });
+    resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-df/", {
+      method: "PATCH",
+      headers: HEADERS,
+      body: patch,
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to register dataframe");
+    }
+
+    df.schema.attrs = { id: "oceanum-js-test-df" };
+
+    // use the fixture value
+    await use(df);
+
+    // cleanup the fixture after each test function
+    await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-df", {
+      method: "DELETE",
+      headers: HEADERS,
+    });
+  },
+  geodataframe: async ({}, use: (df: object) => Promise<void>) => {
+    // setup the fixture before each test function
+    const gdf = {
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [174.0, -37.0],
+          },
+          properties: {
+            time: "1970-01-01T00:00:00.000Z",
+            temperature: 15.5,
+            elevation: 100,
+          },
+        },
+        {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [174.1, -37.0],
+          },
+          properties: {
+            time: "1970-01-02T00:00:00.000Z",
+            temperature: 15.8,
+            elevation: 100,
+          },
+        },
+        {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [174.2, -37.0],
+          },
+          properties: {
+            time: "1970-01-03T00:00:00.000Z",
+            temperature: 15.3,
+            elevation: 100,
+          },
+        },
+      ],
+    };
+
+    let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-gdf/", {
+      method: "PUT",
+      headers: HEADERS,
+      body: jsonify(gdf),
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to write geodataframe");
+    }
+
+    const patch = jsonify({
+      coordinates: { t: "time", g: "geometry" },
+      container: "geodataframe",
+    });
+    resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-gdf/", {
+      method: "PATCH",
+      headers: HEADERS,
+      body: patch,
+    });
+    if (resp.status !== 200) {
+      throw new Error("Failed to register geodataframe");
+    }
+
+    // use the fixture value
+    await use(gdf);
+
+    // cleanup the fixture after each test function
+    await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-gdf", {
       method: "DELETE",
       headers: HEADERS,
     });

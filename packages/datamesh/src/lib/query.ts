@@ -5,73 +5,47 @@ import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 /**
- * GeoFilterType enum representing types of geofilters.
+ * GeoFilterType type representing types of geofilters.
  */
-export enum GeoFilterType {
-  Feature = "feature",
-  Bbox = "bbox",
-}
+export type GeoFilterType = "feature" | "bbox";
 
 /**
- * GeoFilterInterp enum representing interpolation methods for geofilters.
+ * GeoFilterInterp type representing interpolation methods for geofilters.
  */
-export enum GeoFilterInterp {
-  Nearest = "nearest",
-  Linear = "linear",
-}
+export type GeoFilterInterp = "nearest" | "linear";
 
 /**
- * LevelFilterInterp enum representing interpolation methods for level filters.
+ * LevelFilterInterp type representing interpolation methods for level filters.
  */
-export enum LevelFilterInterp {
-  Nearest = "nearest",
-  Linear = "linear",
-}
+export type LevelFilterInterp = "nearest" | "linear";
 
 /**
- * TimeFilterType enum representing types of time filters.
+ * TimeFilterType type representing types of time filters.
  */
-export enum TimeFilterType {
-  Range = "range",
-  Series = "series",
-  Trajectory = "trajectory",
-}
+export type TimeFilterType = "range" | "series" | "trajectory";
 
 /**
- * LevelFilterType enum representing types of level filters.
+ * LevelFilterType type representing types of level filters.
  */
-export enum LevelFilterType {
-  Range = "range",
-  Series = "series",
-}
+export type LevelFilterType = "range" | "series";
 
 /**
- * ResampleType enum representing types of resampling.
+ * ResampleType type representing types of resampling.
  */
-export enum ResampleType {
-  Mean = "mean",
-  Nearest = "nearest",
-  Slinear = "linear",
-}
+export type ResampleType = "mean" | "nearest" | "linear";
 
 /**
- * AggregateOps enum representing aggregation operations.
+ * AggregateOps type representing aggregation operations.
  */
-export enum AggregateOps {
-  Mean = "mean",
-  Min = "min",
-  Max = "max",
-  Std = "std",
-  Sum = "sum",
-}
+export type AggregateOps = "mean" | "min" | "max" | "std" | "sum";
 
 /**
- * Container enum representing data container types.
+ * Container type representing data container types.
  */
-enum Container {
-  GeoDataFrame = "geodataframe",
-  DataFrame = "dataframe",
-  Dataset = "dataset",
+export type Container = "geodataframe" | "dataframe" | "dataset";
+
+export interface GeoFilterFeature extends Omit<Feature, "properties"> {
+  properties?: Record<string, unknown> | undefined;
 }
 
 /**
@@ -79,7 +53,7 @@ enum Container {
  */
 export type GeoFilter = {
   type: GeoFilterType;
-  geom: Array<number[]> | Feature;
+  geom: Array<number[]> | GeoFilterFeature;
   interp?: GeoFilterInterp;
   resolution?: number;
   alltouched?: boolean;
@@ -126,7 +100,7 @@ const timeFilterValidate = (timefilter: TimeFilter): TimeFilter => {
   const times = timefilter.times.map((t) => stringifyTime(t));
 
   return {
-    type: timefilter.type || TimeFilterType.Range,
+    type: timefilter.type || "range",
     times,
     resolution: timefilter.resolution,
     resample: timefilter.resample,

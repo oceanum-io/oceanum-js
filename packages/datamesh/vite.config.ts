@@ -45,7 +45,7 @@ export default defineConfig({
     watch: {},
   },
   test: {
-    watch: false,
+    watch: true,
     globals: true,
     environment: "node",
     include: ["src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
@@ -53,6 +53,11 @@ export default defineConfig({
     coverage: {
       reportsDirectory: "../../coverage/packages/datamesh",
       provider: "v8",
+    },
+    typecheck: {
+      enabled: true,
+      include: ["**/*.{test,spec}.?(c|m)[jt]s?(x)"],
+      checker: "tsc --noEmit --pretty false --watch",
     },
   },
 });

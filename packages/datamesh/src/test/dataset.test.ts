@@ -21,7 +21,7 @@ test("dataset init", async () => {
 
 datameshTest(
   "dataset zarr",
-  async ({ dataset }) => {
+  async ({ dataset: Dataset }) => {
     //Test the zarr proxy endpoint directly
     const dstest = await Dataset.zarr(
       DATAMESH_GATEWAY + "/zarr/" + dataset.attrs.id,

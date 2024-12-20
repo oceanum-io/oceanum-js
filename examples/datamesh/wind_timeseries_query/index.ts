@@ -5,9 +5,9 @@ const datamesh = new Connector(); //Get your datamesh token from your Oceanum.io
 
 //Define a datamesh query
 const location = {
-  type: "Feature",
+  type: "Feature" as const,
   geometry: {
-    type: "Point",
+    type: "Point" as const,
     coordinates: [2, 52],
   },
 };
@@ -15,7 +15,7 @@ const location = {
 const query = {
   datasource: "era5_wind10m",
   geofilter: {
-    type: "feature",
+    type: "feature" as const,
     geom: location,
   },
   timefilter: {
@@ -28,10 +28,11 @@ datamesh
   .query(query)
   .then((data) => {
     //Convert the data to a dataframe
-    return data.asDataframe();
+
+    return data?.asDataframe();
   })
   .then((df) => {
-    console.log(df.slice(0, 5));
+    console.log(df?.slice(0, 5));
   })
   .catch((error) => {
     console.error(error.message);

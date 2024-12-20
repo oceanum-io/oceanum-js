@@ -124,3 +124,5 @@ dist
 .nx/workspace-data
 
 .vscode
+vite.config.ts.timestamp*
+vitest.config.ts.timestamp*
