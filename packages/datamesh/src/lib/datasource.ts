@@ -49,7 +49,7 @@ export type Schema = {
   /**
    * Data variables of the schema.
    */
-  data_vars: Record<string, DataVariable>;
+  vars: Record<string, DataVariable>;
 };
 
 /**

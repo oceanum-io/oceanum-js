@@ -4,6 +4,7 @@ import dts from "vite-plugin-dts";
 import * as path from "path";
 import { nxViteTsPaths } from "@nx/vite/plugins/nx-tsconfig-paths.plugin";
 import { nxCopyAssetsPlugin } from "@nx/vite/plugins/nx-copy-assets.plugin";
+import commonjs from "vite-plugin-commonjs";
 
 export default defineConfig({
   root: __dirname,
@@ -14,6 +15,9 @@ export default defineConfig({
     dts({
       entryRoot: "src",
       tsconfigPath: path.join(__dirname, "tsconfig.lib.json"),
+    }),
+    commonjs({
+      transformMixedEsModules: true,
     }),
   ],
   // Uncomment this if you are using workers.

@@ -1,6 +1,6 @@
 [**@oceanum/datamesh**](../README.md) • **Docs**
 
-***
+---
 
 [@oceanum/datamesh](../README.md) / Dataset
 
@@ -13,13 +13,13 @@ Implements the DatasetApi interface.
 
 ### new Dataset()
 
-> **new Dataset**\<\>(`dims`, `data_vars`, `attrs`, `root`): [`Dataset`](Dataset.md)\<`S`\>
+> **new Dataset**\<\>(`dims`, `vars`, `attrs`, `root`): [`Dataset`](Dataset.md)\<`S`\>
 
 #### Parameters
 
 • **dims**: `Record`\<`string`, `number`\>
 
-• **data\_vars**: `S` *extends* `TempStore` ? `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `TempStore`\>\> : `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `DatameshStore`\>\>
+• **data_vars**: `S` _extends_ `TempStore` ? `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `TempStore`\>\> : `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `DatameshStore`\>\>
 
 • **attrs**: `Record`\<`string`, `unknown`\>
 
@@ -43,17 +43,17 @@ Implements the DatasetApi interface.
 
 [datamodel.ts:289](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L289)
 
-***
+---
 
-### data\_vars
+### data_vars
 
-> **data\_vars**: `S` *extends* `TempStore` ? `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `TempStore`\>\> : `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `DatameshStore`\>\>
+> **data_vars**: `S` _extends_ `TempStore` ? `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `TempStore`\>\> : `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `DatameshStore`\>\>
 
 #### Defined in
 
 [datamodel.ts:286](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L286)
 
-***
+---
 
 ### dims
 
@@ -81,7 +81,7 @@ The root group of the dataset.
 
 [datamodel.ts:285](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L285)
 
-***
+---
 
 ### root
 
@@ -139,11 +139,11 @@ Will throw an error if an existing dimension size does not match the new data.
 
 [datamodel.ts:418](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L418)
 
-***
+---
 
-### to\_dataframe()
+### to_dataframe()
 
-> **to\_dataframe**(): `Promise`\<`Record`\<`string`, `unknown`\>[]\>
+> **to_dataframe**(): `Promise`\<`Record`\<`string`, `unknown`\>[]\>
 
 Converts the data variables into a dataframe format.
 
@@ -170,7 +170,7 @@ console.log(dataframe);
 
 [datamodel.ts:393](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L393)
 
-***
+---
 
 ### init()
 
@@ -192,7 +192,7 @@ An object containing id, dimensions, data variables, and attributes.
 
 [datamodel.ts:367](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L367)
 
-***
+---
 
 ### zarr()
 

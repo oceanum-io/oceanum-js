@@ -153,6 +153,7 @@ export type Stage = {
   size: number;
   dlen: number;
   coordmap: Record<string, string>;
+  coordkeys: Record<string, string>;
   container: Container;
   sig: string;
 };

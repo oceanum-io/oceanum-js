@@ -22,7 +22,7 @@ const datasource: Datasource = {
   schema: {
     attrs: {},
     dims: {},
-    data_vars: {},
+    vars: {},
   },
   coordinates: { t: "time" },
   driver: "onzarr",
@@ -91,7 +91,7 @@ export const dataset: Schema = {
       data: [...Array(30).keys()].map((i) => -i),
     },
   },
-  data_vars: {
+  vars: {
     temperature: {
       dims: ["time", "lat", "lon"],
       attrs: { units: "C" },
@@ -111,7 +111,7 @@ export const dataset: Schema = {
 };
 
 export const datameshTest = test.extend({
-  metadata: async ({}, use: Function) => {
+  metadata: async ({}, use: (dsrc: Datasource) => Promise<void>) => {
     // setup the fixture before each test function
     console.log(HEADERS);
     const resp = await fetch(DATAMESH_SERVICE + "/datasource/", {
@@ -133,7 +133,7 @@ export const datameshTest = test.extend({
       headers: HEADERS,
     });
   },
-  dataset: async ({}, use: (ds: Dataset) => Promise<void>) => {
+  dataset: async ({}, use: (ds: Schema) => Promise<void>) => {
     // setup the fixture before each test function
     let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-ds/", {
       method: "PUT",
@@ -141,7 +141,8 @@ export const datameshTest = test.extend({
       body: jsonify(dataset),
     });
     if (resp.status !== 200) {
-      throw new Error("Failed to write dataset");
+      const text = await resp.text();
+      throw new Error("Failed to write dataset: " + text);
     }
     const patch = jsonify({
       coordinates: { t: "time", x: "lon", y: "lat" },
@@ -190,7 +191,8 @@ export const datameshTest = test.extend({
       body: jsonify(df),
     });
     if (resp.status !== 200) {
-      throw new Error("Failed to write dataframe");
+      const text = await resp.text();
+      throw new Error("Failed to write dataframe: " + text);
     }
 
     const patch = jsonify({
@@ -206,9 +208,7 @@ export const datameshTest = test.extend({
       throw new Error("Failed to register dataframe");
     }
 
-    df.schema.attrs = { id: "oceanum-js-test-df" };
-
-    // use the fixture value
+    //use the fixture value
     await use(df);
 
     // cleanup the fixture after each test function

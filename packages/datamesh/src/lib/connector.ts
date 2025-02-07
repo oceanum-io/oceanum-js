@@ -1,8 +1,8 @@
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
-import { Dataset, DatameshStore } from "./datamodel";
+import { Dataset, DatameshStore, TempStore } from "./datamodel";
 import { measureTime } from "./observe";
-import { tableFromIPC } from "apache-arrow";
+import { tableFromIPC, Table } from "apache-arrow";
 
 /**
  * Datamesh connector class.
@@ -10,11 +10,12 @@ import { tableFromIPC } from "apache-arrow";
  * All datamesh operations are methods of this class.
  *
  */
+const DATAMESH_SERVICE =
+  process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io";
 
 export class Connector {
   static LAZY_LOAD_SIZE = 1e8;
   private _token: string;
-  private _proto: string;
   private _host: string;
   private _authHeaders: Record<string, string>;
   private _gateway: string;
@@ -23,41 +24,44 @@ export class Connector {
    * Datamesh connector constructor
    *
    * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
-   * @param service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
-   * @param _gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+   * @param options - Constructor options.
+   * @param options.service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
+   * @param options.gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+   * @param options.jwtAuth - JWT for Oceanum service.
    *
    * @throws {Error} - If a valid token is not provided.
    */
   constructor(
     token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
-    service = process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io",
-    // @ignore //
-    _gateway = process.env.DATAMESH_GATEWAY ||
-      "https://gateway.datamesh.oceanum.io"
+    options = {}
   ) {
-    if (!token) {
+    if (!token && !options.jwtAuth) {
       throw new Error(
         "A valid datamesh token must be supplied as a connector constructor argument or defined in environment variables as DATAMESH_TOKEN"
       );
     }
 
     this._token = token;
-    const url = new URL(service);
-    this._proto = url.protocol;
-    this._host = url.hostname;
-    this._authHeaders = {
-      Authorization: `Token ${this._token}`,
-      "X-DATAMESH-TOKEN": this._token,
-    };
+    const url = new URL(options.service || DATAMESH_SERVICE);
+    this._host = `${url.protocol}//${url.hostname}`;
+    this._authHeaders = options.jwtAuth
+      ? {
+          Authorization: `Bearer ${options.jwtAuth}`,
+        }
+      : {
+          Authorization: `Token ${this._token}`,
+          "X-DATAMESH-TOKEN": this._token,
+        };
 
     /* This is for testing  the gateway service is not always the same as the service domain */
-    this._gateway = _gateway || `${this._proto}//gateway.${this._host}`;
+    this._gateway =
+      options.gateway || `${url.protocol}//gateway.${url.hostname}`;
 
     if (
       this._host.split(".").slice(-1)[0] !==
       this._gateway.split(".").slice(-1)[0]
     ) {
-      console.warn("Gateway and service domain do not match");
+      console.warn("Datamesh gateway and service domains do not match");
     }
   }
 
@@ -73,10 +77,10 @@ export class Connector {
   /**
    * Check the status of the metadata server.
    *
-   * @returns True if the metadata server is up, false otherwise.
+   * @returns True if the server is up, false otherwise.
    */
   async status(): Promise<boolean> {
-    const response = await fetch(`${this._proto}//${this._host}`, {
+    const response = await fetch(this._host, {
       headers: this._authHeaders,
     });
     return response.status === 200;
@@ -140,11 +144,10 @@ export class Connector {
    * @param dataFormat - The format of the requested data. Defaults to "application/json".
    * @returns The path to the cached file.
    */
-  /** @ts-expect-error Not used at present*/
   private async dataRequest(
     qhash: string,
     dataFormat = "application/vnd.apache.arrow.file"
-  ): Promise<Blob> {
+  ): Promise<Table> {
     const response = await fetch(`${this._gateway}/oceanql/${qhash}?f=arrow`, {
       headers: { Accept: dataFormat, ...this._authHeaders },
     });
@@ -159,7 +162,7 @@ export class Connector {
    * @returns The staged response.
    */
   @measureTime
-  private async stageRequest(query: IQuery): Promise<Stage | null> {
+  async stageRequest(query: IQuery): Promise<Stage | null> {
     const data = JSON.stringify(query);
     const response = await fetch(`${this._gateway}/oceanql/stage/`, {
       method: "POST",
@@ -185,7 +188,7 @@ export class Connector {
   @measureTime
   async query(
     query: IQuery
-  ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
+  ): Promise<Dataset</** @ignore */ DatameshStore | TempStore> | null> {
     const stage = await this.stageRequest(query);
     if (!stage) {
       console.warn("No data found for query");
@@ -209,7 +212,7 @@ export class Connector {
    * @returns The datasource instance.
    * @throws {Error} - If the datasource cannot be found or is not authorized.
    */
-  @measureTime
+  //@measureTime
   async getDatasource(datasourceId: string): Promise<Datasource> {
     const meta = await this.metadataRequest(datasourceId);
     const metaDict = await meta.json();
@@ -227,7 +230,7 @@ export class Connector {
    * @param parameters - Additional datasource parameters.
    * @returns The dataset.
    */
-  @measureTime
+  //@measureTime
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}

@@ -1,10 +1,11 @@
 import * as zarr from "@zarrita/core";
 import { Chunk, DataType, Listable, Location, TypedArray } from "@zarrita/core";
 import { Mutable, AsyncReadable } from "@zarrita/storage";
-import { get, set, Slice } from "@zarrita/indexing";
+import { get, set, Slice, slice } from "@zarrita/indexing";
 import { Table, DataType as ArrowDataType } from "apache-arrow";
-import { Feature, Geometry, FeatureCollection } from "geojson";
-import wkx from "wkx";
+import { Geometry, Feature, FeatureCollection } from "geojson";
+import { Geometry as WkxGeometry, BinaryReader } from "wkx-ts";
+import { Buffer } from "buffer/index";
 
 import { CachedHTTPStore } from "./zarr";
 import { Schema, Coordinates } from "./datasource";
@@ -84,7 +85,9 @@ const getDtype = (data: Data): DataType => {
       break;
     }
   }
-  if (typeof data === "number") {
+  if (data === null) {
+    return "uint8";
+  } else if (typeof data === "number") {
     return "float32";
   } else if (typeof data === "string") {
     return "v2:object";
@@ -112,6 +115,17 @@ const getDtype = (data: Data): DataType => {
   }
 
   throw new Error("Unsupported data type: " + data.constructor.name);
+};
+
+const arrowTypeToDType = (dtype: ArrowDataType): DataType => {
+  //Convert arrow data type to zarr datatype
+  let type: DataType = dtype.name;
+  if (dtype.typeId == 5) {
+    type = "v2:object";
+  } else if (dtype.typeId == 1) {
+    type = "uint8";
+  }
+  return type;
 };
 
 const ravel = (data: Data) => {
@@ -259,16 +273,20 @@ export class DataVar<
 
   /**
    * Retrieves the data from the zarr array. If the data is already cached, it returns the cached data.
-   * @param slice - Optional slice parameters to retrieve specific data from the zarr array.
+   * @param index - Optional slice parameters to retrieve specific data from the zarr array.
    * @returns A promise that resolves to the data of the zarr array.
    */
-  @measureTime
+  //@measureTime
   async get(
-    slice?: (null | Slice | number)[] | null | undefined
+    index?: (null | Slice | string | number)[] | null | undefined
   ): Promise<Data> {
+    if (typeof index === "string") {
+      const { start, stop, step } = index.split(":");
+      index = { start, stop, step };
+    }
     const _data: Chunk<DType> | Scalar = await get(
       this.arr as zarr.Array<DType, AsyncReadable>,
-      slice
+      index
     );
     if (this.arr.dtype !== "v2:object" && _data.shape) {
       return unravel(_data.data, _data.shape, _data.stride);
@@ -286,13 +304,13 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   /**
    * Creates an instance of Dataset.
    * @param dims - The dimensions of the dataset.
-   * @param data_vars - The data variables of the dataset.
+   * @param vars - The data variables of the dataset.
    * @param attrs - The attributes of the dataset.
    * @param root - The root group of the dataset.
    * @param coordinates - The coordinates map of the dataset.
    */
   dims: Record<string, number>;
-  data_vars: S extends TempStore
+  vars: S extends TempStore
     ? Record<string, DataVar<DataType, TempStore>>
     : Record<string, DataVar<DataType, DatameshStore>>;
   attrs: Record<string, unknown>;
@@ -301,14 +319,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
 
   constructor(
     dims: Record<string, number>,
-    data_vars: S extends TempStore
+    vars: S extends TempStore
       ? Record<string, DataVar<DataType, TempStore>>
       : Record<string, DataVar<DataType, DatameshStore>>,
     attrs: Record<string, unknown>,
     coordinates: Coordinates,
     root: S
   ) {
-    this.data_vars = data_vars;
+    this.vars = vars;
     this.dims = dims;
     this.attrs = attrs;
     this.root = root;
@@ -324,7 +342,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param downsample - Optional downsampling strategy.
    * @returns A promise that resolves to a Dataset instance.
    */
-  @measureTime
+  //@measureTime
   static async zarr(
     url: string,
     authHeaders: Record<string, string>,
@@ -344,14 +362,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     );
     const root = await zarr.root(store);
     const group = await zarr.open(root, { kind: "group" });
-    const data_vars = {} as Record<string, DataVar<DataType, DatameshStore>>;
+    const vars = {} as Record<string, DataVar<DataType, DatameshStore>>;
     const dims = {} as Record<string, number>;
     for (const item of store.contents()) {
       if (item.kind == "array") {
         const arr = await zarr.open(root.resolve(item.path), { kind: "array" });
         const array_dims = arr.attrs._ARRAY_DIMENSIONS as string[] | null;
         const vid = item.path.split("/").pop() as string;
-        data_vars[vid] = new DataVar<DataType, DatameshStore>(
+        vars[vid] = new DataVar<DataType, DatameshStore>(
           vid,
           array_dims || [],
           arr.attrs as Record<string, unknown>,
@@ -373,13 +391,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     const coords = JSON.parse(
       group.attrs["_coordinates"] as string
     ) as Coordinates;
-    return new Dataset<DatameshStore>(
-      dims,
-      data_vars,
-      group.attrs,
-      coords,
-      root
-    );
+    return new Dataset<DatameshStore>(dims, vars, group.attrs, coords, root);
   }
 
   static async fromArrow(
@@ -388,31 +400,38 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   ): Promise<Dataset<TempStore>> {
     const attrs = {};
     const dims = { record: data.numRows };
-    const data_vars = {};
+    const vars = {} as Record<string, DataVar<DataType, TempStore>>;
     data.schema.fields.forEach((field) => {
       const column = data.getChild(field.name);
-      let array = column.toArray();
+      let attrs = {};
+      let array = column?.toArray();
+      let dtype = arrowTypeToDType(field.type);
+      //Store times internally as Unix milliseconds in Float64 - this works better than BigInt64 for Date objects
       if (ArrowDataType.isTimestamp(field.type)) {
-        const carray = new Int32Array(array.length);
+        const carray = new Float64Array(array.length);
         const m = BigInt(1000 ** (field.type.unit - 1));
         for (let i = 0; i < array.length; i++) {
           carray[i] = Number(array[i] / m);
         }
         array = carray;
+        dtype = "float64";
+        attrs = { unit: `Unix timestamp (ms)` };
       } else if (ArrowDataType.isBinary(field.type)) {
         const carray = [];
         for (let i = 0; i < array.length; i++) {
-          carray.push(Buffer(array[i]).toString("base64"));
+          carray.push(new Buffer(array[i]).toString("base64"));
         }
         array = carray;
+        dtype = "v2:object";
       }
-      data_vars[field.name] = {
+      vars[field.name] = {
         dims: ["record"],
-        attrs: {},
+        attrs,
         data: array,
+        dtype,
       };
     });
-    return await Dataset.init({ dims, data_vars, attrs }, coordmap);
+    return await Dataset.init({ dims, vars, attrs }, coordmap);
   }
 
   /**
@@ -431,9 +450,9 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       coordinates || {},
       root
     );
-    for (const k in datasource.data_vars) {
-      const { dims, attrs, data }: DataVariable = datasource.data_vars[k];
-      await ds.assign(k, dims, data as Data, attrs);
+    for (const k in datasource.vars) {
+      const { dims, attrs, data, dtype }: DataVariable = datasource.vars[k];
+      await ds.assign(k, dims, data as Data, attrs, dtype);
     }
     return ds;
   }
@@ -456,17 +475,17 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * console.log(dataframe);
    * ```
    */
-  @measureTime
+  //@measureTime
   async asDataframe(): Promise<Record<string, unknown>[]> {
     const data = {} as Record<string, DataVariable>;
     const bigint = [];
-    for (const k in this.data_vars) {
+    for (const k in this.vars) {
       data[k] = {
-        attrs: this.data_vars[k].attrs,
-        dims: this.data_vars[k].dims,
+        attrs: this.vars[k].attrs,
+        dims: this.vars[k].dims,
       };
-      data[k].data = (await this.data_vars[k].get()) as Data;
-      if (this.data_vars[k].arr.type == "int64") {
+      data[k].data = (await this.vars[k].get()) as Data;
+      if (this.vars[k].arr.dtype == "int64") {
         bigint.push(k);
       }
     }
@@ -512,16 +531,18 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     if (!this.coordinates.g && !geom) {
       throw new Error("No geometry found");
     }
-    const features = [];
+    const features = [] as Feature[];
     const df = await this.asDataframe();
-    const encoder = new TextEncoder();
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
       let geometry = geom;
       if (!geometry && this.coordinates.g) {
         delete properties[this.coordinates.g];
-        const wkbbuffer = new Buffer(df[i][this.coordinates.g], "base64");
-        geometry = wkx.Geometry.parse(wkbbuffer).toGeoJSON();
+        const wkbbuffer = new Buffer(
+          df[i][this.coordinates.g as string],
+          "base64"
+        );
+        geometry = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
       }
       features.push({
         type: "Feature",
@@ -531,7 +552,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     }
     return {
       type: "FeatureCollection",
-      features: features,
+      features,
     };
   }
 
@@ -542,9 +563,9 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param dims - An array of dimension names corresponding to the data.
    * @param data - The data to be assigned, which can be a multi-dimensional array.
    * @param attrs - Optional. A record of attributes to be associated with the variable.
-   * @param coordinates - Optional. A record of coordinates to be associated with the variable.
+   * @param dtype - Optional. The data type of the data.
    * @param chunks - Optional. An array specifying the chunk sizes for the data.
-   
+   *
    * @returns A promise that resolves when the data has been successfully assigned.
    * @throws Will throw an error if the shape of the data does not match the provided dimensions.
    * @throws Will throw an error if an existing dimension size does not match the new data.
@@ -554,7 +575,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     dims: string[],
     data: Data,
     attrs?: Record<string, unknown>,
-    coordinates?: Coordinates,
+    dtype?: DataType,
     chunks?: number[]
   ): Promise<void> {
     const shape = getShape(data);
@@ -572,14 +593,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         this.dims[dim] = shape[i];
       }
     });
-    const dtype = getDtype(data);
+    const _dtype = dtype || getDtype(data);
     const arr = await zarr.create(
       this.root.resolve(varid) as Location<Mutable>,
       {
         shape,
-        data_type: dtype,
+        data_type: _dtype,
         chunk_shape: chunks || shape,
-        codecs: dtype == "v2:object" ? [{ name: "json2" }] : [],
+        codecs: _dtype == "v2:object" ? [{ name: "json2" }] : [],
       }
     );
     await set(
@@ -591,6 +612,6 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         stride: get_strides(shape),
       }
     );
-    this.data_vars[varid] = new DataVar(varid, dims, attrs || {}, arr);
+    this.vars[varid] = new DataVar(varid, dims, attrs || {}, arr);
   }
 }
