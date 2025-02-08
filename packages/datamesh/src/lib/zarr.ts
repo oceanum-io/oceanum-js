@@ -32,12 +32,18 @@ export class CachedHTTPStore implements AsyncReadable {
     headers["x-filtered"] = "True";
     this.fetchOptions = { headers };
     this.url = root;
+    const datasource = root.split("/").pop();
     if (nocache) {
       this.cache = undefined;
     } else {
       this.cache = createStore("zarr", "cache");
     }
-    this.cache_prefix = hash({ ...parameters, chunks, downsample });
+    this.cache_prefix = hash({
+      datasource,
+      ...parameters,
+      chunks,
+      downsample,
+    });
   }
 
   async get(
