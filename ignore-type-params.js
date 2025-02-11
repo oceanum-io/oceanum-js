@@ -1,7 +1,7 @@
 /** https://github.com/TypeStrong/typedoc/issues/1319 */
-const { Converter, ReflectionKind } = require("typedoc");
+import { Converter, ReflectionKind } from "typedoc";
 
-exports.load = function ({ application }) {
+export const load = ({ application }) => {
   const ignoredTypeParameters = [];
 
   application.converter.on(

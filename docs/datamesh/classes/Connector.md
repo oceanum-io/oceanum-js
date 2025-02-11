@@ -54,7 +54,7 @@ URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "h
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:34](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L34)
+[packages/datamesh/src/lib/connector.ts:34](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L34)
 
 ## Properties
 
@@ -64,7 +64,7 @@ URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "h
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:17](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L17)
+[packages/datamesh/src/lib/connector.ts:17](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L17)
 
 ## Accessors
 
@@ -84,7 +84,7 @@ The datamesh server host.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:77](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L77)
+[packages/datamesh/src/lib/connector.ts:77](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L77)
 
 ## Methods
 
@@ -114,7 +114,7 @@ The datasource instance.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:218](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L218)
+[packages/datamesh/src/lib/connector.ts:218](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L218)
 
 ***
 
@@ -146,7 +146,7 @@ The dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:236](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L236)
+[packages/datamesh/src/lib/connector.ts:236](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L236)
 
 ***
 
@@ -172,7 +172,7 @@ The response from the server.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:191](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L191)
+[packages/datamesh/src/lib/connector.ts:191](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L191)
 
 ***
 
@@ -198,7 +198,7 @@ The staged response.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:167](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L167)
+[packages/datamesh/src/lib/connector.ts:167](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L167)
 
 ***
 
@@ -216,4 +216,4 @@ True if the server is up, false otherwise.
 
 #### Defined in
 
-[packages/datamesh/src/lib/connector.ts:86](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L86)
+[packages/datamesh/src/lib/connector.ts:86](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/connector.ts#L86)
