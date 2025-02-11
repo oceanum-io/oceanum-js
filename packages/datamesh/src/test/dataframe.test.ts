@@ -1,4 +1,4 @@
-import { test, expect } from "vitest";
+import { expect } from "vitest";
 import { Connector } from "../lib/connector";
 import { datameshTest } from "./fixtures";
 
@@ -32,7 +32,7 @@ datameshTest(
 
 datameshTest(
   "geodataframe",
-  async ({ geodataframe }) => {
+  async () => {
     // Test with the connector
     const datamesh = new Connector(process.env.DATAMESH_TOKEN);
     const gdf = await datamesh.loadDatasource("oceanum-js-test-gdf");

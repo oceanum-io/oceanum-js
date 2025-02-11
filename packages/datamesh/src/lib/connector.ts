@@ -33,18 +33,22 @@ export class Connector {
    */
   constructor(
     token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
-    options = {}
+    options?: {
+      service?: string;
+      gateway?: string;
+      jwtAuth?: string;
+    }
   ) {
-    if (!token && !options.jwtAuth) {
+    if (!token && !options?.jwtAuth) {
       throw new Error(
         "A valid datamesh token must be supplied as a connector constructor argument or defined in environment variables as DATAMESH_TOKEN"
       );
     }
 
     this._token = token;
-    const url = new URL(options.service || DATAMESH_SERVICE);
+    const url = new URL(options?.service || DATAMESH_SERVICE);
     this._host = `${url.protocol}//${url.hostname}`;
-    this._authHeaders = options.jwtAuth
+    this._authHeaders = options?.jwtAuth
       ? {
           Authorization: `Bearer ${options.jwtAuth}`,
         }
@@ -55,7 +59,7 @@ export class Connector {
 
     /* This is for testing  the gateway service is not always the same as the service domain */
     this._gateway =
-      options.gateway || `${url.protocol}//gateway.${url.hostname}`;
+      options?.gateway || `${url.protocol}//gateway.${url.hostname}`;
 
     if (
       this._host.split(".").slice(-1)[0] !==
@@ -116,9 +120,7 @@ export class Connector {
     datasourceId = "",
     params = {} as Record<string, string>
   ): Promise<Response> {
-    const url = new URL(
-      `${this._proto}//${this._host}/datasource/${datasourceId}`
-    );
+    const url = new URL(`${this._host}/datasource/${datasourceId}`);
     Object.keys(params).forEach((key) =>
       url.searchParams.append(key, params[key])
     );
@@ -234,7 +236,7 @@ export class Connector {
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}
-  ): Promise<Dataset</** @ignore */ DatameshStore> | null> {
+  ): Promise<Dataset<DatameshStore | TempStore> | null> {
     const query = { datasource: datasourceId, parameters };
     const dataset = await this.query(query);
     return dataset;

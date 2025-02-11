@@ -1,14 +1,15 @@
 import * as zarr from "@zarrita/core";
 import { Chunk, DataType, Listable, Location, TypedArray } from "@zarrita/core";
 import { Mutable, AsyncReadable } from "@zarrita/storage";
-import { get, set, Slice, slice } from "@zarrita/indexing";
+import { get, set, Slice } from "@zarrita/indexing";
+import { BoolArray } from "@zarrita/typedarray";
 import { Table, DataType as ArrowDataType } from "apache-arrow";
 import { Geometry, Feature, FeatureCollection } from "geojson";
-import { Geometry as WkxGeometry, BinaryReader } from "wkx-ts";
+import { Geometry as WkxGeometry } from "wkx-ts";
 import { Buffer } from "buffer/index";
 
 import { CachedHTTPStore } from "./zarr";
-import { Schema, Coordinates } from "./datasource";
+import { Schema, Coordmap } from "./datasource";
 import { measureTime } from "./observe";
 
 export type ATypedArray =
@@ -87,12 +88,12 @@ const getDtype = (data: Data): DataType => {
   }
   if (data === null) {
     return "uint8";
-  } else if (typeof data === "number") {
-    return "float32";
-  } else if (typeof data === "string") {
-    return "v2:object";
   } else {
     switch (data.constructor.name) {
+      case "Boolean":
+        return "bool";
+      case "Number":
+        return "float32";
       case "Int8Array":
         return "int8";
       case "Int16Array":
@@ -111,6 +112,10 @@ const getDtype = (data: Data): DataType => {
         return "float32";
       case "Float64Array":
         return "float64";
+      case "String":
+        return "v2:object";
+      case "Object":
+        return "v2:object";
     }
   }
 
@@ -212,18 +217,18 @@ const flatten = (
     for (let i = 0; i < dims[dim[0]]; i++) {
       const subdata = {} as Record<string, DataVariable>;
       for (const k in data) {
-        if (data[k].dims.includes(dim[0])) {
+        if (data[k].dimensions.includes(dim[0])) {
           subdata[k] = {
             attrs: {},
             // @ts-expect-error: Is array because include dims
             data: data[k].data[i],
-            dims: data[k].dims.slice(1),
+            dims: data[k].dimensions.slice(1),
           };
         } else {
           subdata[k] = data[k];
         }
       }
-      const subdims = { ...dims };
+      const subdims = { ...dimensions };
       delete subdims[dim[0]];
       flatten(subdata, subdims, rows);
     }
@@ -266,8 +271,8 @@ export class DataVar<
       : zarr.Array<DType, AsyncReadable>
   ) {
     this.id = id;
-    this.dims = dims;
-    this.attrs = attrs;
+    this.dimensions = dims;
+    this.attributes = attrs;
     this.arr = arr; // zarr array
   }
 
@@ -276,7 +281,7 @@ export class DataVar<
    * @param index - Optional slice parameters to retrieve specific data from the zarr array.
    * @returns A promise that resolves to the data of the zarr array.
    */
-  //@measureTime
+  @measureTime
   async get(
     index?: (null | Slice | string | number)[] | null | undefined
   ): Promise<Data> {
@@ -288,10 +293,12 @@ export class DataVar<
       this.arr as zarr.Array<DType, AsyncReadable>,
       index
     );
-    if (this.arr.dtype !== "v2:object" && _data.shape) {
-      return unravel(_data.data, _data.shape, _data.stride);
-    } else {
+    if (this.arr.dtype == "v2:object" || !_data.shape) {
       return _data.data as Data;
+    } else if (this.arr.dtype == "bool") {
+      return [..._data.data] as Data;
+    } else {
+      return unravel(_data.data, _data.shape, _data.stride);
     }
   }
 }
@@ -307,14 +314,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param vars - The data variables of the dataset.
    * @param attrs - The attributes of the dataset.
    * @param root - The root group of the dataset.
-   * @param coordinates - The coordinates map of the dataset.
+   * @param coordmap - The coordinates map of the dataset.
    */
   dims: Record<string, number>;
   vars: S extends TempStore
     ? Record<string, DataVar<DataType, TempStore>>
     : Record<string, DataVar<DataType, DatameshStore>>;
   attrs: Record<string, unknown>;
-  coordinates: Coordinates;
+  coordmap: Coordmap;
   root: S;
 
   constructor(
@@ -323,14 +330,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       ? Record<string, DataVar<DataType, TempStore>>
       : Record<string, DataVar<DataType, DatameshStore>>,
     attrs: Record<string, unknown>,
-    coordinates: Coordinates,
+    coordmap: Coordmap,
     root: S
   ) {
-    this.vars = vars;
-    this.dims = dims;
-    this.attrs = attrs;
+    this.variables = vars;
+    this.dimensions = dims;
+    this.attributes = attrs;
     this.root = root;
-    this.coordinates = coordinates;
+    this.coordmap = coordmap;
   }
 
   /**
@@ -390,13 +397,13 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     }
     const coords = JSON.parse(
       group.attrs["_coordinates"] as string
-    ) as Coordinates;
+    ) as Coordmap;
     return new Dataset<DatameshStore>(dims, vars, group.attrs, coords, root);
   }
 
   static async fromArrow(
     data: Table,
-    coordmap: Coordinates
+    coordmap: Coordmap
   ): Promise<Dataset<TempStore>> {
     const attrs = {};
     const dims = { record: data.numRows };
@@ -434,24 +441,95 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     return await Dataset.init({ dims, vars, attrs }, coordmap);
   }
 
+  static async fromGeojson(
+    featureCollection: FeatureCollection,
+    coordmap?: Coordmap
+  ): Promise<Dataset<TempStore>> {
+    if (
+      !featureCollection.features ||
+      !Array.isArray(featureCollection.features)
+    ) {
+      throw new Error("Invalid FeatureCollection: features array is required");
+    }
+
+    const features = featureCollection.features;
+    if (features.length === 0) {
+      throw new Error("FeatureCollection contains no features");
+    }
+
+    // Extract all unique property keys from features
+    const propertyKeys = new Set<string>();
+    features.forEach((feature) => {
+      if (feature.properties) {
+        Object.keys(feature.properties).forEach((key) => propertyKeys.add(key));
+      }
+    });
+
+    // Create a flattened array of records
+    const records = features.map((feature) => {
+      const record: Record<string, unknown> = {
+        geometry: feature.geometry,
+      };
+      if (feature.properties) {
+        Object.assign(record, feature.properties);
+      }
+      return record;
+    });
+
+    // Create schema with dimensions and variables
+    const schema: Schema = {
+      dimensions: { index: records.length },
+      variables: {},
+      attributes: {
+        type: "FeatureCollection",
+        crs: featureCollection.crs || {
+          type: "name",
+          properties: { name: "EPSG:4326" },
+        },
+      },
+    };
+
+    // Create temporary dataset
+    const dataset = await Dataset.init(schema, { ...coordmap, g: "geometry" });
+
+    // Add geometry variable
+    await dataset.assign(
+      "geometry",
+      ["index"],
+      records.map((r) => r.geometry),
+      { description: "GeoJSON geometry" }
+    );
+
+    // Add property variables
+    for (const key of propertyKeys) {
+      const values = records.map((r) => r[key]);
+      await dataset.assign(key, ["index"], values, {
+        description: `Property: ${key}`,
+      });
+    }
+
+    return dataset;
+  }
+
   /**
    * Initializes an in memory Dataset instance from a data object.
    * @param datasource - An object containing id, dimensions, data variables, and attributes.
    */
   static async init(
     datasource: Schema,
-    coordinates?: Coordinates
+    coordmap?: Coordmap
   ): Promise<Dataset<TempStore>> {
     const root = zarr.root(new Map());
     const ds = new Dataset(
-      datasource.dims,
+      datasource.dimensions,
       {},
-      datasource.attrs || {},
-      coordinates || {},
+      datasource.attributes || {},
+      coordmap || {},
       root
     );
-    for (const k in datasource.vars) {
-      const { dims, attrs, data, dtype }: DataVariable = datasource.vars[k];
+    for (const k in datasource.variables) {
+      const { dims, attrs, data, dtype }: DataVariable =
+        datasource.variables[k];
       await ds.assign(k, dims, data as Data, attrs, dtype);
     }
     return ds;
@@ -479,21 +557,21 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   async asDataframe(): Promise<Record<string, unknown>[]> {
     const data = {} as Record<string, DataVariable>;
     const bigint = [];
-    for (const k in this.vars) {
+    for (const k in this.variables) {
       data[k] = {
-        attrs: this.vars[k].attrs,
-        dims: this.vars[k].dims,
+        attrs: this.variables[k].attributes,
+        dims: this.variables[k].dimensions,
       };
-      data[k].data = (await this.vars[k].get()) as Data;
-      if (this.vars[k].arr.dtype == "int64") {
+      data[k].data = (await this.variables[k].get()) as Data;
+      if (this.variables[k].arr.dtype == "int64") {
         bigint.push(k);
       }
     }
-    const df = flatten(data, { ...this.dims }, []);
-    if (this.coordinates.t) {
+    const df = flatten(data, { ...this.dimensions }, []);
+    if (this.coordmap.t) {
       for (let i = 0; i < df.length; i++) {
-        df[i][this.coordinates.t] = new Date(
-          df[i][this.coordinates.t] as number
+        df[i][this.coordmap.t] = new Date(
+          df[i][this.coordmap.t] as number
         ).toISOString();
       }
     }
@@ -528,7 +606,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * ```
    */
   async asGeojson(geom?: Geometry): Promise<FeatureCollection> {
-    if (!this.coordinates.g && !geom) {
+    if (!this.coordmap.g && !geom) {
       throw new Error("No geometry found");
     }
     const features = [] as Feature[];
@@ -536,13 +614,17 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
       let geometry = geom;
-      if (!geometry && this.coordinates.g) {
-        delete properties[this.coordinates.g];
-        const wkbbuffer = new Buffer(
-          df[i][this.coordinates.g as string],
-          "base64"
-        );
-        geometry = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
+      if (!geometry && this.coordmap.g) {
+        delete properties[this.coordmap.g];
+        const g = df[i][this.coordmap.g as string];
+        if (g.slice(0, 7) == '{"type:') {
+          //GeoJSON
+          geometry = g as Geometry;
+        } else {
+          //WKB
+          const wkbbuffer = new Buffer(g, "base64");
+          geometry = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
+        }
       }
       features.push({
         type: "Feature",
@@ -583,14 +665,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       throw new Error("Data shape does not match dimensions");
     }
     dims.map((dim, i) => {
-      if (this.dims[dim]) {
-        if (this.dims[dim] != shape[i]) {
+      if (this.dimensions[dim]) {
+        if (this.dimensions[dim] != shape[i]) {
           throw new Error(
             `Existing size of dimension ${dim} does not match new data`
           );
         }
       } else {
-        this.dims[dim] = shape[i];
+        this.dimensions[dim] = shape[i];
       }
     });
     const _dtype = dtype || getDtype(data);
@@ -603,15 +685,23 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         codecs: _dtype == "v2:object" ? [{ name: "json2" }] : [],
       }
     );
+    let _data = ravel(data);
+    if (_data.length == 0) {
+      _data = null;
+    } else if (_dtype == "bool") {
+      _data = new BoolArray(_data);
+    } else if (_data[0].constructor.name == "Number") {
+      _data = new Float32Array(_data);
+    }
     await set(
       arr,
       shape.map(() => null),
       {
-        data: ravel(data),
+        data: _data,
         shape: shape,
         stride: get_strides(shape),
       }
     );
-    this.vars[varid] = new DataVar(varid, dims, attrs || {}, arr);
+    this.variables[varid] = new DataVar(varid, dims, attrs || {}, arr);
   }
 }

@@ -23,7 +23,7 @@ export type Coordinate =
   | "j" // Coordinate_j
   | "k"; // Coordinate_k
 
-export type Coordinates = {
+export type Coordmap = {
   [key in Coordinate]?: string;
 };
 
@@ -42,9 +42,9 @@ export type Schema = {
   dims: Record<string, number>;
 
   /**
-   * Coordinates of the schema.
+   * Coordinate map of the schema.
    */
-  coords?: Record<string, DataVariable>;
+  coordmap?: Coordmap;
 
   /**
    * Data variables of the schema.
@@ -117,9 +117,9 @@ export type Datasource = {
   schema: Schema;
 
   /**
-   * Coordinate mappings for the data source.
+   * Coordinate map for the data source.
    */
-  coordinates: Coordinates;
+  coordmap: Coordmap;
 
   /**
    * Additional details about the data source.

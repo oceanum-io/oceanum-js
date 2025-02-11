@@ -24,7 +24,7 @@ const datasource: Datasource = {
     dims: {},
     vars: {},
   },
-  coordinates: { t: "time" },
+  coordmap: { t: "time" },
   driver: "onzarr",
 };
 
@@ -72,43 +72,6 @@ const jsonify = (data: Record<string, unknown>): string => {
 
 const scalar = new Float32Array(1);
 scalar[0] = 10.1;
-export const dataset: Schema = {
-  dims: { one: 1, time: 10, lon: 20, lat: 30 },
-  coords: {
-    time: {
-      dims: ["time"],
-      attrs: { units: "unix timestamp" },
-      data: [...Array(10).keys()].map((i) => 86400000 * i),
-    },
-    lon: {
-      dims: ["lon"],
-      attrs: { units: "degrees east" },
-      data: [...Array(20).keys()].map((i) => i),
-    },
-    lat: {
-      dims: ["lat"],
-      attrs: { units: "degrees north" },
-      data: [...Array(30).keys()].map((i) => -i),
-    },
-  },
-  vars: {
-    temperature: {
-      dims: ["time", "lat", "lon"],
-      attrs: { units: "C" },
-      data: createFloatArray([10, 30, 20], 0, true),
-    },
-    elevation: {
-      dims: ["lat", "lon"],
-      attrs: { units: "m" },
-      data: createFloatArray([30, 20], 0, false),
-    },
-    scalar: {
-      dims: ["one"],
-      attrs: { units: "m" },
-      data: scalar,
-    },
-  },
-};
 
 export const datameshTest = test.extend({
   metadata: async ({}, use: (dsrc: Datasource) => Promise<void>) => {
@@ -133,19 +96,57 @@ export const datameshTest = test.extend({
       headers: HEADERS,
     });
   },
-  dataset: async ({}, use: (ds: Schema) => Promise<void>) => {
+  dataset: async ({}, use: (ds: object) => Promise<void>) => {
+    const ds = {
+      attrs: { id: "oceanum-js-test-ds" },
+      dims: { one: 1, time: 10, lon: 20, lat: 30 },
+      coords: {
+        time: {
+          dims: ["time"],
+          attrs: { units: "unix timestamp" },
+          data: [...Array(10).keys()].map((i) => 86400000 * i),
+        },
+        lon: {
+          dims: ["lon"],
+          attrs: { units: "degrees east" },
+          data: [...Array(20).keys()].map((i) => i),
+        },
+        lat: {
+          dims: ["lat"],
+          attrs: { units: "degrees north" },
+          data: [...Array(30).keys()].map((i) => -i),
+        },
+      },
+      data_vars: {
+        temperature: {
+          dims: ["time", "lat", "lon"],
+          attrs: { units: "C" },
+          data: createFloatArray([10, 30, 20], 0, true),
+        },
+        elevation: {
+          dims: ["lat", "lon"],
+          attrs: { units: "m" },
+          data: createFloatArray([30, 20], 0, false),
+        },
+        scalar: {
+          dims: ["one"],
+          attrs: { units: "m" },
+          data: scalar,
+        },
+      },
+    };
     // setup the fixture before each test function
     let resp = await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-ds/", {
       method: "PUT",
       headers: HEADERS,
-      body: jsonify(dataset),
+      body: jsonify(ds),
     });
     if (resp.status !== 200) {
       const text = await resp.text();
       throw new Error("Failed to write dataset: " + text);
     }
     const patch = jsonify({
-      coordinates: { t: "time", x: "lon", y: "lat" },
+      coordmap: { t: "time", x: "lon", y: "lat" },
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-ds/", {
       method: "PATCH",
@@ -155,10 +156,9 @@ export const datameshTest = test.extend({
     if (resp.status !== 200) {
       throw new Error("Failed to register dataset");
     }
-    dataset.attrs = { id: "oceanum-js-test-ds" };
 
     // use the fixture value
-    await use(dataset);
+    await use(ds);
 
     // cleanup the fixture after each test function
     await fetch(DATAMESH_GATEWAY + "/data/oceanum-js-test-ds", {
@@ -196,7 +196,7 @@ export const datameshTest = test.extend({
     }
 
     const patch = jsonify({
-      coordinates: { t: "time" },
+      coordmap: { t: "time" },
       container: "dataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-df/", {
@@ -226,7 +226,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: [174.0, -37.0],
+            coordmap: [174.0, -37.0],
           },
           properties: {
             time: "1970-01-01T00:00:00.000Z",
@@ -238,7 +238,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: [174.1, -37.0],
+            coordmap: [174.1, -37.0],
           },
           properties: {
             time: "1970-01-02T00:00:00.000Z",
@@ -250,7 +250,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: [174.2, -37.0],
+            coordmap: [174.2, -37.0],
           },
           properties: {
             time: "1970-01-03T00:00:00.000Z",
@@ -271,7 +271,7 @@ export const datameshTest = test.extend({
     }
 
     const patch = jsonify({
-      coordinates: { t: "time", g: "geometry" },
+      coordmap: { t: "time", g: "geometry" },
       container: "geodataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-gdf/", {

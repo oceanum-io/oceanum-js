@@ -11,12 +11,12 @@ test("datasource type", () => {
     schema: {
       attrs: {},
       dims: {},
-      vars: {},
+      data_vars: {},
     },
   };
   assertType<Record<string, unknown>>(datasource.schema.attrs);
   assertType<Record<string, unknown>>(datasource.schema.dims);
-  assertType<Record<string, unknown>>(datasource.schema.vars);
+  assertType<Record<string, unknown>>(datasource.schema.data_vars);
 });
 
 datameshTest("datasource_metadata", async ({ metadata }) => {
