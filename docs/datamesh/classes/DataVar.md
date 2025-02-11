@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -16,17 +16,25 @@ Represents a data variable within a dataset.
 
 ### new DataVar()
 
-> **new DataVar**\<`S`\>(`id`, `dims`, `attrs`, `arr`): [`DataVar`](DataVar.md)\<`DType`, `S`\>
+> **new DataVar**\<`S`\>(`id`, `dimensions`, `attributes`, `arr`): [`DataVar`](DataVar.md)\<`DType`, `S`\>
 
 #### Parameters
 
-• **id**: `string`
+##### id
 
-• **dims**: `string`[]
+`string`
 
-• **attrs**: `Record`\<`string`, `unknown`\>
+##### dimensions
 
-• **arr**: `S` *extends* `TempStore` ? `Array`\<`DType`, `Mutable`\> : `Array`\<`DType`, `AsyncReadable`\<`unknown`\>\>
+`string`[]
+
+##### attributes
+
+`Record`\<`string`, `unknown`\>
+
+##### arr
+
+`S` *extends* `TempStore` ? `Array`\<`DType`, `Mutable`\> : `Array`\<`DType`, `AsyncReadable`\<`unknown`\>\>
 
 #### Returns
 
@@ -34,7 +42,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:238](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L238)
+[packages/datamesh/src/lib/datamodel.ts:272](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L272)
 
 ## Properties
 
@@ -44,27 +52,27 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[datamodel.ts:235](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L235)
+[packages/datamesh/src/lib/datamodel.ts:269](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L269)
 
 ***
 
-### attrs
+### attributes
 
-> **attrs**: `Record`\<`string`, `unknown`\>
+> **attributes**: `Record`\<`string`, `unknown`\>
 
 #### Defined in
 
-[datamodel.ts:234](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L234)
+[packages/datamesh/src/lib/datamodel.ts:268](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L268)
 
 ***
 
-### dims
+### dimensions
 
-> **dims**: `string`[]
+> **dimensions**: `string`[]
 
 #### Defined in
 
-[datamodel.ts:233](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L233)
+[packages/datamesh/src/lib/datamodel.ts:267](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L267)
 
 ***
 
@@ -92,21 +100,23 @@ The zarr array associated with the data variable.
 
 #### Defined in
 
-[datamodel.ts:232](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L232)
+[packages/datamesh/src/lib/datamodel.ts:266](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L266)
 
 ## Methods
 
 ### get()
 
-> **get**(`slice`?): `Promise`\<[`Data`](../type-aliases/Data.md)\>
+> **get**(`index`?): `Promise`\<[`Data`](../type-aliases/Data.md)\>
 
 Retrieves the data from the zarr array. If the data is already cached, it returns the cached data.
 
 #### Parameters
 
-• **slice?**: `null` \| (`null` \| `number` \| `Slice`)[]
+##### index?
 
 Optional slice parameters to retrieve specific data from the zarr array.
+
+`string`[] | `SliceDef`
 
 #### Returns
 
@@ -116,4 +126,4 @@ A promise that resolves to the data of the zarr array.
 
 #### Defined in
 
-[datamodel.ts:258](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L258)
+[packages/datamesh/src/lib/datamodel.ts:293](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L293)

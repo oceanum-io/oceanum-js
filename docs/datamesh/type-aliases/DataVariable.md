@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -12,9 +12,9 @@ Represents a data variable.
 
 ## Type declaration
 
-### attrs
+### attributes
 
-> **attrs**: `Record`\<`string`, `string` \| `unknown`\>
+> **attributes**: `Record`\<`string`, `string` \| `unknown`\>
 
 Attributes of the variable.
 
@@ -24,9 +24,9 @@ Attributes of the variable.
 
 Data associated with the variable.
 
-### dims
+### dimensions
 
-> **dims**: `string`[]
+> **dimensions**: `string`[]
 
 Dimensions of the variable
 
@@ -38,4 +38,4 @@ Datatype of the variable.
 
 ## Defined in
 
-[datamodel.ts:33](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datamodel.ts#L33)
+[packages/datamesh/src/lib/datamodel.ts:48](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datamodel.ts#L48)

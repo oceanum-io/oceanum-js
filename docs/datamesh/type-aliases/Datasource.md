@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -14,9 +14,9 @@ Represents a data source.
 
 ### coordinates
 
-> **coordinates**: [`Coordinates`](Coordinates.md)
+> **coordinates**: [`Coordmap`](Coordmap.md)
 
-Coordinate mappings for the data source.
+Coordinate map for the data source.
 
 ### description?
 
@@ -84,7 +84,7 @@ Forecast time period for the data source.
 
 ### schema
 
-> **schema**: [`Schema`](Schema.md)
+> **schema**: [`DatameshSchema`](DatameshSchema.md)
 
 Schema information for the data source.
 
@@ -108,4 +108,4 @@ Start time for the data source.
 
 ## Defined in
 
-[datasource.ts:59](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datasource.ts#L59)
+[packages/datamesh/src/lib/datasource.ts:84](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datasource.ts#L84)

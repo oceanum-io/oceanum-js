@@ -1,7 +1,7 @@
 /// <reference lib="dom" />
 
 import { test } from "vitest";
-import { Datasource, Schema } from "../lib/datasource";
+import { Datasource } from "../lib/datasource";
 
 const DATAMESH_TOKEN: string = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN";
 export const HEADERS: HeadersInit = {
@@ -22,9 +22,9 @@ const datasource: Datasource = {
   schema: {
     attrs: {},
     dims: {},
-    vars: {},
+    data_vars: {},
   },
-  coordmap: { t: "time" },
+  coordinates: { t: "time" },
   driver: "onzarr",
 };
 

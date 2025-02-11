@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -20,7 +20,9 @@ Query class representing a Datamesh query.
 
 #### Parameters
 
-• **query**: [`IQuery`](../interfaces/IQuery.md)
+##### query
+
+[`IQuery`](../interfaces/IQuery.md)
 
 #### Returns
 
@@ -28,7 +30,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:203](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L203)
+[packages/datamesh/src/lib/query.ts:178](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L178)
 
 ## Properties
 
@@ -42,7 +44,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:199](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L199)
+[packages/datamesh/src/lib/query.ts:174](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L174)
 
 ***
 
@@ -56,7 +58,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:197](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L197)
+[packages/datamesh/src/lib/query.ts:172](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L172)
 
 ***
 
@@ -70,7 +72,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:198](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L198)
+[packages/datamesh/src/lib/query.ts:173](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L173)
 
 ***
 
@@ -84,7 +86,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:190](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L190)
+[packages/datamesh/src/lib/query.ts:165](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L165)
 
 ***
 
@@ -98,7 +100,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:192](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L192)
+[packages/datamesh/src/lib/query.ts:167](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L167)
 
 ***
 
@@ -112,7 +114,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:195](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L195)
+[packages/datamesh/src/lib/query.ts:170](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L170)
 
 ***
 
@@ -126,7 +128,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:201](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L201)
+[packages/datamesh/src/lib/query.ts:176](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L176)
 
 ***
 
@@ -140,7 +142,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:196](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L196)
+[packages/datamesh/src/lib/query.ts:171](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L171)
 
 ***
 
@@ -154,7 +156,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:200](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L200)
+[packages/datamesh/src/lib/query.ts:175](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L175)
 
 ***
 
@@ -168,7 +170,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:191](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L191)
+[packages/datamesh/src/lib/query.ts:166](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L166)
 
 ***
 
@@ -182,7 +184,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:194](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L194)
+[packages/datamesh/src/lib/query.ts:169](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L169)
 
 ***
 
@@ -196,7 +198,7 @@ Query class representing a Datamesh query.
 
 #### Defined in
 
-[query.ts:193](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L193)
+[packages/datamesh/src/lib/query.ts:168](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L168)
 
 ## Methods
 
@@ -212,4 +214,4 @@ Returns the query as a JSON object.
 
 #### Defined in
 
-[query.ts:221](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L221)
+[packages/datamesh/src/lib/query.ts:196](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L196)

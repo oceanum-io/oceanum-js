@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -14,7 +14,7 @@ Aggregate type representing aggregation operations.
 
 ### operations
 
-> **operations**: [`AggregateOps`](../enumerations/AggregateOps.md)[]
+> **operations**: [`AggregateOps`](AggregateOps.md)[]
 
 ### spatial?
 
@@ -26,4 +26,4 @@ Aggregate type representing aggregation operations.
 
 ## Defined in
 
-[query.ts:139](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L139)
+[packages/datamesh/src/lib/query.ts:113](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L113)

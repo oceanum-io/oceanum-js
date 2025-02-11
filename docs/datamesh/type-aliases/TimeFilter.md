@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -14,7 +14,7 @@ TimeFilter type representing a temporal subset or interpolation.
 
 ### resample?
 
-> `optional` **resample**: [`ResampleType`](../enumerations/ResampleType.md)
+> `optional` **resample**: [`ResampleType`](ResampleType.md)
 
 ### resolution?
 
@@ -26,8 +26,8 @@ TimeFilter type representing a temporal subset or interpolation.
 
 ### type?
 
-> `optional` **type**: [`TimeFilterType`](../enumerations/TimeFilterType.md)
+> `optional` **type**: [`TimeFilterType`](TimeFilterType.md)
 
 ## Defined in
 
-[query.ts:100](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L100)
+[packages/datamesh/src/lib/query.ts:74](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L74)

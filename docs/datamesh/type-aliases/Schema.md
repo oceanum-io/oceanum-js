@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -8,34 +8,34 @@
 
 > **Schema**: `object`
 
-Represents the schema of a data source.
+Represents the internal schema of a data source.
 
 ## Type declaration
 
-### attrs?
+### attributes?
 
-> `optional` **attrs**: `Record`\<`string`, `string` \| `number`\>
+> `optional` **attributes**: `Record`\<`string`, `string` \| `number`\>
 
 Attributes of the schema.
 
-### coords?
+### coordmap?
 
-> `optional` **coords**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
+> `optional` **coordmap**: [`Coordmap`](Coordmap.md)
 
-Coordinates of the schema.
+Coordinate map of the schema.
 
-### data\_vars
+### dimensions
 
-> **data\_vars**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
-
-Data variables of the schema.
-
-### dims
-
-> **dims**: `Record`\<`string`, `number`\>
+> **dimensions**: `Record`\<`string`, `number`\>
 
 Dimensions of the schema.
 
+### variables
+
+> **variables**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
+
+Data variables of the schema.
+
 ## Defined in
 
-[datasource.ts:34](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/datasource.ts#L34)
+[packages/datamesh/src/lib/datasource.ts:33](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/datasource.ts#L33)

@@ -1,7 +1,14 @@
 import * as zarr from "@zarrita/core";
-import { Chunk, DataType, Listable, Location, TypedArray } from "@zarrita/core";
+import {
+  Chunk,
+  DataType,
+  Listable,
+  Location,
+  TypedArray,
+  CodecMetadata,
+} from "@zarrita/core";
 import { Mutable, AsyncReadable } from "@zarrita/storage";
-import { get, set, Slice } from "@zarrita/indexing";
+import { get, set, Slice, slice } from "@zarrita/indexing";
 import { BoolArray } from "@zarrita/typedarray";
 import { Table, DataType as ArrowDataType } from "apache-arrow";
 import { Geometry, Feature, FeatureCollection } from "geojson";
@@ -42,11 +49,11 @@ export type DataVariable = {
   /**
    * Attributes of the variable.
    */
-  attrs: Record<string, string | unknown>;
+  attributes: Record<string, string | unknown>;
   /**
    * Dimensions of the variable
    *  */
-  dims: string[];
+  dimensions: string[];
   /**
    * Datatype of the variable.
    */
@@ -122,9 +129,9 @@ const getDtype = (data: Data): DataType => {
   throw new Error("Unsupported data type: " + data.constructor.name);
 };
 
-const arrowTypeToDType = (dtype: ArrowDataType): DataType => {
+const arrowTypeToDType = (dtype: ArrowDataType): string => {
   //Convert arrow data type to zarr datatype
-  let type: DataType = dtype.name;
+  let type: string = dtype.toString();
   if (dtype.typeId == 5) {
     type = "v2:object";
   } else if (dtype.typeId == 1) {
@@ -219,16 +226,16 @@ const flatten = (
       for (const k in data) {
         if (data[k].dimensions.includes(dim[0])) {
           subdata[k] = {
-            attrs: {},
+            attributes: {},
             // @ts-expect-error: Is array because include dims
             data: data[k].data[i],
-            dims: data[k].dimensions.slice(1),
+            dimensions: data[k].dimensions.slice(1),
           };
         } else {
           subdata[k] = data[k];
         }
       }
-      const subdims = { ...dimensions };
+      const subdims = { ...dims };
       delete subdims[dim[0]];
       flatten(subdata, subdims, rows);
     }
@@ -240,7 +247,7 @@ const flatten = (
 export type DatameshStore = Location<Listable<AsyncReadable>>;
 /** @ignore */
 export type TempStore = Location<Mutable>;
-
+type SliceDef = (null | Slice | number)[] | null | undefined;
 /**
  * Represents a data variable within a dataset.
  */
@@ -252,27 +259,27 @@ export class DataVar<
   /**
    * Creates an instance of DataVar.
    * @param id - The identifier for the data variable.
-   * @param dims - The dimensions associated with the data variable.
-   * @param attrs - The attributes of the data variable, represented as a record of key-value pairs.
+   * @param dimensions - The dimensions associated with the data variable.
+   * @param attributes - The attributes of the data variable, represented as a record of key-value pairs.
    * @param arr - The zarr array associated with the data variable.
    */
   id: string;
-  dims: string[];
-  attrs: Record<string, unknown>;
+  dimensions: string[];
+  attributes: Record<string, unknown>;
   arr: S extends TempStore
     ? zarr.Array<DType, Mutable>
     : zarr.Array<DType, AsyncReadable>;
   constructor(
     id: string,
-    dims: string[],
-    attrs: Record<string, unknown>,
+    dimensions: string[],
+    attributes: Record<string, unknown>,
     arr: S extends TempStore
       ? zarr.Array<DType, Mutable>
       : zarr.Array<DType, AsyncReadable>
   ) {
     this.id = id;
-    this.dimensions = dims;
-    this.attributes = attrs;
+    this.dimensions = dimensions;
+    this.attributes = attributes;
     this.arr = arr; // zarr array
   }
 
@@ -281,17 +288,26 @@ export class DataVar<
    * @param index - Optional slice parameters to retrieve specific data from the zarr array.
    * @returns A promise that resolves to the data of the zarr array.
    */
+
   @measureTime
-  async get(
-    index?: (null | Slice | string | number)[] | null | undefined
-  ): Promise<Data> {
-    if (typeof index === "string") {
-      const { start, stop, step } = index.split(":");
-      index = { start, stop, step };
-    }
+  async get(index?: SliceDef | string[]): Promise<Data> {
+    const _index =
+      index &&
+      index.map((i) => {
+        if (typeof i === "string") {
+          const [start, stop, step] = i.split(":");
+          return slice(
+            parseInt(start),
+            parseInt(stop),
+            parseInt(step)
+          ) as Slice;
+        } else {
+          return i;
+        }
+      });
     const _data: Chunk<DType> | Scalar = await get(
       this.arr as zarr.Array<DType, AsyncReadable>,
-      index
+      _index as SliceDef
     );
     if (this.arr.dtype == "v2:object" || !_data.shape) {
       return _data.data as Data;
@@ -310,32 +326,32 @@ export class DataVar<
 export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   /**
    * Creates an instance of Dataset.
-   * @param dims - The dimensions of the dataset.
-   * @param vars - The data variables of the dataset.
-   * @param attrs - The attributes of the dataset.
+   * @param dimensions - The dimensions of the dataset.
+   * @param variables - The data variables of the dataset.
+   * @param attributes - The attributes of the dataset.
    * @param root - The root group of the dataset.
    * @param coordmap - The coordinates map of the dataset.
    */
-  dims: Record<string, number>;
-  vars: S extends TempStore
+  dimensions: Record<string, number>;
+  variables: S extends TempStore
     ? Record<string, DataVar<DataType, TempStore>>
     : Record<string, DataVar<DataType, DatameshStore>>;
-  attrs: Record<string, unknown>;
+  attributes: Record<string, unknown>;
   coordmap: Coordmap;
   root: S;
 
   constructor(
-    dims: Record<string, number>,
-    vars: S extends TempStore
+    dimensions: Record<string, number>,
+    variables: S extends TempStore
       ? Record<string, DataVar<DataType, TempStore>>
       : Record<string, DataVar<DataType, DatameshStore>>,
-    attrs: Record<string, unknown>,
+    attributes: Record<string, unknown>,
     coordmap: Coordmap,
     root: S
   ) {
-    this.variables = vars;
-    this.dimensions = dims;
-    this.attributes = attrs;
+    this.dimensions = dimensions;
+    this.variables = variables;
+    this.attributes = attributes;
     this.root = root;
     this.coordmap = coordmap;
   }
@@ -405,9 +421,9 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     data: Table,
     coordmap: Coordmap
   ): Promise<Dataset<TempStore>> {
-    const attrs = {};
-    const dims = { record: data.numRows };
-    const vars = {} as Record<string, DataVar<DataType, TempStore>>;
+    const attributes = {};
+    const dimensions = { record: data.numRows };
+    const variables = {} as Record<string, DataVariable>;
     data.schema.fields.forEach((field) => {
       const column = data.getChild(field.name);
       let attrs = {};
@@ -431,14 +447,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         array = carray;
         dtype = "v2:object";
       }
-      vars[field.name] = {
-        dims: ["record"],
-        attrs,
+      variables[field.name] = {
+        dimensions: ["record"],
+        attributes: attrs,
         data: array,
         dtype,
       };
     });
-    return await Dataset.init({ dims, vars, attrs }, coordmap);
+    return await Dataset.init({ dimensions, variables, attributes }, coordmap);
   }
 
   static async fromGeojson(
@@ -480,13 +496,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     const schema: Schema = {
       dimensions: { index: records.length },
       variables: {},
-      attributes: {
-        type: "FeatureCollection",
-        crs: featureCollection.crs || {
-          type: "name",
-          properties: { name: "EPSG:4326" },
-        },
-      },
+      attributes: {},
     };
 
     // Create temporary dataset
@@ -496,13 +506,13 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     await dataset.assign(
       "geometry",
       ["index"],
-      records.map((r) => r.geometry),
+      records.map((r) => r.geometry) as Data,
       { description: "GeoJSON geometry" }
     );
 
     // Add property variables
     for (const key of propertyKeys) {
-      const values = records.map((r) => r[key]);
+      const values = records.map((r) => r[key]) as Data;
       await dataset.assign(key, ["index"], values, {
         description: `Property: ${key}`,
       });
@@ -528,9 +538,9 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       root
     );
     for (const k in datasource.variables) {
-      const { dims, attrs, data, dtype }: DataVariable =
+      const { dimensions, attributes, data }: DataVariable =
         datasource.variables[k];
-      await ds.assign(k, dims, data as Data, attrs, dtype);
+      await ds.assign(k, dimensions, data as Data, attributes);
     }
     return ds;
   }
@@ -559,8 +569,8 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     const bigint = [];
     for (const k in this.variables) {
       data[k] = {
-        attrs: this.variables[k].attributes,
-        dims: this.variables[k].dimensions,
+        attributes: this.variables[k].attributes,
+        dimensions: this.variables[k].dimensions,
       };
       data[k].data = (await this.variables[k].get()) as Data;
       if (this.variables[k].arr.dtype == "int64") {
@@ -606,7 +616,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * ```
    */
   async asGeojson(geom?: Geometry): Promise<FeatureCollection> {
-    if (!this.coordmap.g && !geom) {
+    if (!this.coordmap.g || !geom) {
       throw new Error("No geometry found");
     }
     const features = [] as Feature[];
@@ -616,10 +626,10 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       let geometry = geom;
       if (!geometry && this.coordmap.g) {
         delete properties[this.coordmap.g];
-        const g = df[i][this.coordmap.g as string];
+        const g = df[i][this.coordmap.g] as string;
         if (g.slice(0, 7) == '{"type:') {
           //GeoJSON
-          geometry = g as Geometry;
+          geometry = JSON.parse(g) as Geometry;
         } else {
           //WKB
           const wkbbuffer = new Buffer(g, "base64");
@@ -682,7 +692,8 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         shape,
         data_type: _dtype,
         chunk_shape: chunks || shape,
-        codecs: _dtype == "v2:object" ? [{ name: "json2" }] : [],
+        codecs:
+          _dtype == "v2:object" ? [{ name: "json2" } as CodecMetadata] : [],
       }
     );
     let _data = ravel(data);

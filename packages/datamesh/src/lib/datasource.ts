@@ -28,9 +28,35 @@ export type Coordmap = {
 };
 
 /**
- * Represents the schema of a data source.
+ * Represents the internal schema of a data source.
  */
 export type Schema = {
+  /**
+   * Attributes of the schema.
+   */
+  attributes?: Record<string, string | number>;
+
+  /**
+   * Dimensions of the schema.
+   */
+  dimensions: Record<string, number>;
+
+  /**
+   * Coordinate map of the schema.
+   */
+  coordmap?: Coordmap;
+
+  /**
+   * Data variables of the schema.
+   */
+  variables: Record<string, DataVariable>;
+};
+
+/**
+ * Datamesh schema
+ */
+
+export type DatameshSchema = {
   /**
    * Attributes of the schema.
    */
@@ -44,12 +70,12 @@ export type Schema = {
   /**
    * Coordinate map of the schema.
    */
-  coordmap?: Coordmap;
+  coords?: Record<string, DatameshSchema>;
 
   /**
    * Data variables of the schema.
    */
-  vars: Record<string, DataVariable>;
+  data_vars?: Record<string, DatameshSchema>;
 };
 
 /**
@@ -114,12 +140,12 @@ export type Datasource = {
   /**
    * Schema information for the data source.
    */
-  schema: Schema;
+  schema: DatameshSchema;
 
   /**
    * Coordinate map for the data source.
    */
-  coordmap: Coordmap;
+  coordinates: Coordmap;
 
   /**
    * Additional details about the data source.

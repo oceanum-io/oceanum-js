@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -14,7 +14,7 @@ LevelFilter type representing a vertical subset or interpolation.
 
 ### interp?
 
-> `optional` **interp**: [`LevelFilterInterp`](../enumerations/LevelFilterInterp.md)
+> `optional` **interp**: [`LevelFilterInterp`](LevelFilterInterp.md)
 
 ### levels
 
@@ -22,8 +22,8 @@ LevelFilter type representing a vertical subset or interpolation.
 
 ### type
 
-> **type**: [`LevelFilterType`](../enumerations/LevelFilterType.md)
+> **type**: [`LevelFilterType`](LevelFilterType.md)
 
 ## Defined in
 
-[query.ts:91](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/query.ts#L91)
+[packages/datamesh/src/lib/query.ts:65](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/query.ts#L65)

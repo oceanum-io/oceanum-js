@@ -1,4 +1,4 @@
-[**@oceanum/datamesh**](../README.md) • **Docs**
+[**@oceanum/datamesh**](../README.md)
 
 ***
 
@@ -6,31 +6,43 @@
 
 # Class: Connector
 
-Datamesh connector class.
-
-All datamesh operations are methods of this class.
-
 ## Constructors
 
 ### new Connector()
 
-> **new Connector**(`token`, `service`, `gateway`): [`Connector`](Connector.md)
+> **new Connector**(`token`, `options`?): [`Connector`](Connector.md)
 
 Datamesh connector constructor
 
 #### Parameters
 
-• **token**: `string` = `...`
+##### token
+
+`string` = `...`
 
 Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
 
-• **service**: `string` = `...`
+##### options?
 
-URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
+Constructor options.
 
-• **gateway**: `string` = `...`
+###### gateway
+
+`string`
 
 URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+
+###### jwtAuth
+
+`string`
+
+JWT for Oceanum service.
+
+###### service
+
+`string`
+
+URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
 
 #### Returns
 
@@ -42,17 +54,29 @@ URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
 
 #### Defined in
 
-[connector.ts:26](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L26)
+[packages/datamesh/src/lib/connector.ts:34](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L34)
+
+## Properties
+
+### LAZY\_LOAD\_SIZE
+
+> `static` **LAZY\_LOAD\_SIZE**: `number` = `1e8`
+
+#### Defined in
+
+[packages/datamesh/src/lib/connector.ts:17](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L17)
 
 ## Accessors
 
 ### host
 
-> `get` **host**(): `string`
+#### Get Signature
+
+> **get** **host**(): `string`
 
 Get datamesh host.
 
-#### Returns
+##### Returns
 
 `string`
 
@@ -60,7 +84,7 @@ The datamesh server host.
 
 #### Defined in
 
-[connector.ts:63](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L63)
+[packages/datamesh/src/lib/connector.ts:77](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L77)
 
 ## Methods
 
@@ -72,7 +96,9 @@ Get a datasource instance from the datamesh.
 
 #### Parameters
 
-• **datasourceId**: `string`
+##### datasourceId
+
+`string`
 
 Unique datasource ID.
 
@@ -88,59 +114,91 @@ The datasource instance.
 
 #### Defined in
 
-[connector.ts:198](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L198)
+[packages/datamesh/src/lib/connector.ts:218](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L218)
 
 ***
 
 ### loadDatasource()
 
-> **loadDatasource**(`datasourceId`, `parameters`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore`\>\>
+> **loadDatasource**(`datasourceId`, `parameters`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore` \| `TempStore`\>\>
 
 Load a datasource into the work environment.
 
 #### Parameters
 
-• **datasourceId**: `string`
+##### datasourceId
+
+`string`
 
 Unique datasource ID.
 
-• **parameters**: `Record`\<`string`, `string` \| `number`\> = `{}`
+##### parameters
+
+`Record`\<`string`, `string` \| `number`\> = `{}`
 
 Additional datasource parameters.
 
 #### Returns
 
-`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore`\>\>
+`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore` \| `TempStore`\>\>
 
 The dataset.
 
 #### Defined in
 
-[connector.ts:215](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L215)
+[packages/datamesh/src/lib/connector.ts:236](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L236)
 
 ***
 
 ### query()
 
-> **query**(`query`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore`\>\>
+> **query**(`query`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore` \| `TempStore`\>\>
 
 Execute a query to the datamesh.
 
 #### Parameters
 
-• **query**: [`IQuery`](../interfaces/IQuery.md)
+##### query
+
+[`IQuery`](../interfaces/IQuery.md)
 
 The query to execute.
 
 #### Returns
 
-`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore`\>\>
+`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`DatameshStore` \| `TempStore`\>\>
 
 The response from the server.
 
 #### Defined in
 
-[connector.ts:178](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L178)
+[packages/datamesh/src/lib/connector.ts:191](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L191)
+
+***
+
+### stageRequest()
+
+> **stageRequest**(`query`): `Promise`\<`null` \| `Stage`\>
+
+Stage a query to the datamesh.
+
+#### Parameters
+
+##### query
+
+[`IQuery`](../interfaces/IQuery.md)
+
+The query to stage.
+
+#### Returns
+
+`Promise`\<`null` \| `Stage`\>
+
+The staged response.
+
+#### Defined in
+
+[packages/datamesh/src/lib/connector.ts:167](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L167)
 
 ***
 
@@ -154,8 +212,8 @@ Check the status of the metadata server.
 
 `Promise`\<`boolean`\>
 
-True if the metadata server is up, false otherwise.
+True if the server is up, false otherwise.
 
 #### Defined in
 
-[connector.ts:72](https://github.com/oceanum-io/oceanum-js/blob/16e7839874a87c82d4c481b562840bf7ccac2d83/packages/datamesh/src/lib/connector.ts#L72)
+[packages/datamesh/src/lib/connector.ts:86](https://github.com/oceanum-io/oceanum-js/blob/b819c1f297a41b7ce9644bbdd1734c693df7b2fd/packages/datamesh/src/lib/connector.ts#L86)
