@@ -16,7 +16,7 @@ import { Geometry as WkxGeometry } from "wkx-ts";
 import { Buffer } from "buffer/index";
 
 import { CachedHTTPStore } from "./zarr";
-import { Schema, Coordmap } from "./datasource";
+import { Schema, Coordkeys } from "./datasource";
 import { measureTime } from "./observe";
 
 export type ATypedArray =
@@ -323,6 +323,13 @@ export class DataVar<
  * Represents a dataset with dimensions, data variables, and attributes.
  * Implements the DatasetApi interface.
  */
+export interface ZarrOptions {
+  parameters?: Record<string, string | number>;
+  chunks?: string;
+  downsample?: Record<string, number>;
+  coordkeys?: Coordkeys;
+}
+
 export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   /**
    * Creates an instance of Dataset.
@@ -330,14 +337,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param variables - The data variables of the dataset.
    * @param attributes - The attributes of the dataset.
    * @param root - The root group of the dataset.
-   * @param coordmap - The coordinates map of the dataset.
+   * @param coordkeys - The coordinates map of the dataset.
    */
   dimensions: Record<string, number>;
   variables: S extends TempStore
     ? Record<string, DataVar<DataType, TempStore>>
     : Record<string, DataVar<DataType, DatameshStore>>;
   attributes: Record<string, unknown>;
-  coordmap: Coordmap;
+  coordkeys: Coordkeys;
   root: S;
 
   constructor(
@@ -346,40 +353,39 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       ? Record<string, DataVar<DataType, TempStore>>
       : Record<string, DataVar<DataType, DatameshStore>>,
     attributes: Record<string, unknown>,
-    coordmap: Coordmap,
+    coordkeys: Coordkeys,
     root: S
   ) {
     this.dimensions = dimensions;
     this.variables = variables;
     this.attributes = attributes;
     this.root = root;
-    this.coordmap = coordmap;
+    this.coordkeys = coordkeys;
   }
 
   /**
    * Creates a Dataset instance from a Zarr store.
    * @param url - The URL of the datamesh gateway.
    * @param authHeaders - The authentication headers.
-   * @param parameters - Optional parameters for the request.
-   * @param chunks - Optional chunking strategy.
-   * @param downsample - Optional downsampling strategy.
+   * @param options.chunks - Optional chunking for the request.
+   * @param options.downsample - Optional downsample parameters for the request.
+   * @param options.parameters - Optional parameters for the request.
+   * @param options.coordkeys - Optional coordinates for the request.
    * @returns A promise that resolves to a Dataset instance.
    */
   //@measureTime
   static async zarr(
     url: string,
     authHeaders: Record<string, string>,
-    parameters?: Record<string, string | number>,
-    chunks?: string,
-    downsample?: Record<string, number>
+    options: ZarrOptions = {}
   ): Promise<Dataset<DatameshStore>> {
     const store = await zarr.withConsolidated(
       new CachedHTTPStore(
         url,
         authHeaders,
-        parameters,
-        chunks,
-        downsample,
+        options.parameters,
+        options.chunks,
+        options.downsample,
         typeof window === "undefined"
       )
     );
@@ -411,15 +417,20 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
           });
       }
     }
-    const coords = JSON.parse(
-      group.attrs["_coordinates"] as string
-    ) as Coordmap;
-    return new Dataset<DatameshStore>(dims, vars, group.attrs, coords, root);
+    const coords = (JSON.parse(group.attrs["_coordinates"] as string) ||
+      {}) as Coordkeys;
+    return new Dataset<DatameshStore>(
+      dims,
+      vars,
+      group.attrs,
+      options.coordkeys || coords,
+      root
+    );
   }
 
   static async fromArrow(
     data: Table,
-    coordmap: Coordmap
+    coordkeys: Coordkeys
   ): Promise<Dataset<TempStore>> {
     const attributes = {};
     const dimensions = { record: data.numRows };
@@ -429,10 +440,10 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       let attrs = {};
       let array = column?.toArray();
       let dtype = arrowTypeToDType(field.type);
-      //Store times internally as Unix milliseconds in Float64 - this works better than BigInt64 for Date objects
+      //Store times internally as Unix seconds in Float64 - this is consistent with Datamesh zarr
       if (ArrowDataType.isTimestamp(field.type)) {
         const carray = new Float64Array(array.length);
-        const m = BigInt(1000 ** (field.type.unit - 1));
+        const m = BigInt(1000 ** (field.type.unit - 0));
         for (let i = 0; i < array.length; i++) {
           carray[i] = Number(array[i] / m);
         }
@@ -454,12 +465,12 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         dtype,
       };
     });
-    return await Dataset.init({ dimensions, variables, attributes }, coordmap);
+    return await Dataset.init({ dimensions, variables, attributes }, coordkeys);
   }
 
   static async fromGeojson(
     featureCollection: FeatureCollection,
-    coordmap?: Coordmap
+    coordkeys?: Coordkeys
   ): Promise<Dataset<TempStore>> {
     if (
       !featureCollection.features ||
@@ -500,7 +511,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     };
 
     // Create temporary dataset
-    const dataset = await Dataset.init(schema, { ...coordmap, g: "geometry" });
+    const dataset = await Dataset.init(schema, { ...coordkeys, g: "geometry" });
 
     // Add geometry variable
     await dataset.assign(
@@ -527,14 +538,14 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    */
   static async init(
     datasource: Schema,
-    coordmap?: Coordmap
+    coordkeys?: Coordkeys
   ): Promise<Dataset<TempStore>> {
     const root = zarr.root(new Map());
     const ds = new Dataset(
       datasource.dimensions,
       {},
       datasource.attributes || {},
-      coordmap || {},
+      coordkeys || {},
       root
     );
     for (const k in datasource.variables) {
@@ -578,10 +589,10 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       }
     }
     const df = flatten(data, { ...this.dimensions }, []);
-    if (this.coordmap.t) {
+    if (this.coordkeys.t) {
       for (let i = 0; i < df.length; i++) {
-        df[i][this.coordmap.t] = new Date(
-          df[i][this.coordmap.t] as number
+        df[i][this.coordkeys.t] = new Date(
+          1000 * (df[i][this.coordkeys.t] as number)
         ).toISOString();
       }
     }
@@ -616,7 +627,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * ```
    */
   async asGeojson(geom?: Geometry): Promise<FeatureCollection> {
-    if (!this.coordmap.g || !geom) {
+    if (!this.coordkeys.g || !geom) {
       throw new Error("No geometry found");
     }
     const features = [] as Feature[];
@@ -624,9 +635,9 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
       let geometry = geom;
-      if (!geometry && this.coordmap.g) {
-        delete properties[this.coordmap.g];
-        const g = df[i][this.coordmap.g] as string;
+      if (!geometry && this.coordkeys.g) {
+        delete properties[this.coordkeys.g];
+        const g = df[i][this.coordkeys.g] as string;
         if (g.slice(0, 7) == '{"type:') {
           //GeoJSON
           geometry = JSON.parse(g) as Geometry;

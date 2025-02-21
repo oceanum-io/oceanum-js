@@ -16,7 +16,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:140](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L140)
+[packages/datamesh/src/lib/query.ts:140](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L140)
 
 ***
 
@@ -26,7 +26,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:138](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L138)
+[packages/datamesh/src/lib/query.ts:138](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L138)
 
 ***
 
@@ -36,7 +36,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:139](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L139)
+[packages/datamesh/src/lib/query.ts:139](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L139)
 
 ***
 
@@ -46,7 +46,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:131](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L131)
+[packages/datamesh/src/lib/query.ts:131](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L131)
 
 ***
 
@@ -56,7 +56,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:133](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L133)
+[packages/datamesh/src/lib/query.ts:133](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L133)
 
 ***
 
@@ -66,7 +66,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:136](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L136)
+[packages/datamesh/src/lib/query.ts:136](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L136)
 
 ***
 
@@ -76,7 +76,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:142](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L142)
+[packages/datamesh/src/lib/query.ts:142](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L142)
 
 ***
 
@@ -86,7 +86,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:137](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L137)
+[packages/datamesh/src/lib/query.ts:137](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L137)
 
 ***
 
@@ -96,7 +96,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:141](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L141)
+[packages/datamesh/src/lib/query.ts:141](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L141)
 
 ***
 
@@ -106,7 +106,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:132](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L132)
+[packages/datamesh/src/lib/query.ts:132](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L132)
 
 ***
 
@@ -116,7 +116,7 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:135](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L135)
+[packages/datamesh/src/lib/query.ts:135](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L135)
 
 ***
 
@@ -126,4 +126,4 @@ Query interface representing a Datamesh query.
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:134](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L134)
+[packages/datamesh/src/lib/query.ts:134](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L134)

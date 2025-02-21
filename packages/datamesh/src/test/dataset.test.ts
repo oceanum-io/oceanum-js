@@ -147,11 +147,11 @@ datameshTest("dataset fromGeojson", async () => {
   expect(temp[0]).toBe(15.5);
   expect(temp[1]).toBe(16.5);
 
-  // Test with custom coordmap
-  const customCoordmap = { t: "time", g: "geometry" };
-  const dsWithCoordmap = await Dataset.fromGeojson(
+  // Test with custom coordkeys
+  const customcoordkeys = { t: "time", g: "geometry" };
+  const dsWithcoordkeys = await Dataset.fromGeojson(
     validGeoJson,
-    customCoordmap
+    customcoordkeys
   );
-  expect(dsWithCoordmap.coordmap).toEqual(customCoordmap);
+  expect(dsWithcoordkeys.coordkeys).toEqual(customcoordkeys);
 });

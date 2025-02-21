@@ -72,7 +72,7 @@ node\_modules/@types/geojson/index.d.ts:154
 
 #### Defined in
 
-[packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/query.ts#L48)
+[packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L48)
 
 ***
 

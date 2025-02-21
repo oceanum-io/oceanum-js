@@ -23,7 +23,7 @@ export type Coordinate =
   | "j" // Coordinate_j
   | "k"; // Coordinate_k
 
-export type Coordmap = {
+export type Coordkeys = {
   [key in Coordinate]?: string;
 };
 
@@ -44,7 +44,7 @@ export type Schema = {
   /**
    * Coordinate map of the schema.
    */
-  coordmap?: Coordmap;
+  coordkeys?: Coordkeys;
 
   /**
    * Data variables of the schema.
@@ -100,7 +100,7 @@ export type Datasource = {
   /**
    * Parameters associated with the data source.
    */
-  parameters?: Record<string, unknown>;
+  parameters?: Record<string, string | number>;
 
   /**
    * Geometric representation of the data source.
@@ -145,7 +145,7 @@ export type Datasource = {
   /**
    * Coordinate map for the data source.
    */
-  coordinates: Coordmap;
+  coordinates: Coordkeys;
 
   /**
    * Additional details about the data source.

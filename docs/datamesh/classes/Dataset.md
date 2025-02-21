@@ -13,7 +13,7 @@ Implements the DatasetApi interface.
 
 ### new Dataset()
 
-> **new Dataset**\<\>(`dimensions`, `variables`, `attributes`, `coordmap`, `root`): [`Dataset`](Dataset.md)\<`S`\>
+> **new Dataset**\<\>(`dimensions`, `variables`, `attributes`, `coordkeys`, `root`): [`Dataset`](Dataset.md)\<`S`\>
 
 #### Parameters
 
@@ -29,9 +29,9 @@ Implements the DatasetApi interface.
 
 `Record`\<`string`, `unknown`\>
 
-##### coordmap
+##### coordkeys
 
-[`Coordmap`](../type-aliases/Coordmap.md)
+[`Coordkeys`](../type-aliases/Coordkeys.md)
 
 ##### root
 
@@ -43,7 +43,7 @@ Implements the DatasetApi interface.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:343](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L343)
+[packages/datamesh/src/lib/datamodel.ts:343](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L343)
 
 ## Properties
 
@@ -53,17 +53,17 @@ Implements the DatasetApi interface.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:339](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L339)
+[packages/datamesh/src/lib/datamodel.ts:339](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L339)
 
 ***
 
-### coordmap
+### coordkeys
 
-> **coordmap**: [`Coordmap`](../type-aliases/Coordmap.md)
+> **coordkeys**: [`Coordkeys`](../type-aliases/Coordkeys.md)
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:340](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L340)
+[packages/datamesh/src/lib/datamodel.ts:340](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L340)
 
 ***
 
@@ -95,7 +95,7 @@ The coordinates map of the dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:335](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L335)
+[packages/datamesh/src/lib/datamodel.ts:335](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L335)
 
 ***
 
@@ -105,7 +105,7 @@ The coordinates map of the dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:341](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L341)
+[packages/datamesh/src/lib/datamodel.ts:341](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L341)
 
 ***
 
@@ -115,7 +115,7 @@ The coordinates map of the dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:336](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L336)
+[packages/datamesh/src/lib/datamodel.ts:336](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L336)
 
 ## Methods
 
@@ -148,7 +148,7 @@ console.log(dataframe);
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:567](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L567)
+[packages/datamesh/src/lib/datamodel.ts:567](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L567)
 
 ***
 
@@ -189,7 +189,7 @@ console.log(dataframe);
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:618](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L618)
+[packages/datamesh/src/lib/datamodel.ts:618](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L618)
 
 ***
 
@@ -253,13 +253,13 @@ Will throw an error if an existing dimension size does not match the new data.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:665](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L665)
+[packages/datamesh/src/lib/datamodel.ts:665](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L665)
 
 ***
 
 ### fromArrow()
 
-> `static` **fromArrow**(`data`, `coordmap`): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
+> `static` **fromArrow**(`data`, `coordkeys`): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
 
 #### Parameters
 
@@ -267,9 +267,9 @@ Will throw an error if an existing dimension size does not match the new data.
 
 `Table`\<`any`\>
 
-##### coordmap
+##### coordkeys
 
-[`Coordmap`](../type-aliases/Coordmap.md)
+[`Coordkeys`](../type-aliases/Coordkeys.md)
 
 #### Returns
 
@@ -277,13 +277,13 @@ Will throw an error if an existing dimension size does not match the new data.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:420](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L420)
+[packages/datamesh/src/lib/datamodel.ts:420](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L420)
 
 ***
 
 ### fromGeojson()
 
-> `static` **fromGeojson**(`featureCollection`, `coordmap`?): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
+> `static` **fromGeojson**(`featureCollection`, `coordkeys`?): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
 
 #### Parameters
 
@@ -291,9 +291,9 @@ Will throw an error if an existing dimension size does not match the new data.
 
 `FeatureCollection`\<`Geometry`, `GeoJsonProperties`\>
 
-##### coordmap?
+##### coordkeys?
 
-[`Coordmap`](../type-aliases/Coordmap.md)
+[`Coordkeys`](../type-aliases/Coordkeys.md)
 
 #### Returns
 
@@ -301,13 +301,13 @@ Will throw an error if an existing dimension size does not match the new data.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:460](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L460)
+[packages/datamesh/src/lib/datamodel.ts:460](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L460)
 
 ***
 
 ### init()
 
-> `static` **init**(`datasource`, `coordmap`?): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
+> `static` **init**(`datasource`, `coordkeys`?): `Promise`\<[`Dataset`](Dataset.md)\<`TempStore`\>\>
 
 Initializes an in memory Dataset instance from a data object.
 
@@ -319,9 +319,9 @@ Initializes an in memory Dataset instance from a data object.
 
 An object containing id, dimensions, data variables, and attributes.
 
-##### coordmap?
+##### coordkeys?
 
-[`Coordmap`](../type-aliases/Coordmap.md)
+[`Coordkeys`](../type-aliases/Coordkeys.md)
 
 #### Returns
 
@@ -329,7 +329,7 @@ An object containing id, dimensions, data variables, and attributes.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:528](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L528)
+[packages/datamesh/src/lib/datamodel.ts:528](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L528)
 
 ***
 
@@ -379,4 +379,4 @@ A promise that resolves to a Dataset instance.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:369](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L369)
+[packages/datamesh/src/lib/datamodel.ts:369](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L369)

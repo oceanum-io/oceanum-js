@@ -42,7 +42,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:272](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L272)
+[packages/datamesh/src/lib/datamodel.ts:272](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L272)
 
 ## Properties
 
@@ -52,7 +52,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:269](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L269)
+[packages/datamesh/src/lib/datamodel.ts:269](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L269)
 
 ***
 
@@ -62,7 +62,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:268](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L268)
+[packages/datamesh/src/lib/datamodel.ts:268](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L268)
 
 ***
 
@@ -72,7 +72,7 @@ Represents a data variable within a dataset.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:267](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L267)
+[packages/datamesh/src/lib/datamodel.ts:267](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L267)
 
 ***
 
@@ -100,7 +100,7 @@ The zarr array associated with the data variable.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:266](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L266)
+[packages/datamesh/src/lib/datamodel.ts:266](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L266)
 
 ## Methods
 
@@ -126,4 +126,4 @@ A promise that resolves to the data of the zarr array.
 
 #### Defined in
 
-[packages/datamesh/src/lib/datamodel.ts:293](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datamodel.ts#L293)
+[packages/datamesh/src/lib/datamodel.ts:293](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datamodel.ts#L293)

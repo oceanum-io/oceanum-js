@@ -146,7 +146,7 @@ export const datameshTest = test.extend({
       throw new Error("Failed to write dataset: " + text);
     }
     const patch = jsonify({
-      coordmap: { t: "time", x: "lon", y: "lat" },
+      coordkeys: { t: "time", x: "lon", y: "lat" },
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-ds/", {
       method: "PATCH",
@@ -196,7 +196,7 @@ export const datameshTest = test.extend({
     }
 
     const patch = jsonify({
-      coordmap: { t: "time" },
+      coordkeys: { t: "time" },
       container: "dataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-df/", {
@@ -226,7 +226,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordmap: [174.0, -37.0],
+            coordkeys: [174.0, -37.0],
           },
           properties: {
             time: "1970-01-01T00:00:00.000Z",
@@ -238,7 +238,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordmap: [174.1, -37.0],
+            coordkeys: [174.1, -37.0],
           },
           properties: {
             time: "1970-01-02T00:00:00.000Z",
@@ -250,7 +250,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordmap: [174.2, -37.0],
+            coordkeys: [174.2, -37.0],
           },
           properties: {
             time: "1970-01-03T00:00:00.000Z",
@@ -271,7 +271,7 @@ export const datameshTest = test.extend({
     }
 
     const patch = jsonify({
-      coordmap: { t: "time", g: "geometry" },
+      coordkeys: { t: "time", g: "geometry" },
       container: "geodataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-gdf/", {

@@ -17,13 +17,17 @@ export class CachedHTTPStore implements AsyncReadable {
   url: string;
   cache_prefix: string;
   fetchOptions: RequestInit;
+  timeout = 60000;
+  _pending: Record<string, boolean> = {};
+
   constructor(
     root: string,
     authHeaders: Record<string, string>,
     parameters?: Record<string, string | number>,
     chunks?: string,
     downsample?: Record<string, number>,
-    nocache?: boolean
+    nocache?: boolean,
+    timeout?: number
   ) {
     const headers = { ...authHeaders };
     if (parameters) headers["x-parameters"] = JSON.stringify(parameters);
@@ -44,6 +48,7 @@ export class CachedHTTPStore implements AsyncReadable {
       chunks,
       downsample,
     });
+    this.timeout = timeout || 60000;
   }
 
   async get(
@@ -55,9 +60,9 @@ export class CachedHTTPStore implements AsyncReadable {
     let data = null;
     if (this.cache) {
       data = await get_cache(key, this.cache);
-      if (data === "pending") {
+      if (this._pending[key]) {
         await delay(200);
-        if (retry > 5 * 60) {
+        if (retry > this.timeout / 200) {
           await del_cache(key, this.cache);
           throw new Error("Zarr timeout");
         } else {
@@ -65,26 +70,34 @@ export class CachedHTTPStore implements AsyncReadable {
         }
       }
     }
-    if (!data || !this.cache) {
-      if (this.cache) set_cache(key, "pending", this.cache);
+    if (!data) {
+      this._pending[key] = true;
       //console.log(`${this.url}/${item}`);
       //console.log(this.fetchOptions.headers);
-      const response = await fetch(`${this.url}${item}`, {
-        ...this.fetchOptions,
-        ...options,
-      });
+      try {
+        const response = await fetch(`${this.url}${item}`, {
+          ...this.fetchOptions,
+          ...options,
+          signal: AbortSignal.timeout(this.timeout),
+        });
 
-      if (response.status === 404) {
-        // Item is not found
+        if (response.status === 404) {
+          // Item is not found
+          if (this.cache) await del_cache(key, this.cache);
+          return undefined;
+        } else if (response.status >= 500) {
+          if (retry > this.timeout / 200) {
+            throw new Error(String(response.status));
+          } else {
+            return await this.get(item, options, retry + 60);
+          }
+        }
+        data = new Uint8Array(await response.arrayBuffer());
+        if (this.cache) await set_cache(key, data, this.cache);
+      } catch (e) {
         if (this.cache) await del_cache(key, this.cache);
-        return undefined;
-      } else if (response.status !== 200) {
-        // Item is found but there was an error
-        if (this.cache) await del_cache(key, this.cache);
-        throw new Error(String(response.status));
+        this._pending[key] = false;
       }
-      data = new Uint8Array(await response.arrayBuffer());
-      if (this.cache) await set_cache(key, data, this.cache);
     }
     return data;
   }

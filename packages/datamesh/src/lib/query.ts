@@ -129,7 +129,7 @@ export type CoordSelector = {
  */
 export interface IQuery {
   datasource: string;
-  parameters?: Record<string, number | string | number[] | string[]>;
+  parameters?: Record<string, number | string>;
   description?: string;
   variables?: string[];
   timefilter?: TimeFilter;

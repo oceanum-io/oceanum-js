@@ -14,7 +14,7 @@ Represents a data source.
 
 ### coordinates
 
-> **coordinates**: [`Coordmap`](Coordmap.md)
+> **coordinates**: [`Coordkeys`](Coordkeys.md)
 
 Coordinate map for the data source.
 
@@ -108,4 +108,4 @@ Start time for the data source.
 
 ## Defined in
 
-[packages/datamesh/src/lib/datasource.ts:84](https://github.com/oceanum-io/oceanum-js/blob/8743de96e5f943db8ec0df1328a02f233bca002b/packages/datamesh/src/lib/datasource.ts#L84)
+[packages/datamesh/src/lib/datasource.ts:84](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datasource.ts#L84)

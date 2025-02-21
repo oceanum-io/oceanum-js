@@ -53,7 +53,7 @@ DO NOT put your Datamesh token directly into browser code. For use in an SPA, yo
 - [ATypedArray](type-aliases/ATypedArray.md)
 - [Container](type-aliases/Container.md)
 - [Coordinate](type-aliases/Coordinate.md)
-- [Coordmap](type-aliases/Coordmap.md)
+- [Coordkeys](type-aliases/Coordkeys.md)
 - [CoordSelector](type-aliases/CoordSelector.md)
 - [Data](type-aliases/Data.md)
 - [DatameshSchema](type-aliases/DatameshSchema.md)

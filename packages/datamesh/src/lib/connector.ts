@@ -191,6 +191,7 @@ export class Connector {
   async query(
     query: IQuery
   ): Promise<Dataset</** @ignore */ DatameshStore | TempStore> | null> {
+    //Stage the query
     const stage = await this.stageRequest(query);
     if (!stage) {
       console.warn("No data found for query");
@@ -202,8 +203,32 @@ export class Connector {
       const dataset = await Dataset.fromArrow(table, stage.coordkeys);
       return dataset;
     }
-    const url = `${this._gateway}/zarr/${stage.qhash}`;
-    const dataset = await Dataset.zarr(url, this._authHeaders);
+    let url = null;
+    let params = undefined;
+    if (
+      query.timefilter ||
+      query.geofilter ||
+      query.levelfilter ||
+      query.coordfilter
+    ) {
+      url = `${this._gateway}/zarr/${stage.qhash}`;
+    } else {
+      url = `${this._gateway}/zarr/${query.datasource}`;
+      params = query.parameters;
+    }
+    const dataset = await Dataset.zarr(url, this._authHeaders, {
+      parameters: params,
+    });
+    if (query.variables) {
+      for (const v of Object.keys(dataset.variables)) {
+        if (
+          !query.variables.includes(v) &&
+          !Object.values(dataset.coordkeys).includes(v)
+        ) {
+          delete dataset.variables[v];
+        }
+      }
+    }
     return dataset;
   }
 
