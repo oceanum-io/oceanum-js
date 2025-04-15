@@ -1,10 +1,30 @@
 import { assertType, test, expect } from "vitest";
 import { Dataset, IDataVar } from "../lib/datamodel";
 import { Connector } from "../lib/connector";
-import { dataset, datameshTest, DATAMESH_GATEWAY, HEADERS } from "./fixtures";
+import { datameshTest, DATAMESH_GATEWAY, HEADERS } from "./fixtures";
 
-test("dataset init", async () => {
-  const dstest = await Dataset.init(dataset);
+datameshTest("dataset init", async ({ dataset }) => {
+  const coordkeys = { t: "time", x: "lon", y: "lat" };
+  const ds = {
+    attributes: dataset.attrs,
+    dimensions: dataset.dims,
+    variables: {},
+  };
+  for (const v in dataset.coords) {
+    ds.variables[v] = {
+      attributes: dataset.coords[v].attrs,
+      dimensions: dataset.coords[v].dims,
+      data: dataset.coords[v].data,
+    };
+  }
+  for (const v in dataset.data_vars) {
+    ds.variables[v] = {
+      attributes: dataset.data_vars[v].attrs,
+      dimensions: dataset.data_vars[v].dims,
+      data: dataset.data_vars[v].data,
+    };
+  }
+  const dstest = await Dataset.init(ds, coordkeys);
   assertType<Record<string, unknown>>(dstest.attributes);
   assertType<Record<string, IDataVar>>(dstest.variables);
   const datatest = await dstest.variables.temperature.get();
@@ -13,7 +33,7 @@ test("dataset init", async () => {
   expect(datatest[0].length).toBe(30);
   expect(datatest[0][0].length).toBe(20);
   expect(datatest[3][4][5]).toEqual(
-    dataset.variables.temperature.data[3][4][5]
+    dataset.data_vars.temperature.data[3][4][5]
   );
   const datatest0 = await dstest.variables.scalar.get();
   expect(datatest0[0]).closeTo(10.1, 0.0001);
@@ -25,7 +45,8 @@ datameshTest(
     //Test the zarr proxy endpoint directly
     const dstest = await Dataset.zarr(
       DATAMESH_GATEWAY + "/zarr/" + dataset.attrs.id,
-      HEADERS
+      HEADERS,
+      { nocache: true }
     );
     assertType<Record<string, unknown>>(dstest.attributes);
     assertType<Record<string, IDataVar>>(dstest.variables);
@@ -41,7 +62,9 @@ datameshTest(
     expect(datatest[0]).closeTo(10.1, 0.0001);
 
     //Now test with the connector
-    const datamesh = new Connector(process.env.DATAMESH_TOKEN);
+    const datamesh = new Connector(process.env.DATAMESH_TOKEN, {
+      nocache: true,
+    });
     const dstest2 = await datamesh.loadDatasource(dataset.attrs.id);
     assertType<Record<string, unknown>>(dstest2.attributes);
     assertType<Record<string, IDataVar>>(dstest2.variables);

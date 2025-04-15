@@ -2,14 +2,14 @@ import * as zarr from "@zarrita/core";
 import {
   Chunk,
   DataType,
-  Listable,
   Location,
+  Listable,
   TypedArray,
   CodecMetadata,
 } from "@zarrita/core";
 import { Mutable, AsyncReadable } from "@zarrita/storage";
 import { get, set, Slice, slice } from "@zarrita/indexing";
-import { BoolArray } from "@zarrita/typedarray";
+import { BoolArray } from "zarrita";
 import { Table, DataType as ArrowDataType } from "apache-arrow";
 import { Geometry, Feature, FeatureCollection } from "geojson";
 import { Geometry as WkxGeometry } from "wkx-ts";
@@ -57,7 +57,7 @@ export type DataVariable = {
   /**
    * Datatype of the variable.
    */
-  dtype?: string;
+  dtype?: DataType;
   /**
    * Data associated with the variable.
    */
@@ -244,9 +244,9 @@ const flatten = (
 };
 
 /** @ignore */
-export type DatameshStore = Location<Listable<AsyncReadable>>;
+export type HttpZarr = Location<Listable<CachedHTTPStore>>;
 /** @ignore */
-export type TempStore = Location<Mutable>;
+export type TempZarr = Location<Mutable>;
 type SliceDef = (null | Slice | number)[] | null | undefined;
 /**
  * Represents a data variable within a dataset.
@@ -254,7 +254,7 @@ type SliceDef = (null | Slice | number)[] | null | undefined;
 export class DataVar<
   /** @ignore */
   DType extends DataType,
-  S extends TempStore | DatameshStore,
+  S extends TempZarr | HttpZarr,
 > {
   /**
    * Creates an instance of DataVar.
@@ -266,14 +266,14 @@ export class DataVar<
   id: string;
   dimensions: string[];
   attributes: Record<string, unknown>;
-  arr: S extends TempStore
+  arr: S extends TempZarr
     ? zarr.Array<DType, Mutable>
     : zarr.Array<DType, AsyncReadable>;
   constructor(
     id: string,
     dimensions: string[],
     attributes: Record<string, unknown>,
-    arr: S extends TempStore
+    arr: S extends TempZarr
       ? zarr.Array<DType, Mutable>
       : zarr.Array<DType, AsyncReadable>
   ) {
@@ -328,9 +328,11 @@ export interface ZarrOptions {
   chunks?: string;
   downsample?: Record<string, number>;
   coordkeys?: Coordkeys;
+  timeout?: number;
+  nocache?: boolean;
 }
 
-export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
+export class Dataset<S extends HttpZarr | TempZarr> {
   /**
    * Creates an instance of Dataset.
    * @param dimensions - The dimensions of the dataset.
@@ -340,18 +342,18 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param coordkeys - The coordinates map of the dataset.
    */
   dimensions: Record<string, number>;
-  variables: S extends TempStore
-    ? Record<string, DataVar<DataType, TempStore>>
-    : Record<string, DataVar<DataType, DatameshStore>>;
+  variables: S extends TempZarr
+    ? Record<string, DataVar<DataType, TempZarr>>
+    : Record<string, DataVar<DataType, HttpZarr>>;
   attributes: Record<string, unknown>;
   coordkeys: Coordkeys;
   root: S;
 
   constructor(
     dimensions: Record<string, number>,
-    variables: S extends TempStore
-      ? Record<string, DataVar<DataType, TempStore>>
-      : Record<string, DataVar<DataType, DatameshStore>>,
+    variables: S extends TempZarr
+      ? Record<string, DataVar<DataType, TempZarr>>
+      : Record<string, DataVar<DataType, HttpZarr>>,
     attributes: Record<string, unknown>,
     coordkeys: Coordkeys,
     root: S
@@ -359,8 +361,8 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     this.dimensions = dimensions;
     this.variables = variables;
     this.attributes = attributes;
-    this.root = root;
     this.coordkeys = coordkeys;
+    this.root = root;
   }
 
   /**
@@ -371,6 +373,8 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * @param options.downsample - Optional downsample parameters for the request.
    * @param options.parameters - Optional parameters for the request.
    * @param options.coordkeys - Optional coordinates for the request.
+   * @param options.timeout - Optional timeout for the request.
+   * @param options.nocache - Disable caching
    * @returns A promise that resolves to a Dataset instance.
    */
   //@measureTime
@@ -378,27 +382,26 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
     url: string,
     authHeaders: Record<string, string>,
     options: ZarrOptions = {}
-  ): Promise<Dataset<DatameshStore>> {
-    const store = await zarr.withConsolidated(
-      new CachedHTTPStore(
-        url,
-        authHeaders,
-        options.parameters,
-        options.chunks,
-        options.downsample,
-        typeof window === "undefined"
-      )
-    );
-    const root = await zarr.root(store);
-    const group = await zarr.open(root, { kind: "group" });
-    const vars = {} as Record<string, DataVar<DataType, DatameshStore>>;
+  ): Promise<Dataset<HttpZarr>> {
+    const store = new CachedHTTPStore(url, authHeaders, {
+      chunks: options.chunks,
+      downsample: options.downsample,
+      parameters: options.parameters,
+      timeout: options.timeout,
+      nocache: options.nocache,
+    }) as AsyncReadable;
+    const _zarr = await zarr.withConsolidated(store);
+    const root = await zarr.open(_zarr, { kind: "group" });
+    const vars = {} as Record<string, DataVar<DataType, HttpZarr>>;
     const dims = {} as Record<string, number>;
-    for (const item of store.contents()) {
+    for (const item of _zarr.contents()) {
       if (item.kind == "array") {
-        const arr = await zarr.open(root.resolve(item.path), { kind: "array" });
+        const arr = await zarr.open(root.resolve(item.path), {
+          kind: "array",
+        });
         const array_dims = arr.attrs._ARRAY_DIMENSIONS as string[] | null;
         const vid = item.path.split("/").pop() as string;
-        vars[vid] = new DataVar<DataType, DatameshStore>(
+        vars[vid] = new DataVar<DataType, HttpZarr>(
           vid,
           array_dims || [],
           arr.attrs as Record<string, unknown>,
@@ -417,12 +420,12 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
           });
       }
     }
-    const coords = (JSON.parse(group.attrs["_coordinates"] as string) ||
+    const coords = (JSON.parse(root.attrs["_coordinates"] as string) ||
       {}) as Coordkeys;
-    return new Dataset<DatameshStore>(
+    return new Dataset<HttpZarr>(
       dims,
       vars,
-      group.attrs,
+      root.attrs,
       options.coordkeys || coords,
       root
     );
@@ -431,7 +434,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   static async fromArrow(
     data: Table,
     coordkeys: Coordkeys
-  ): Promise<Dataset<TempStore>> {
+  ): Promise<Dataset<TempZarr>> {
     const attributes = {};
     const dimensions = { record: data.numRows };
     const variables = {} as Record<string, DataVariable>;
@@ -449,7 +452,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
         }
         array = carray;
         dtype = "float64";
-        attrs = { unit: `Unix timestamp (ms)` };
+        attrs = { unit: `Unix timestamp (s)` };
       } else if (ArrowDataType.isBinary(field.type)) {
         const carray = [];
         for (let i = 0; i < array.length; i++) {
@@ -471,7 +474,7 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   static async fromGeojson(
     featureCollection: FeatureCollection,
     coordkeys?: Coordkeys
-  ): Promise<Dataset<TempStore>> {
+  ): Promise<Dataset<TempZarr>> {
     if (
       !featureCollection.features ||
       !Array.isArray(featureCollection.features)
@@ -539,8 +542,10 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
   static async init(
     datasource: Schema,
     coordkeys?: Coordkeys
-  ): Promise<Dataset<TempStore>> {
-    const root = zarr.root(new Map());
+  ): Promise<Dataset<TempZarr>> {
+    const root = (await zarr.create(new Map(), {
+      attributes: { created: new Date() },
+    })) as TempZarr;
     const ds = new Dataset(
       datasource.dimensions,
       {},
@@ -549,9 +554,15 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       root
     );
     for (const k in datasource.variables) {
-      const { dimensions, attributes, data }: DataVariable =
+      const { dimensions, attributes, data, dtype }: DataVariable =
         datasource.variables[k];
-      await ds.assign(k, dimensions, data as Data, attributes);
+      await ds.assign(
+        k,
+        dimensions,
+        data as Data,
+        attributes,
+        dtype === "string" ? "v2:object" : dtype
+      );
     }
     return ds;
   }
@@ -626,30 +637,30 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
    * console.log(dataframe);
    * ```
    */
-  async asGeojson(geom?: Geometry): Promise<FeatureCollection> {
-    if (!this.coordkeys.g || !geom) {
+  async asGeojson(geometry?: Geometry): Promise<FeatureCollection> {
+    if (!this.coordkeys.g && !geometry) {
       throw new Error("No geometry found");
     }
     const features = [] as Feature[];
     const df = await this.asDataframe();
     for (let i = 0; i < df.length; i++) {
       const { ...properties } = df[i];
-      let geometry = geom;
-      if (!geometry && this.coordkeys.g) {
+      let geom = geometry;
+      if (!geom && this.coordkeys.g) {
         delete properties[this.coordkeys.g];
         const g = df[i][this.coordkeys.g] as string;
         if (g.slice(0, 7) == '{"type:') {
           //GeoJSON
-          geometry = JSON.parse(g) as Geometry;
+          geom = JSON.parse(g) as Geometry;
         } else {
           //WKB
           const wkbbuffer = new Buffer(g, "base64");
-          geometry = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
+          geom = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
         }
       }
       features.push({
         type: "Feature",
-        geometry,
+        geometry: geom as Geometry,
         properties,
       });
     }
@@ -712,8 +723,26 @@ export class Dataset</** @ignore */ S extends DatameshStore | TempStore> {
       _data = null;
     } else if (_dtype == "bool") {
       _data = new BoolArray(_data);
-    } else if (_data[0].constructor.name == "Number") {
+    } else if (Array.isArray(_data) && _dtype == "float32") {
       _data = new Float32Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "float64") {
+      _data = new Float64Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "int8") {
+      _data = new Int8Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "int16") {
+      _data = new Int16Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "int32") {
+      _data = new Int32Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "int64") {
+      _data = new BigInt64Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "uint8") {
+      _data = new Uint8Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "uint16") {
+      _data = new Uint16Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "uint32") {
+      _data = new Uint32Array(_data);
+    } else if (Array.isArray(_data) && _dtype == "uint64") {
+      _data = new BigUint64Array(_data);
     }
     await set(
       arr,

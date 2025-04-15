@@ -6,6 +6,8 @@
 
 # Interface: GeoFilterFeature
 
+Defined in: [packages/datamesh/src/lib/query.ts:47](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/query.ts#L47)
+
 ## Extends
 
 - `Omit`\<`Feature`, `"properties"`\>
@@ -15,6 +17,8 @@
 ### bbox?
 
 > `optional` **bbox**: `BBox`
+
+Defined in: node\_modules/@types/geojson/index.d.ts:91
 
 Bounding box of the coordinate range of the object's Geometries, Features, or Feature Collections.
 The value of the bbox member is an array of length 2*n where n is the number of dimensions
@@ -27,15 +31,13 @@ https://tools.ietf.org/html/rfc7946#section-5
 
 `Omit.bbox`
 
-#### Defined in
-
-node\_modules/@types/geojson/index.d.ts:57
-
 ***
 
 ### geometry
 
 > **geometry**: `Geometry`
+
+Defined in: node\_modules/@types/geojson/index.d.ts:183
 
 The feature's geometry
 
@@ -43,15 +45,13 @@ The feature's geometry
 
 `Omit.geometry`
 
-#### Defined in
-
-node\_modules/@types/geojson/index.d.ts:149
-
 ***
 
 ### id?
 
 > `optional` **id**: `string` \| `number`
+
+Defined in: node\_modules/@types/geojson/index.d.ts:188
 
 A value that uniquely identifies this feature in a
 https://tools.ietf.org/html/rfc7946#section-3.2.
@@ -60,19 +60,13 @@ https://tools.ietf.org/html/rfc7946#section-3.2.
 
 `Omit.id`
 
-#### Defined in
-
-node\_modules/@types/geojson/index.d.ts:154
-
 ***
 
 ### properties?
 
 > `optional` **properties**: `Record`\<`string`, `unknown`\>
 
-#### Defined in
-
-[packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L48)
+Defined in: [packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/query.ts#L48)
 
 ***
 
@@ -80,12 +74,10 @@ node\_modules/@types/geojson/index.d.ts:154
 
 > **type**: `"Feature"`
 
+Defined in: node\_modules/@types/geojson/index.d.ts:179
+
 Specifies the type of GeoJSON object.
 
 #### Inherited from
 
 `Omit.type`
-
-#### Defined in
-
-node\_modules/@types/geojson/index.d.ts:145

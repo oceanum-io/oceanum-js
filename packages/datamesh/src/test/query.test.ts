@@ -26,14 +26,14 @@ datameshTest(
   async ({ dataset }) => {
     const datamesh = new Connector(process.env.DATAMESH_TOKEN);
     const query = {
-      datasource: dataset.attributes.id,
+      datasource: dataset.attrs.id,
       geofilter: {
         type: "feature",
         geom: {
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: [10, -10],
+            coordinates: [10, -11],
           },
         },
       },
@@ -43,7 +43,7 @@ datameshTest(
     const datatest = await dstest.variables.temperature.get();
     expect(datatest).toBeInstanceOf(Float64Array);
     expect(datatest.length).toBe(10);
-    expect(datatest[5]).toEqual(dataset.variables.temperature.data[5][10][10]);
+    expect(datatest[5]).toEqual(dataset.data_vars.temperature.data[5][11][10]);
   },
   { timeout: 100000 }
 );

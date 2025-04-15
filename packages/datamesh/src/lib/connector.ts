@@ -1,8 +1,9 @@
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
-import { Dataset, DatameshStore, TempStore } from "./datamodel";
+import { Dataset, HttpZarr, TempZarr } from "./datamodel";
 import { measureTime } from "./observe";
 import { tableFromIPC, Table } from "apache-arrow";
+import { Session } from "./session";
 
 /**
  * Datamesh connector class.
@@ -19,6 +20,12 @@ export class Connector {
   private _host: string;
   private _authHeaders: Record<string, string>;
   private _gateway: string;
+  private _nocache = false;
+  private _isV1 = false;
+  private _sessionParams: Record<string, number> = {};
+  private _currentSession: Session | null = null;
+  service?: string;
+  gateway?: string;
 
   /**
    * Datamesh connector constructor
@@ -26,8 +33,10 @@ export class Connector {
    * @param token - Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
    * @param options - Constructor options.
    * @param options.service - URL of datamesh service. Defaults to environment variable DATAMESH_SERVICE or "https://datamesh.oceanum.io".
-   * @param options.gateway - URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+   * @param options.gateway - URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
    * @param options.jwtAuth - JWT for Oceanum service.
+   * @param options.nocache - Disable caching of datamesh results.
+   * @param options.sessionDuration - The desired length of time for acquired datamesh sessions in hours. Will be 1 hour by default.
    *
    * @throws {Error} - If a valid token is not provided.
    */
@@ -37,6 +46,8 @@ export class Connector {
       service?: string;
       gateway?: string;
       jwtAuth?: string;
+      nocache?: boolean;
+      sessionDuration?: number;
     }
   ) {
     if (!token && !options?.jwtAuth) {
@@ -46,6 +57,7 @@ export class Connector {
     }
 
     this._token = token;
+    this._nocache = options?.nocache ?? false;
     const url = new URL(options?.service || DATAMESH_SERVICE);
     this._host = `${url.protocol}//${url.hostname}`;
     this._authHeaders = options?.jwtAuth
@@ -66,6 +78,57 @@ export class Connector {
       this._gateway.split(".").slice(-1)[0]
     ) {
       console.warn("Datamesh gateway and service domains do not match");
+    }
+
+    // Set session parameters if provided
+    if (
+      options?.sessionDuration &&
+      typeof options.sessionDuration === "number"
+    ) {
+      this._sessionParams = { duration: options.sessionDuration };
+    }
+
+    // Check if the API is v1 (supports sessions)
+    this._checkApiVersion();
+  }
+
+  /**
+   * Check if the API version supports sessions.
+   *
+   * @private
+   */
+  private async _checkApiVersion(): Promise<void> {
+    this._isV1 = false;
+    return;
+    try {
+      // Simply check the root of the gateway service
+      const response = await fetch(this._gateway, {
+        headers: this._authHeaders,
+      });
+
+      if (response.status === 200) {
+        try {
+          const data = await response.json();
+          if (data.version && typeof data.version === "object") {
+            this._isV1 = data.version.major >= 1;
+            console.info(
+              `Using datamesh API version ${data.version.major}.${data.version.minor}.${data.version.patch}`
+            );
+            return;
+          }
+        } catch {
+          // If we can't parse the JSON or it doesn't have a version field,
+          // assume it's not a v1 API
+        }
+      }
+
+      // If we reach here, we couldn't determine the version
+      this._isV1 = false;
+      console.info("Using datamesh API version 0");
+    } catch {
+      // If we can't connect to the gateway, assume it's not a v1 API
+      this._isV1 = false;
+      console.info("Using datamesh API version 0");
     }
   }
 
@@ -110,6 +173,56 @@ export class Connector {
   }
 
   /**
+   * Create a new session.
+   *
+   * @param options - Session options.
+   * @param options.duration - The desired length of time for the session in hours. Defaults to the value set in the constructor or 1 hour.
+   * @returns A new session instance.
+   */
+  async createSession(options: { duration?: number } = {}): Promise<Session> {
+    const sessionOptions = {
+      duration: options.duration || this._sessionParams.duration || 1,
+    };
+    this._currentSession = await Session.acquire(this, sessionOptions);
+    return this._currentSession;
+  }
+
+  /**
+   * Get the current session or create a new one if none exists.
+   *
+   * @returns The current session.
+   */
+  async getSession(): Promise<Session> {
+    if (!this._currentSession) {
+      return this.createSession();
+    }
+    return this._currentSession;
+  }
+
+  /**
+   * Get headers with session information if available.
+   *
+   * @param additionalHeaders - Additional headers to include.
+   * @returns Headers with session information.
+   */
+  private async getSessionHeaders(
+    additionalHeaders: Record<string, string> = {}
+  ): Promise<Record<string, string>> {
+    if (this._isV1 && !this._currentSession) {
+      await this.createSession();
+    }
+
+    if (this._currentSession) {
+      return this._currentSession.addHeader({
+        ...this._authHeaders,
+        ...additionalHeaders,
+      });
+    }
+
+    return { ...this._authHeaders, ...additionalHeaders };
+  }
+
+  /**
    * Request metadata from datamesh.
    *
    * @param datasourceId - The ID of the datasource to request.
@@ -125,13 +238,12 @@ export class Connector {
       url.searchParams.append(key, params[key])
     );
 
+    const headers = await this.getSessionHeaders();
     const response = await fetch(url.toString(), {
-      headers: this._authHeaders,
+      headers,
     });
 
-    if (response.status === 404) {
-      throw new Error(`Datasource ${datasourceId} not found`);
-    } else if (response.status === 401) {
+    if (response.status === 403) {
       throw new Error(`Datasource ${datasourceId} not authorized`);
     }
 
@@ -150,8 +262,9 @@ export class Connector {
     qhash: string,
     dataFormat = "application/vnd.apache.arrow.file"
   ): Promise<Table> {
+    const headers = await this.getSessionHeaders({ Accept: dataFormat });
     const response = await fetch(`${this._gateway}/oceanql/${qhash}?f=arrow`, {
-      headers: { Accept: dataFormat, ...this._authHeaders },
+      headers,
     });
     await this.validateResponse(response);
     return tableFromIPC(await response.arrayBuffer());
@@ -166,9 +279,13 @@ export class Connector {
   @measureTime
   async stageRequest(query: IQuery): Promise<Stage | null> {
     const data = JSON.stringify(query);
+    const headers = await this.getSessionHeaders({
+      "Content-Type": "application/json",
+    });
+
     const response = await fetch(`${this._gateway}/oceanql/stage/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...this._authHeaders },
+      headers,
       body: data,
     });
     if (response.status >= 400) {
@@ -185,12 +302,14 @@ export class Connector {
    * Execute a query to the datamesh.
    *
    * @param query - The query to execute.
+   * @param options.timeout - Additional options for the query.
    * @returns The response from the server.
    */
   @measureTime
   async query(
-    query: IQuery
-  ): Promise<Dataset</** @ignore */ DatameshStore | TempStore> | null> {
+    query: IQuery,
+    options: { timeout?: number } = {}
+  ): Promise<Dataset<HttpZarr | TempZarr> | null> {
     //Stage the query
     const stage = await this.stageRequest(query);
     if (!stage) {
@@ -216,9 +335,17 @@ export class Connector {
       url = `${this._gateway}/zarr/${query.datasource}`;
       params = query.parameters;
     }
-    const dataset = await Dataset.zarr(url, this._authHeaders, {
+
+    // Get headers with session information if available
+    const headers = await this.getSessionHeaders();
+
+    // Pass the headers to the Dataset.zarr method
+    const dataset = await Dataset.zarr(url, headers, {
       parameters: params,
+      timeout: options.timeout || 60000, // Default timeout value
+      nocache: this._nocache,
     });
+
     if (query.variables) {
       for (const v of Object.keys(dataset.variables)) {
         if (
@@ -261,9 +388,22 @@ export class Connector {
   async loadDatasource(
     datasourceId: string,
     parameters: Record<string, string | number> = {}
-  ): Promise<Dataset<DatameshStore | TempStore> | null> {
+  ): Promise<Dataset<HttpZarr | TempZarr> | null> {
     const query = { datasource: datasourceId, parameters };
     const dataset = await this.query(query);
     return dataset;
+  }
+
+  /**
+   * Close the current session if one exists.
+   *
+   * @param finaliseWrite - Whether to finalise any write operations. Defaults to false.
+   * @returns A promise that resolves when the session is closed.
+   */
+  async closeSession(finaliseWrite = false): Promise<void> {
+    if (this._currentSession) {
+      await this._currentSession.close(finaliseWrite);
+      this._currentSession = null;
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@oceanum/datamesh",
-  "version": "0.3.0",
+  "version": "0.4.1",
   "scripts": {
     "build:docs": "typedoc"
   },
@@ -8,21 +8,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@zarrita/typedarray": "^0.1.0",
-    "@types/geojson": "^7946.0.15",
+    "@types/geojson": "^7946.0.16",
     "@types/object-hash": "^3.0.6",
-    "@zarrita/core": "^0.1.0-next.15",
-    "@zarrita/indexing": "^0.1.0-next.17",
-    "@zarrita/storage": "^0.1.0-next.7",
-    "apache-arrow": "^18.1.0",
+    "apache-arrow": "^19.0.1",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.13",
     "idb-keyval": "^6.2.1",
     "object-hash": "^3.0.0",
-    "wkx-ts": "^1.0.1"
-  },
-  "devDependencies": {
-    "vitest": "^1.0.0"
+    "wkx-ts": "^1.0.1",
+    "zarrita": "^0.4.0-next.23"
   },
   "type": "module",
   "main": "./dist/index.js",

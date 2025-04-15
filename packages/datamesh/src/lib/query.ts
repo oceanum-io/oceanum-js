@@ -163,7 +163,7 @@ export type Stage = {
  */
 export class Query implements IQuery {
   datasource: string;
-  parameters?: Record<string, number | string | number[] | string[]>;
+  parameters?: Record<string, number | string>;
   description?: string;
   variables?: string[];
   timefilter?: TimeFilter;

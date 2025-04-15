@@ -24,7 +24,7 @@ const datasource: Datasource = {
     dims: {},
     data_vars: {},
   },
-  coordinates: { t: "time" },
+  coordinates: { t: "time", x: "lon", y: "lat" },
   driver: "onzarr",
 };
 
@@ -146,7 +146,7 @@ export const datameshTest = test.extend({
       throw new Error("Failed to write dataset: " + text);
     }
     const patch = jsonify({
-      coordkeys: { t: "time", x: "lon", y: "lat" },
+      coordinates: { t: "time", x: "lon", y: "lat" },
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-ds/", {
       method: "PATCH",
@@ -196,7 +196,7 @@ export const datameshTest = test.extend({
     }
 
     const patch = jsonify({
-      coordkeys: { t: "time" },
+      coordinates: { t: "time" },
       container: "dataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-df/", {
@@ -226,7 +226,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordkeys: [174.0, -37.0],
+            coordinates: [174.0, -37.0],
           },
           properties: {
             time: "1970-01-01T00:00:00.000Z",
@@ -238,7 +238,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordkeys: [174.1, -37.0],
+            coordinates: [174.1, -37.0],
           },
           properties: {
             time: "1970-01-02T00:00:00.000Z",
@@ -250,7 +250,7 @@ export const datameshTest = test.extend({
           type: "Feature",
           geometry: {
             type: "Point",
-            coordkeys: [174.2, -37.0],
+            coordinates: [174.2, -37.0],
           },
           properties: {
             time: "1970-01-03T00:00:00.000Z",
@@ -267,11 +267,12 @@ export const datameshTest = test.extend({
       body: jsonify(gdf),
     });
     if (resp.status !== 200) {
-      throw new Error("Failed to write geodataframe");
+      const text = await resp.text();
+      throw new Error("Failed to write geodataframe " + text);
     }
 
     const patch = jsonify({
-      coordkeys: { t: "time", g: "geometry" },
+      coordinates: { t: "time", g: "geometry" },
       container: "geodataframe",
     });
     resp = await fetch(DATAMESH_SERVICE + "/datasource/oceanum-js-test-gdf/", {
@@ -280,7 +281,8 @@ export const datameshTest = test.extend({
       body: patch,
     });
     if (resp.status !== 200) {
-      throw new Error("Failed to register geodataframe");
+      const text = await resp.text();
+      throw new Error("Failed to register geodataframe " + text);
     }
 
     // use the fixture value

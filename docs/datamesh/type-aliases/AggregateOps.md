@@ -8,8 +8,6 @@
 
 > **AggregateOps**: `"mean"` \| `"min"` \| `"max"` \| `"std"` \| `"sum"`
 
+Defined in: [packages/datamesh/src/lib/query.ts:40](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/query.ts#L40)
+
 AggregateOps type representing aggregation operations.
-
-## Defined in
-
-[packages/datamesh/src/lib/query.ts:40](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/query.ts#L40)

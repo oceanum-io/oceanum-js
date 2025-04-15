@@ -8,6 +8,8 @@
 
 > **Schema**: `object`
 
+Defined in: [packages/datamesh/src/lib/datasource.ts:33](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datasource.ts#L33)
+
 Represents the internal schema of a data source.
 
 ## Type declaration
@@ -35,7 +37,3 @@ Dimensions of the schema.
 > **variables**: `Record`\<`string`, [`DataVariable`](DataVariable.md)\>
 
 Data variables of the schema.
-
-## Defined in
-
-[packages/datamesh/src/lib/datasource.ts:33](https://github.com/oceanum-io/oceanum-js/blob/434a76394a76820b6be1b553be9d6f05bb5ccb16/packages/datamesh/src/lib/datasource.ts#L33)

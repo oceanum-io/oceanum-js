@@ -12,47 +12,63 @@ function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }
 
+interface CachedHTTPStoreOptions {
+  parameters?: Record<string, string | number>;
+  chunks?: string;
+  downsample?: Record<string, number>;
+  nocache?: boolean;
+  timeout?: number;
+}
+
 export class CachedHTTPStore implements AsyncReadable {
   cache: UseStore | undefined;
   url: string;
   cache_prefix: string;
   fetchOptions: RequestInit;
-  timeout = 60000;
+  timeout: number;
   _pending: Record<string, boolean> = {};
 
   constructor(
     root: string,
     authHeaders: Record<string, string>,
-    parameters?: Record<string, string | number>,
-    chunks?: string,
-    downsample?: Record<string, number>,
-    nocache?: boolean,
-    timeout?: number
+    options: CachedHTTPStoreOptions = {}
   ) {
+    // Create a copy of the auth headers to avoid modifying the original
+    // Important: We need to preserve all auth headers, including session headers
     const headers = { ...authHeaders };
-    if (parameters) headers["x-parameters"] = JSON.stringify(parameters);
-    if (chunks) headers["x-chunks"] = chunks;
-    if (downsample) headers["x-downsample"] = JSON.stringify(downsample);
+
+    // Add parameters, chunks, and downsample as headers if provided
+    if (options.parameters)
+      headers["x-parameters"] = JSON.stringify(options.parameters);
+    if (options.chunks) headers["x-chunks"] = options.chunks;
+    if (options.downsample)
+      headers["x-downsample"] = JSON.stringify(options.downsample);
     headers["x-filtered"] = "True";
+
     this.fetchOptions = { headers };
     this.url = root;
     const datasource = root.split("/").pop();
-    if (nocache) {
+
+    // Determine if caching should be used
+    if (options.nocache || typeof window === "undefined") {
       this.cache = undefined;
     } else {
       this.cache = createStore("zarr", "cache");
     }
+
+    // Create a cache prefix based on datasource and options
+    // Note: We don't include auth headers in the cache key to avoid leaking sensitive information
     this.cache_prefix = hash({
       datasource,
-      ...parameters,
-      chunks,
-      downsample,
+      ...options.parameters,
+      chunks: options.chunks,
+      downsample: options.downsample,
     });
-    this.timeout = timeout || 60000;
+    this.timeout = options.timeout || 60000;
   }
 
   async get(
-    item: string,
+    item: AbsolutePath,
     options?: RequestInit,
     retry = 0
   ): Promise<Uint8Array | undefined> {
@@ -72,22 +88,27 @@ export class CachedHTTPStore implements AsyncReadable {
     }
     if (!data) {
       this._pending[key] = true;
-      //console.log(`${this.url}/${item}`);
-      //console.log(this.fetchOptions.headers);
       try {
-        const response = await fetch(`${this.url}${item}`, {
+        // Ensure we're preserving the headers from fetchOptions when making the request
+        const requestOptions = {
           ...this.fetchOptions,
           ...options,
+          headers: {
+            ...(this.fetchOptions.headers || {}),
+            ...(options?.headers || {}),
+          },
           signal: AbortSignal.timeout(this.timeout),
-        });
+        };
+
+        const response = await fetch(`${this.url}${item}`, requestOptions);
 
         if (response.status === 404) {
           // Item is not found
           if (this.cache) await del_cache(key, this.cache);
           return undefined;
-        } else if (response.status >= 500) {
+        } else if (response.status >= 400) {
           if (retry > this.timeout / 200) {
-            throw new Error(String(response.status));
+            return undefined;
           } else {
             return await this.get(item, options, retry + 60);
           }
@@ -96,6 +117,9 @@ export class CachedHTTPStore implements AsyncReadable {
         if (this.cache) await set_cache(key, data, this.cache);
       } catch (e) {
         if (this.cache) await del_cache(key, this.cache);
+        this._pending[key] = false;
+        throw e; // Re-throw the error to propagate it
+      } finally {
         this._pending[key] = false;
       }
     }

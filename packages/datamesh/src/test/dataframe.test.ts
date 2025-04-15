@@ -32,7 +32,7 @@ datameshTest(
 
 datameshTest(
   "geodataframe",
-  async () => {
+  async ({ geodataframe }) => {
     // Test with the connector
     const datamesh = new Connector(process.env.DATAMESH_TOKEN);
     const gdf = await datamesh.loadDatasource("oceanum-js-test-gdf");
