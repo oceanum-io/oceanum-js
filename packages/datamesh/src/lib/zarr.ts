@@ -7,6 +7,7 @@ import {
 } from "idb-keyval";
 import hash from "object-hash";
 import { AsyncReadable, AsyncMutable, AbsolutePath } from "@zarrita/storage";
+import { Session } from "./session";
 
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
@@ -23,6 +24,7 @@ interface CachedHTTPStoreOptions {
 export class CachedHTTPStore implements AsyncReadable {
   cache: UseStore | undefined;
   url: string;
+  session: Session;
   cache_prefix: string;
   fetchOptions: RequestInit;
   timeout: number;
@@ -45,7 +47,16 @@ export class CachedHTTPStore implements AsyncReadable {
       headers["x-downsample"] = JSON.stringify(options.downsample);
     headers["x-filtered"] = "True";
 
+    this.params = {};
+    if (authHeaders["x-datamesh-auth"]) {
+      this.params["auth"] = authHeaders["x-datamesh-auth"];
+    }
+    if (authHeaders["x-datamesh-sig"]) {
+      this.params["sig"] = authHeaders["x-datamesh-sig"];
+    }
+
     this.fetchOptions = { headers };
+
     this.url = root;
     const datasource = root.split("/").pop();
 
@@ -99,8 +110,11 @@ export class CachedHTTPStore implements AsyncReadable {
           },
           signal: AbortSignal.timeout(this.timeout),
         };
-
-        const response = await fetch(`${this.url}${item}`, requestOptions);
+        const query = new URLSearchParams(this.params).toString();
+        const response = await fetch(
+          `${this.url}${item}?${query}`,
+          requestOptions
+        );
 
         if (response.status === 404) {
           // Item is not found

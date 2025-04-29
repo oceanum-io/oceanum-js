@@ -131,7 +131,7 @@ const getDtype = (data: Data): DataType => {
 
 const arrowTypeToDType = (dtype: ArrowDataType): string => {
   //Convert arrow data type to zarr datatype
-  let type: string = dtype.toString();
+  let type: string = dtype.toString().toLowerCase();
   if (dtype.typeId == 5) {
     type = "v2:object";
   } else if (dtype.typeId == 1) {
@@ -472,17 +472,17 @@ export class Dataset<S extends HttpZarr | TempZarr> {
   }
 
   static async fromGeojson(
-    featureCollection: FeatureCollection,
+    geojson: FeatureCollection | Feature,
     coordkeys?: Coordkeys
   ): Promise<Dataset<TempZarr>> {
     if (
-      !featureCollection.features ||
-      !Array.isArray(featureCollection.features)
+      (!geojson.features || !Array.isArray(geojson.features)) &&
+      !geojson.geometry
     ) {
-      throw new Error("Invalid FeatureCollection: features array is required");
+      throw new Error("Invalid geojson: featureCollection or feature required");
     }
 
-    const features = featureCollection.features;
+    const features = geojson.features || [geojson];
     if (features.length === 0) {
       throw new Error("FeatureCollection contains no features");
     }
