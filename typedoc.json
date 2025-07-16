@@ -1,6 +1,29 @@
 {
-  
   "entryPoints": ["packages/*"],
   "entryPointStrategy": "packages",
-  "mergeReadme": true
+  "mergeReadme": true,
+  "out": "docs/api",
+  "plugin": ["typedoc-plugin-markdown"],
+  "readme": "README.md",
+  "exclude": ["**/node_modules/**", "**/test/**", "**/tests/**", "**/*.test.ts", "**/*.spec.ts"],
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeInternal": false,
+  "includeVersion": true,
+  "sort": ["source-order"],
+  "kindSortOrder": [
+    "Project",
+    "Module",
+    "Namespace", 
+    "Enum",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Variable",
+    "Function",
+    "Accessor",
+    "Method"
+  ]
 }

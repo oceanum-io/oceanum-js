@@ -1,6 +1,6 @@
 {
   "name": "oceanum-js",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "license": "MIT",
   "private": false,
   "devDependencies": {
@@ -38,5 +38,9 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "docs": "typedoc",
+    "docs:serve": "typedoc --watch"
+  }
 }

@@ -7,7 +7,7 @@ import {
 } from "idb-keyval";
 import hash from "object-hash";
 import { AsyncReadable, AsyncMutable, AbsolutePath } from "@zarrita/storage";
-import { Session } from "./session";
+
 
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
@@ -24,7 +24,7 @@ interface CachedHTTPStoreOptions {
 export class CachedHTTPStore implements AsyncReadable {
   cache: UseStore | undefined;
   url: string;
-  session: Session;
+  params: Record<string, string>;
   cache_prefix: string;
   fetchOptions: RequestInit;
   timeout: number;
@@ -47,7 +47,7 @@ export class CachedHTTPStore implements AsyncReadable {
       headers["x-downsample"] = JSON.stringify(options.downsample);
     headers["x-filtered"] = "True";
 
-    this.params = {};
+        this.params = {};
     if (authHeaders["x-datamesh-auth"]) {
       this.params["auth"] = authHeaders["x-datamesh-auth"];
     }

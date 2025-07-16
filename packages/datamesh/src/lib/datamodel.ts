@@ -129,7 +129,7 @@ const getDtype = (data: Data): DataType => {
   throw new Error("Unsupported data type: " + data.constructor.name);
 };
 
-const arrowTypeToDType = (dtype: ArrowDataType): string => {
+const arrowTypeToDType = (dtype: ArrowDataType): DataType => {
   //Convert arrow data type to zarr datatype
   let type: string = dtype.toString().toLowerCase();
   if (dtype.typeId == 5) {
@@ -137,7 +137,7 @@ const arrowTypeToDType = (dtype: ArrowDataType): string => {
   } else if (dtype.typeId == 1) {
     type = "uint8";
   }
-  return type;
+  return type as DataType;
 };
 
 const ravel = (data: Data) => {
@@ -476,13 +476,15 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     coordkeys?: Coordkeys
   ): Promise<Dataset<TempZarr>> {
     if (
-      (!geojson.features || !Array.isArray(geojson.features)) &&
-      !geojson.geometry
+      !("features" in geojson && Array.isArray(geojson.features)) &&
+      !("geometry" in geojson)
     ) {
-      throw new Error("Invalid geojson: featureCollection or feature required");
+      throw new Error("Invalid GeoJSON");
     }
-
-    const features = geojson.features || [geojson];
+    const features: Feature[] =
+      "features" in geojson && geojson.features
+        ? geojson.features
+        : [geojson as Feature];
     if (features.length === 0) {
       throw new Error("FeatureCollection contains no features");
     }
@@ -496,15 +498,17 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     });
 
     // Create a flattened array of records
-    const records = features.map((feature) => {
-      const record: Record<string, unknown> = {
-        geometry: feature.geometry,
-      };
-      if (feature.properties) {
-        Object.assign(record, feature.properties);
+    const records: Array<Record<string, unknown>> = features.map(
+      (feature: Feature) => {
+        const record: Record<string, unknown> = {
+          geometry: feature.geometry,
+        };
+        if (feature.properties) {
+          Object.assign(record, feature.properties);
+        }
+        return record;
       }
-      return record;
-    });
+    );
 
     // Create schema with dimensions and variables
     const schema: Schema = {
@@ -561,7 +565,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         dimensions,
         data as Data,
         attributes,
-        dtype === "string" ? "v2:object" : dtype
+        dtype && (dtype as string) === "string" ? "v2:object" : dtype
       );
     }
     return ds;
@@ -724,25 +728,25 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     } else if (_dtype == "bool") {
       _data = new BoolArray(_data);
     } else if (Array.isArray(_data) && _dtype == "float32") {
-      _data = new Float32Array(_data);
+      _data = Float32Array.from(_data, (n) => (n == null ? NaN : n));
     } else if (Array.isArray(_data) && _dtype == "float64") {
-      _data = new Float64Array(_data);
+      _data = Float64Array.from(_data, (n) => (n == null ? NaN : n));
     } else if (Array.isArray(_data) && _dtype == "int8") {
-      _data = new Int8Array(_data);
+      _data = Int8Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "int16") {
-      _data = new Int16Array(_data);
+      _data = Int16Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "int32") {
-      _data = new Int32Array(_data);
+      _data = Int32Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "int64") {
-      _data = new BigInt64Array(_data);
+      _data = BigInt64Array.from(_data.map((d) => BigInt(d)));
     } else if (Array.isArray(_data) && _dtype == "uint8") {
-      _data = new Uint8Array(_data);
+      _data = Uint8Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "uint16") {
-      _data = new Uint16Array(_data);
+      _data = Uint16Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "uint32") {
-      _data = new Uint32Array(_data);
+      _data = Uint32Array.from(_data);
     } else if (Array.isArray(_data) && _dtype == "uint64") {
-      _data = new BigUint64Array(_data);
+      _data = BigUint64Array.from(_data.map((d) => BigInt(d)));
     }
     await set(
       arr,
