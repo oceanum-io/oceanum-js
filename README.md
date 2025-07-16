@@ -1,2 +1,9 @@
+---
+
 # OceanumJs
-A Typescript/Javascript library for interacting with the Oceanum.io datamesh
+
+A Typescript/Javascript library for interacting with the Oceanum.io platform.
+
+## Packages
+
+[**@oceanum/datamesh**](docs/datamesh/README.md)
