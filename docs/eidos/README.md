@@ -54,25 +54,13 @@ eidos.root.children.push({
 
 ## Framework Integration
 
-- [React Integration](./docs/eidos/react.md) - Hooks, components, and patterns
-- [Vue.js Integration](./docs/eidos/vue.md) - Composition API and component examples
-- [Svelte Integration](./docs/eidos/svelte.md) - Stores and reactive patterns
-- [Vanilla JavaScript](./docs/eidos/vanilla.md) - Pure JavaScript examples
+- [React Integration](./react.md) - Hooks, components, and patterns
+- [Vue.js Integration](./vue.md) - Composition API and component examples
+- [Svelte Integration](./svelte.md) - Stores and reactive patterns
+- [Vanilla JavaScript](./vanilla.md) - Pure JavaScript examples
 
 ## API Reference
 
-- [Core API](./docs/eidos/api.md) - Complete API documentation
-- [Events](./docs/eidos/events.md) - Event handling and communication
-- [Validation](./docs/eidos/validation.md) - Schema validation details
-
-## Examples
-
-Check out the [examples directory](./examples/) for complete working examples in different frameworks.
-
-## Contributing
-
-This library is part of the [EIDOS](https://github.com/oceanum-io/eidos) project. Please see the main repository for contribution guidelines.
-
-## License
-
-MIT License - see the main EIDOS repository for details.
+- [Core API](./api.md) - Complete API documentation
+- [Events](./events.md) - Event handling and communication
+- [Validation](./validation.md) - Schema validation details
