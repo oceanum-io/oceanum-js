@@ -93,7 +93,7 @@ const getDtype = (data: Data): DataType => {
       break;
     }
   }
-  if (data === null) {
+  if (data === null || data === undefined) {
     return "uint8";
   } else {
     switch (data.constructor.name) {
@@ -291,6 +291,9 @@ export class DataVar<
 
   @measureTime
   async get(index?: SliceDef | string[]): Promise<Data> {
+    if (this.arr.shape.length == 0 || this.arr.shape[0] == 0) {
+      return [];
+    }
     const _index =
       index &&
       index.map((i) => {
@@ -748,15 +751,17 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     } else if (Array.isArray(_data) && _dtype == "uint64") {
       _data = BigUint64Array.from(_data.map((d) => BigInt(d)));
     }
-    await set(
-      arr,
-      shape.map(() => null),
-      {
-        data: _data,
-        shape: shape,
-        stride: get_strides(shape),
-      }
-    );
+    if (_data) {
+      await set(
+        arr,
+        shape.map(() => null),
+        {
+          data: _data,
+          shape: shape,
+          stride: get_strides(shape),
+        }
+      );
+    }
     this.variables[varid] = new DataVar(varid, dims, attrs || {}, arr);
   }
 }
