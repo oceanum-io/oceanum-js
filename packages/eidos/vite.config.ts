@@ -1,11 +1,11 @@
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'lib/index.js'),
+      entry: resolve(__dirname, 'src/index.js'),
       formats: ['es'],
     },
   },
