@@ -1,27 +1,6 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import Ajv, { ValidateFunction } from "ajv";
 
-interface EidosSpec {
-  id: string;
-  name: string;
-  description?: string;
-  data: EidosData[];
-  root: EidosNode;
-}
-
-interface EidosNode {
-  id: string;
-  nodeType: string;
-  nodeSpec: object;
-}
-
-interface EidosData {
-  id: string;
-  name: string;
-  description?: string;
-  data: any;
-}
-
 const ROOT_SCHEMA = "https://schemas.oceanum.io/eidos/root.json";
 let validator: ValidateFunction | null = null;
 
