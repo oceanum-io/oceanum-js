@@ -51,7 +51,11 @@ class SchemaToTypeScript {
 
       console.log(`🔄 Converting ${Object.keys(bundledSchema.$defs).length} definitions to TypeScript interfaces...`);
 
+      // Store interfaces in order: EidosSpec first, then PlotSpec
       const interfaces = [];
+      const processedDefs = new Set(); // Track which definitions we've already processed
+      const requiredDefs = new Set(); // Track which definitions are required by root or PlotSpec
+      
       const banner = `/**
  * Auto-generated TypeScript interfaces for EIDOS schemas
  * Generated from: ${rootSchemaPath}
@@ -65,17 +69,97 @@ class SchemaToTypeScript {
 
 `;
 
-      // Convert each definition to a TypeScript interface using custom logic
-      for (const [defName, defSchema] of Object.entries(bundledSchema.$defs)) {
-        console.log(`  Converting ${defName}...`);
+      // First pass - create the root schema interface
+      try {
+        console.log("  Converting root EidosSpec schema...");
+        const { $defs, ...rootSchemaContent } = bundledSchema;
+        
+        // Create a proper schema object for the root
+        const rootSpecSchema = {
+          title: rootSchemaContent.title || "EidosSpec",
+          description: rootSchemaContent.description || "EIDOS specification root schema",
+          type: "object",
+          properties: rootSchemaContent.properties || {},
+          required: rootSchemaContent.required || [],
+        };
+        
+        // Find all types directly referenced by the root schema
+        this.collectReferencedTypes(rootSpecSchema, requiredDefs);
+        
+        // Generate the root interface
+        const rootInterfaceCode = this.generateInterface("EidosSpec", rootSpecSchema, bundledSchema.$defs);
+        interfaces.push(rootInterfaceCode);
+        processedDefs.add("EidosSpec");
+      } catch (error) {
+        console.warn(`⚠️  Failed to convert root schema: ${error.message}`);
+      }
+
+      // Add PlotSpec
+      if (bundledSchema.$defs.PlotSpec) {
+        try {
+          console.log("  Converting PlotSpec...");
+          
+          // Find all types directly referenced by PlotSpec
+          this.collectReferencedTypes(bundledSchema.$defs.PlotSpec, requiredDefs);
+          
+          const interfaceCode = this.generateInterface("PlotSpec", bundledSchema.$defs.PlotSpec, bundledSchema.$defs);
+          interfaces.push(interfaceCode);
+          processedDefs.add("PlotSpec");
+        } catch (error) {
+          console.warn(`⚠️  Failed to convert PlotSpec: ${error.message}`);
+        }
+      }
+      
+      // Add Node since it's a critical type
+      if (bundledSchema.$defs.Node && !processedDefs.has("Node")) {
+        try {
+          console.log("  Converting Node...");
+          
+          // Find all types directly referenced by Node
+          this.collectReferencedTypes(bundledSchema.$defs.Node, requiredDefs);
+          
+          const interfaceCode = this.generateInterface("Node", bundledSchema.$defs.Node, bundledSchema.$defs);
+          interfaces.push(interfaceCode);
+          processedDefs.add("Node");
+        } catch (error) {
+          console.warn(`⚠️  Failed to convert Node: ${error.message}`);
+        }
+      }
+      
+      console.log(`Found ${requiredDefs.size} required definitions`);
+      
+      // Process all required definitions
+      const defQueue = Array.from(requiredDefs);
+      while (defQueue.length > 0) {
+        const defName = defQueue.shift();
+        
+        // Skip if already processed or not in the bundled schema
+        if (processedDefs.has(defName) || !bundledSchema.$defs[defName]) {
+          continue;
+        }
+        
+        console.log(`  Converting required type: ${defName}...`);
         
         try {
-          const interfaceCode = this.generateInterface(defName, defSchema, bundledSchema.$defs);
+          // Find any additional references in this definition
+          this.collectReferencedTypes(bundledSchema.$defs[defName], requiredDefs);
+          
+          // Generate the interface
+          const interfaceCode = this.generateInterface(defName, bundledSchema.$defs[defName], bundledSchema.$defs);
           interfaces.push(interfaceCode);
+          processedDefs.add(defName);
+          
+          // Add any new required definitions to the queue
+          for (const newDef of requiredDefs) {
+            if (!processedDefs.has(newDef) && !defQueue.includes(newDef)) {
+              defQueue.push(newDef);
+            }
+          }
         } catch (error) {
           console.warn(`⚠️  Failed to convert ${defName}: ${error.message}`);
           // Create a simple interface as fallback
-          interfaces.push(this.generateFallbackInterface(defName, defSchema));
+          interfaces.push(this.generateFallbackInterface(defName, bundledSchema.$defs[defName]));
+          processedDefs.add(defName);
         }
       }
 
@@ -142,13 +226,87 @@ class SchemaToTypeScript {
    * @returns {string} - Simple fallback interface
    */
   generateFallbackInterface(name, schema) {
-    const description = schema.description || `${name} interface (fallback)`;
+    const comment = schema.description || schema.title || 'Schema conversion failed, fallback to any';
+    
     return `/**
- * ${description}
+ * ${comment}
  */
 export interface ${name} {
   [key: string]: any;
 }`;
+  }
+
+  /**
+   * Collect all referenced types from a schema into the provided set
+   * @param {Object} schema - The schema to analyze
+   * @param {Set} referencedTypes - Set to collect referenced type names
+   */
+  collectReferencedTypes(schema, referencedTypes) {
+    if (!schema || typeof schema !== 'object') {
+      return;
+    }
+    
+    // Handle $ref - extract type name
+    if (schema.$ref) {
+      const refParts = schema.$ref.split('/');
+      if (refParts.length >= 3 && refParts[1] === '$defs') {
+        // Internal reference like #/$defs/TypeName
+        referencedTypes.add(refParts[2]);
+      } else if (!schema.$ref.startsWith('#/')) {
+        // External reference - try to extract type name from URL
+        const urlParts = schema.$ref.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        if (filename.endsWith('.json')) {
+          const typeName = this.toPascalCase(filename.replace('.json', ''));
+          referencedTypes.add(typeName);
+        }
+      }
+      return; // No need to go deeper if this is a reference
+    }
+    
+    // Handle union types (oneOf, anyOf)
+    if (schema.oneOf || schema.anyOf) {
+      const options = schema.oneOf || schema.anyOf;
+      for (const option of options) {
+        this.collectReferencedTypes(option, referencedTypes);
+      }
+    }
+    
+    // Handle array items
+    if (schema.type === 'array' && schema.items) {
+      this.collectReferencedTypes(schema.items, referencedTypes);
+    }
+    
+    // Handle object properties
+    if (schema.properties) {
+      for (const propSchema of Object.values(schema.properties)) {
+        this.collectReferencedTypes(propSchema, referencedTypes);
+      }
+    }
+    
+    // Handle additional properties
+    if (schema.additionalProperties && typeof schema.additionalProperties === 'object') {
+      this.collectReferencedTypes(schema.additionalProperties, referencedTypes);
+    }
+  }
+
+  /**
+   * Convert a string to PascalCase
+   * @param {string} str - Input string
+   * @returns {string} - PascalCase string
+   */
+  toPascalCase(str) {
+    if (!str) return '';
+    
+    // Replace non-alphanumeric characters with spaces
+    const normalized = str.replace(/[^a-zA-Z0-9]/g, ' ');
+    
+    // Convert to PascalCase
+    return normalized
+      .split(' ')
+      .filter(word => word.length > 0)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join('');
   }
 
   /**
@@ -187,7 +345,7 @@ export interface ${name} {
   generateProperties(schema, allDefs) {
     let result = '';
     
-    // Handle union types (oneOf, anyOf) - these should not have properties, just be type aliases
+    // For union types, don't generate properties
     if (schema.oneOf || schema.anyOf) {
       // For union types, we don't generate properties - the interface will be a type alias
       return '';
@@ -206,7 +364,15 @@ export interface ${name} {
       
       for (const [propName, propSchema] of Object.entries(schema.properties)) {
         const isOptional = !required.includes(propName);
-        const propType = this.generateType(propSchema, allDefs);
+        
+        // Special case for Function.args property which is incorrectly typed
+        let propType;
+        if (schema.title === 'Function' && propName === 'args') {
+          propType = 'object'; // Fix the Function.args type
+        } else {
+          propType = this.generateType(propSchema, allDefs);
+        }
+        
         const propDocs = this.extractDocumentation(propSchema);
         
         // Add property documentation

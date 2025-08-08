@@ -112,6 +112,28 @@ class SchemaBundler {
       type: 'object',
       title: 'PlotSpec',
       description: 'Placeholder for Vega/Vega-Lite plot specifications',
+      properties: {
+        $schema: {
+          type: 'string',
+          description: 'The Vega/Vega-Lite schema URL'
+        },
+        data: {
+          type: 'object',
+          description: 'The data specification'
+        },
+        mark: {
+          type: ['string', 'object'],
+          description: 'The mark type or definition'
+        },
+        encoding: {
+          type: 'object',
+          description: 'The encoding specification'
+        },
+        config: {
+          type: 'object',
+          description: 'The configuration options'
+        }
+      },
       additionalProperties: true
     };
   }
@@ -531,6 +553,12 @@ class SchemaBundler {
       finalSchema.$defs = {};
       for (const [key, definition] of this.definitions) {
         finalSchema.$defs[key] = this.rewriteRefs(definition);
+      }
+      
+      // Always ensure PlotSpec placeholder exists
+      if (!finalSchema.$defs.PlotSpec) {
+        console.log('Adding PlotSpec placeholder definition');
+        finalSchema.$defs.PlotSpec = this.createVegaPlaceholder();
       }
 
       console.log(`✅ Schema bundling completed! Generated ${Object.keys(finalSchema.$defs).length} definitions.`);

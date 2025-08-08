@@ -3,18 +3,18 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "./dist/index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --p ./tsconfig-build.json && vite build",
-    "preview": "vite preview",
     "generate-types": "node ./scripts/generate-interfaces.js"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "ajv": "^8.17.1",
     "valtio": "^2.1.5"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^15.0.4"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0"
   }
 }
