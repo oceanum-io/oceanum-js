@@ -8,7 +8,6 @@ import {
 import hash from "object-hash";
 import { AsyncReadable, AsyncMutable, AbsolutePath } from "@zarrita/storage";
 
-
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }
@@ -47,7 +46,7 @@ export class CachedHTTPStore implements AsyncReadable {
       headers["x-downsample"] = JSON.stringify(options.downsample);
     headers["x-filtered"] = "True";
 
-        this.params = {};
+    this.params = {};
     if (authHeaders["x-datamesh-auth"]) {
       this.params["auth"] = authHeaders["x-datamesh-auth"];
     }
@@ -87,13 +86,17 @@ export class CachedHTTPStore implements AsyncReadable {
     let data = null;
     if (this.cache) {
       data = await get_cache(key, this.cache);
+      if (data) delete this._pending[key];
       if (this._pending[key]) {
         await delay(200);
-        if (retry > this.timeout / 200) {
+        //console.debug("Zarr pending:" + key);
+        if (retry > this.timeout) {
           await del_cache(key, this.cache);
-          throw new Error("Zarr timeout");
+          delete this._pending[key];
+          console.error("Zarr timeout");
+          return undefined;
         } else {
-          return await this.get(item, options, retry + 1);
+          return await this.get(item, options, retry + 200);
         }
       }
     }
@@ -120,21 +123,23 @@ export class CachedHTTPStore implements AsyncReadable {
           // Item is not found
           if (this.cache) await del_cache(key, this.cache);
           return undefined;
-        } else if (response.status >= 400) {
-          if (retry > this.timeout / 200) {
-            return undefined;
-          } else {
-            return await this.get(item, options, retry + 60);
-          }
+        }
+        if (response.status >= 400) {
+          throw new Error(`HTTP error: ${response.status}`);
         }
         data = new Uint8Array(await response.arrayBuffer());
         if (this.cache) await set_cache(key, data, this.cache);
       } catch (e) {
+        console.debug("Zarr retry:" + key);
+        if (retry < this.timeout / 200) {
+          delete this._pending[key];
+          return await this.get(item, options, retry + 200);
+        }
         if (this.cache) await del_cache(key, this.cache);
-        this._pending[key] = false;
-        throw e; // Re-throw the error to propagate it
+        console.error(e);
+        return undefined;
       } finally {
-        this._pending[key] = false;
+        delete this._pending[key];
       }
     }
     return data;

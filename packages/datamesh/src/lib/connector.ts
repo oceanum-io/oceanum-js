@@ -98,33 +98,19 @@ export class Connector {
    * @private
    */
   private async _checkApiVersion(): Promise<void> {
-    this._isV1 = false;
-    return;
     try {
-      // Simply check the root of the gateway service
-      const response = await fetch(this._gateway, {
+      // Simply check to see if we can get a session
+      const response = await fetch(`${this._gateway}/session`, {
         headers: this._authHeaders,
       });
 
       if (response.status === 200) {
-        try {
-          const data = await response.json();
-          if (data.version && typeof data.version === "object") {
-            this._isV1 = data.version.major >= 1;
-            console.info(
-              `Using datamesh API version ${data.version.major}.${data.version.minor}.${data.version.patch}`
-            );
-            return;
-          }
-        } catch {
-          // If we can't parse the JSON or it doesn't have a version field,
-          // assume it's not a v1 API
-        }
+        this._isV1 = true;
+        console.info("Using datamesh API version 1");
+      } else {
+        this._isV1 = false;
+        console.info("Using datamesh API version 0");
       }
-
-      // If we reach here, we couldn't determine the version
-      this._isV1 = false;
-      console.info("Using datamesh API version 0");
     } catch {
       // If we can't connect to the gateway, assume it's not a v1 API
       this._isV1 = false;

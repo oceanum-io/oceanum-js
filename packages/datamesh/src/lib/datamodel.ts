@@ -64,6 +64,12 @@ export type DataVariable = {
   data?: Data;
 };
 
+export const wkb_to_geojson = (wkb: string) => {
+  const b = new Buffer(wkb, "base64");
+  const geometry = WkxGeometry.parse(b);
+  return geometry.toGeoJSON();
+};
+
 const isArray = (data?: Data) => {
   return data && (Array.isArray(data) || ArrayBuffer.isView(data));
 };
@@ -661,8 +667,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           geom = JSON.parse(g) as Geometry;
         } else {
           //WKB
-          const wkbbuffer = new Buffer(g, "base64");
-          geom = WkxGeometry.parse(wkbbuffer).toGeoJSON() as Geometry;
+          geom = wkb_to_geojson(g);
         }
       }
       features.push({
