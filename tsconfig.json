@@ -12,6 +12,9 @@
     },
     {
       "path": "./examples/datamesh/wind_timeseries_query"
+    },
+    {
+      "path": "./packages/eidos"
     }
   ]
 }

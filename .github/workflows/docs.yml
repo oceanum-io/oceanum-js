@@ -31,14 +31,13 @@ jobs:
         name: "Install Node.js dependencies"
         run: |
           set -euo pipefail
-          npm install --frozen-lockfile
+          npm install --frozen-lockfile --legacy-peer-deps
 
       - id: "build"
         name: "Build typedoc documentation"
         run: |
           set -euo pipefail
           npx nx run-many -t build:docs
-          
 
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1

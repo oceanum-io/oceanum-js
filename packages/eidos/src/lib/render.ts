@@ -1,5 +1,6 @@
-import { proxy, subscribe } from "valtio/vanilla";
+import { proxy, subscribe, snapshot } from "valtio/vanilla";
 import { validateSchema } from "./eidosmodel";
+import { EidosSpec } from "../schema/interfaces";
 
 const DEFAULT_RENDERER = "https://render.eidos.oceanum.io";
 
@@ -11,12 +12,12 @@ const DEFAULT_RENDERER = "https://render.eidos.oceanum.io";
  * @param renderer URL of the EIDOS renderer
  * @returns A proxy object that can be used with useEidosSpec
  */
-const render = async <T extends object>(
+const render = async (
   element: HTMLElement,
-  spec: T,
+  spec: EidosSpec,
   eventListener?: (payload: unknown) => void,
   renderer = DEFAULT_RENDERER
-) => {
+): Promise<Proxy<EidosSpec>> => {
   // Validate the spec before creating proxy
   try {
     await validateSchema(spec);
@@ -58,13 +59,13 @@ const render = async <T extends object>(
       });
 
       // Subscribe to changes and send patches to renderer
-      subscribe(eidos, (ops) => {
+      subscribe(eidos, () => {
         // ops are already JSON patch format operations
         win?.postMessage(
           {
             id: eidos.id,
             type: "patch",
-            payload: ops,
+            payload: snapshot(eidos),
           },
           "*"
         );
