@@ -71,8 +71,8 @@ Check out the [examples directory](./examples/) for complete working examples in
 
 ## Contributing
 
-This library is part of the [EIDOS](https://github.com/oceanum-io/eidos) project. Please see the main repository for contribution guidelines.
+This library is part of the [oceanum-js](https://github.com/oceanum-io/oceanum-js) project. Please see the main repository for contribution guidelines.
 
 ## License
 
-MIT License - see the main EIDOS repository for details.
+MIT License - see the main [oceanum-js](https://github.com/oceanum-io/oceanum-js) repository for details.
