@@ -8,6 +8,7 @@ const DEFAULT_RENDERER = "https://render.eidos.oceanum.io";
  * Embed the EIDOS iframe and set up message passing
  * @param element HTML element to render the EIDOS spec into
  * @param spec The EIDOS specification object
+ * @param id The unique identifier for the EIDOS spec (optional, defaults to spec.id)
  * @param eventListener Optional callback for handling events from the renderer
  * @param renderer URL of the EIDOS renderer
  * @returns A proxy object that can be used with useEidosSpec
@@ -15,6 +16,7 @@ const DEFAULT_RENDERER = "https://render.eidos.oceanum.io";
 const render = async (
   element: HTMLElement,
   spec: EidosSpec,
+  id?: string,
   eventListener?: (payload: unknown) => void,
   renderer = DEFAULT_RENDERER
 ): Promise<Proxy<EidosSpec>> => {
@@ -27,10 +29,11 @@ const render = async (
 
   // Create Valtio proxy - naturally mutable, no unprotect needed
   const eidos = proxy(structuredClone(spec));
+  const _id = id || spec.id;
 
   return new Promise((resolve, reject) => {
     const iframe = document.createElement("iframe");
-    iframe.src = `${renderer}`;
+    iframe.src = `${renderer}?id=${_id}`;
     iframe.width = "100%";
     iframe.height = "100%";
     iframe.frameBorder = "0";
@@ -41,13 +44,13 @@ const render = async (
 
       window.addEventListener("message", (event) => {
         if (event.source !== win) return;
-        if (event.data.id !== eidos.id) return;
+        if (event.data.id !== id) return;
 
         if (event.data.type === "init") {
           // Send initial spec
           win?.postMessage(
             {
-              id: eidos.id,
+              id: _id,
               type: "spec",
               payload: structuredClone(eidos),
             },
@@ -60,11 +63,10 @@ const render = async (
 
       // Subscribe to changes and send patches to renderer
       subscribe(eidos, () => {
-        // ops are already JSON patch format operations
         win?.postMessage(
           {
-            id: eidos.id,
-            type: "patch",
+            id: _id,
+            type: "spec",
             payload: snapshot(eidos),
           },
           "*"

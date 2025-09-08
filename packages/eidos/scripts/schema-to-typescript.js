@@ -53,6 +53,7 @@ class SchemaToTypeScript {
 
       // Store interfaces in order: EidosSpec first, then PlotSpec
       const interfaces = [];
+      const constants = []; // Track generated constants from const values
       const processedDefs = new Set(); // Track which definitions we've already processed
       const requiredDefs = new Set(); // Track which definitions are required by root or PlotSpec
       
@@ -87,7 +88,7 @@ class SchemaToTypeScript {
         this.collectReferencedTypes(rootSpecSchema, requiredDefs);
         
         // Generate the root interface
-        const rootInterfaceCode = this.generateInterface("EidosSpec", rootSpecSchema, bundledSchema.$defs);
+        const rootInterfaceCode = this.generateInterface("EidosSpec", rootSpecSchema, bundledSchema.$defs, constants);
         interfaces.push(rootInterfaceCode);
         processedDefs.add("EidosSpec");
       } catch (error) {
@@ -102,7 +103,7 @@ class SchemaToTypeScript {
           // Find all types directly referenced by PlotSpec
           this.collectReferencedTypes(bundledSchema.$defs.PlotSpec, requiredDefs);
           
-          const interfaceCode = this.generateInterface("PlotSpec", bundledSchema.$defs.PlotSpec, bundledSchema.$defs);
+          const interfaceCode = this.generateInterface("PlotSpec", bundledSchema.$defs.PlotSpec, bundledSchema.$defs, constants);
           interfaces.push(interfaceCode);
           processedDefs.add("PlotSpec");
         } catch (error) {
@@ -118,7 +119,7 @@ class SchemaToTypeScript {
           // Find all types directly referenced by Node
           this.collectReferencedTypes(bundledSchema.$defs.Node, requiredDefs);
           
-          const interfaceCode = this.generateInterface("Node", bundledSchema.$defs.Node, bundledSchema.$defs);
+          const interfaceCode = this.generateInterface("Node", bundledSchema.$defs.Node, bundledSchema.$defs, constants);
           interfaces.push(interfaceCode);
           processedDefs.add("Node");
         } catch (error) {
@@ -145,7 +146,7 @@ class SchemaToTypeScript {
           this.collectReferencedTypes(bundledSchema.$defs[defName], requiredDefs);
           
           // Generate the interface
-          const interfaceCode = this.generateInterface(defName, bundledSchema.$defs[defName], bundledSchema.$defs);
+          const interfaceCode = this.generateInterface(defName, bundledSchema.$defs[defName], bundledSchema.$defs, constants);
           interfaces.push(interfaceCode);
           processedDefs.add(defName);
           
@@ -164,9 +165,14 @@ class SchemaToTypeScript {
       }
 
       // Combine all interfaces into a single file
-      const finalOutput = banner + interfaces.join('\n\n') + '\n';
-
-      // Write the TypeScript file
+      let finalOutput = banner;
+      
+      // Add constants first if any were generated
+      if (constants.length > 0) {
+        finalOutput += constants.join('\n') + '\n\n';
+      }
+      
+      finalOutput += interfaces.join('\n\n') + '\n';
       fs.writeFileSync(this.outputFile, finalOutput);
 
       console.log("✅ TypeScript interface generation completed successfully!");
@@ -184,11 +190,12 @@ class SchemaToTypeScript {
    * @param {string} name - Interface name
    * @param {Object} schema - Schema definition
    * @param {Object} allDefs - All definitions for reference resolution
+   * @param {Array} constants - Array to collect generated constants
    * @returns {string} - Generated TypeScript interface
    */
-  generateInterface(name, schema, allDefs) {
+  generateInterface(name, schema, allDefs, constants = []) {
     const docs = this.extractDocumentation(schema);
-    const properties = this.generateProperties(schema, allDefs);
+    const properties = this.generateProperties(schema, allDefs, constants);
     
     let result = '';
     
@@ -291,6 +298,32 @@ export interface ${name} {
   }
 
   /**
+   * Generate a constant name for a const value
+   * @param {Object} schema - Schema object with const value
+   * @param {Object} allDefs - All definitions for context
+   * @returns {string} - Generated constant name
+   */
+  generateConstantName(schema, allDefs) {
+    // If the schema has a title, use it as the base for the constant name
+    if (schema.title) {
+      return this.toPascalCase(schema.title);
+    }
+    
+    // If the const value is a string, try to generate a meaningful name
+    if (typeof schema.const === 'string') {
+      // For node types like "world", "plot", etc., generate names like "WorldNodeType", "PlotNodeType"
+      if (schema.const.match(/^[a-z]+$/)) {
+        return this.toPascalCase(schema.const) + 'NodeType';
+      }
+      // For other string constants, use the value itself
+      return this.toPascalCase(schema.const) + 'Constant';
+    }
+    
+    // For non-string constants, generate a generic name
+    return 'Constant' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
    * Convert a string to PascalCase
    * @param {string} str - Input string
    * @returns {string} - PascalCase string
@@ -340,9 +373,10 @@ export interface ${name} {
    * Generate TypeScript properties from schema
    * @param {Object} schema - Schema object
    * @param {Object} allDefs - All definitions for reference resolution
+   * @param {Array} constants - Array to collect generated constants
    * @returns {string} - Generated properties string
    */
-  generateProperties(schema, allDefs) {
+  generateProperties(schema, allDefs, constants = []) {
     let result = '';
     
     // For union types, don't generate properties
@@ -370,7 +404,7 @@ export interface ${name} {
         if (schema.title === 'Function' && propName === 'args') {
           propType = 'object'; // Fix the Function.args type
         } else {
-          propType = this.generateType(propSchema, allDefs);
+          propType = this.generateType(propSchema, allDefs, constants);
         }
         
         const propDocs = this.extractDocumentation(propSchema);
@@ -391,7 +425,7 @@ export interface ${name} {
       if (schema.additionalProperties === true) {
         result += '  [key: string]: any;\n';
       } else if (typeof schema.additionalProperties === 'object') {
-        const additionalType = this.generateType(schema.additionalProperties, allDefs);
+        const additionalType = this.generateType(schema.additionalProperties, allDefs, constants);
         result += `  [key: string]: ${additionalType};\n`;
       }
     } else if (schema.type && schema.type !== 'object') {
@@ -399,7 +433,7 @@ export interface ${name} {
       return '';
     } else {
       // For schemas without clear structure, fallback to index signature
-      const type = this.generateType(schema, allDefs);
+      const type = this.generateType(schema, allDefs, constants);
       result += `  [key: string]: ${type};\n`;
     }
     
@@ -410,9 +444,10 @@ export interface ${name} {
    * Generate TypeScript type from schema
    * @param {Object} schema - Schema object
    * @param {Object} allDefs - All definitions for reference resolution
+   * @param {Array} constants - Array to collect generated constants
    * @returns {string} - Generated TypeScript type
    */
-  generateType(schema, allDefs) {
+  generateType(schema, allDefs, constants = []) {
     if (!schema || typeof schema !== 'object') {
       return 'any';
     }
@@ -420,6 +455,20 @@ export interface ${name} {
     // Handle $ref
     if (schema.$ref) {
       return this.resolveReference(schema.$ref);
+    }
+    
+    // Handle const values - generate TypeScript constants
+    if (schema.const !== undefined) {
+      const constantName = this.generateConstantName(schema, allDefs);
+      const constantValue = typeof schema.const === 'string' ? `"${schema.const}"` : JSON.stringify(schema.const);
+      const constantDeclaration = `const ${constantName} = ${constantValue} as const;`;
+      
+      // Add to constants array if not already present
+      if (!constants.some(c => c.includes(constantName))) {
+        constants.push(constantDeclaration);
+      }
+      
+      return constantName;
     }
     
     // Handle union types (oneOf, anyOf)
@@ -455,7 +504,7 @@ export interface ${name} {
         }
         
         // Generate the type for this option
-        return this.generateType(option, allDefs);
+        return this.generateType(option, allDefs, constants);
       });
       
       // Filter out duplicates and empty types
@@ -472,14 +521,14 @@ export interface ${name} {
     
     // Handle allOf (intersection)
     if (schema.allOf) {
-      const types = schema.allOf.map(option => this.generateType(option, allDefs));
+      const types = schema.allOf.map(option => this.generateType(option, allDefs, constants));
       return types.join(' & ');
     }
     
     // Handle arrays
     if (schema.type === 'array') {
       if (schema.items) {
-        const itemType = this.generateType(schema.items, allDefs);
+        const itemType = this.generateType(schema.items, allDefs, constants);
         return `${itemType}[]`;
       }
       return 'any[]';

@@ -126,3 +126,7 @@ dist
 .vscode
 vite.config.ts.timestamp*
 vitest.config.ts.timestamp*
+
+#Claude
+.claude
+CLAUDE.md

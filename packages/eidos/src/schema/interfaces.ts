@@ -9,6 +9,13 @@
  * npx nx run eidos:generate-types
  */
 
+const WorldNodeType = "world" as const;
+const PlotNodeType = "plot" as const;
+const DocumentNodeType = "document" as const;
+const GridNodeType = "grid" as const;
+const MenuNodeType = "menu" as const;
+const WorldlayerNodeType = "worldlayer" as const;
+
 /**
  * EIDOS specification
  * Complete specification for defining interactive oceanic and geospatial data visualizations using the EIDOS framework. An EIDOS specification is a declarative JSON document that describes the entire structure, layout, data sources, and interactions for a data visualization application. This top-level schema defines the root structure that contains metadata, data definitions, theming, and the hierarchical node structure that defines the user interface.
@@ -189,7 +196,7 @@ export interface World {
   /**
    * Node type identifier. Must be 'world' for map/globe visualizations.
    */
-  nodeType?: any;
+  nodeType?: WorldNodeType;
   /**
    * Array of world layers to display on this map. Each layer represents a different data visualization (e.g., gridded data, vector features, tracks, 3D objects). Layers are rendered in order with later layers appearing on top.
    */
@@ -224,7 +231,7 @@ export interface Plot {
    * Unique id of the node
    */
   id: string;
-  nodeType?: any;
+  nodeType?: PlotNodeType;
   plotType?: "vega" | "vega-lite";
   plotSpec: any & PlotSpec;
   /**
@@ -245,7 +252,7 @@ export interface Document {
    * Unique id of the node
    */
   id: string;
-  nodeType?: any;
+  nodeType?: DocumentNodeType;
   /**
    * Document content as templated markdown
    */
@@ -270,7 +277,7 @@ export interface Grid {
   /**
    * Node type identifier. Must be 'grid' for layout containers that arrange children in a grid pattern.
    */
-  nodeType?: any;
+  nodeType?: GridNodeType;
   /**
    * Defines the overall grid dimensions. All child nodes must fit within these bounds. The grid acts as a responsive layout container that adapts to screen size while maintaining relative proportions.
    */
@@ -293,7 +300,7 @@ export interface Menu {
    * Unique id of the node
    */
   id: string;
-  nodeType?: any;
+  nodeType?: MenuNodeType;
   activeItem?: string;
   /**
    * Location of menu relative to content
@@ -527,7 +534,7 @@ export interface Worldlayer {
    * "Weather Stations"
    */
   name?: string;
-  nodeType: any;
+  nodeType: WorldlayerNodeType;
   /**
    * Reference to a data source defined in the root 'data' array. This connects the layer to its data source for visualization.
    * 
@@ -788,7 +795,7 @@ export interface MapHoverInfo {
 /**
  * Layer specification
  */
-export type Layerspec = Feature | Gridded | Label | Scenegraph | Sea-surface | Track;
+export type Layerspec = Feature | Gridded | Label | Scenegraph | Seasurface | Track;
 
 export interface Timeselect {
   mode: "nearest" | "exact" | "range";
@@ -900,7 +907,7 @@ export interface Point {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -915,7 +922,7 @@ export interface Multipoint {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -930,7 +937,7 @@ export interface Linestring {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -945,7 +952,7 @@ export interface Multilinestring {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -960,7 +967,7 @@ export interface Polygon {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -975,7 +982,7 @@ export interface Multipolygon {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
 }
 
 /**
@@ -986,7 +993,7 @@ export interface Geometrycollection {
   /**
    * Type
    */
-  type?: string;
+  type?: Type;
   /**
    * Geometries
    */
