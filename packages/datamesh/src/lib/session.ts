@@ -57,7 +57,7 @@ export class Session {
       headers["Cache-Control"] = "no-store";
       const params = { duration: options.duration || 1 };
       const response = await fetch(
-        `${connection._gateway}/session/?${params}`,
+        `${connection._gateway}/session/?` + new URLSearchParams(params),
         { headers }
       );
 

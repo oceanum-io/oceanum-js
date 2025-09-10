@@ -15,7 +15,7 @@ import { Geometry, Feature, FeatureCollection } from "geojson";
 import { Geometry as WkxGeometry } from "wkx-ts";
 import { Buffer } from "buffer/index";
 
-import { CachedHTTPStore } from "./zarr";
+import { CachedHTTPStore, zarr_open_v2_datetime } from "./zarr";
 import { Schema, Coordkeys } from "./datasource";
 import { measureTime } from "./observe";
 
@@ -163,7 +163,7 @@ const ravel = (data: Data) => {
   }
 };
 
-function get_strides(shape: readonly number[]) {
+const get_strides = (shape: readonly number[]) => {
   const ndim = shape.length;
   const stride: number[] = Array(ndim);
   for (let i = ndim - 1, step = 1; i >= 0; i--) {
@@ -171,14 +171,14 @@ function get_strides(shape: readonly number[]) {
     step *= shape[i];
   }
   return stride;
-}
+};
 
-function unravel<T extends DataType>(
+const unravel = <T extends DataType>(
   data: TypedArray<T>,
   shape: number[],
   stride: number[],
   offset = 0
-): Data {
+): Data => {
   // @ts-expect-error: Is array
   if (shape.length === 0) return data[0];
   if (shape.length === 1) {
@@ -199,7 +199,30 @@ function unravel<T extends DataType>(
     );
   }
   return arr;
-}
+};
+
+const npdatetime_to_posixtime = (data: Chunk<DataType>, dtype: string) => {
+  const [_, unit] = dtype.split("<M8");
+  let _data;
+  switch (unit) {
+    case "[s]":
+      _data = new Float64Array(data.data.map((d) => Number(d)));
+      break;
+    case "[ms]":
+      _data = new Float64Array(data.data.map((d) => Number(d / 1000n)));
+      break;
+    case "[us]":
+      _data = new Float64Array(data.data.map((d) => Number(d / 1000000n)));
+      break;
+    case "[ns]":
+      _data = new Float64Array(data.data.map((d) => Number(d / 1000000000n)));
+      break;
+    default:
+      _data = data.data;
+      break;
+  }
+  return unravel(_data, data.shape, data.stride);
+};
 
 const flatten = (
   data: Record<string, DataVariable>,
@@ -232,7 +255,7 @@ const flatten = (
       for (const k in data) {
         if (data[k].dimensions.includes(dim[0])) {
           subdata[k] = {
-            attributes: {},
+            attributes: data[k].attributes,
             // @ts-expect-error: Is array because include dims
             data: data[k].data[i],
             dimensions: data[k].dimensions.slice(1),
@@ -322,6 +345,8 @@ export class DataVar<
       return _data.data as Data;
     } else if (this.arr.dtype == "bool") {
       return [..._data.data] as Data;
+    } else if (this.arr.attrs._dtype?.startsWith("<M8")) {
+      return npdatetime_to_posixtime(_data, this.arr.attrs._dtype) as Data;
     } else {
       return unravel(_data.data, _data.shape, _data.stride);
     }
@@ -405,9 +430,21 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     const dims = {} as Record<string, number>;
     for (const item of _zarr.contents()) {
       if (item.kind == "array") {
-        const arr = await zarr.open(root.resolve(item.path), {
-          kind: "array",
-        });
+        let arr;
+        try {
+          arr = await zarr.open(root.resolve(item.path), {
+            kind: "array",
+          });
+        } catch (e) {
+          if (e.message.includes("<M8")) {
+            //A python <M8 type fails to load
+            arr = await zarr_open_v2_datetime(root.resolve(item.path), {
+              kind: "array",
+            });
+          } else {
+            throw e;
+          }
+        }
         const array_dims = arr.attrs._ARRAY_DIMENSIONS as string[] | null;
         const vid = item.path.split("/").pop() as string;
         vars[vid] = new DataVar<DataType, HttpZarr>(

@@ -12,7 +12,9 @@ import { Session } from "./session";
  *
  */
 const DATAMESH_SERVICE =
-  process.env.DATAMESH_SERVICE || "https://datamesh.oceanum.io";
+  typeof process !== "undefined" && process.env?.DATAMESH_SERVICE
+    ? process.env.DATAMESH_SERVICE
+    : "https://datamesh.oceanum.io";
 
 export class Connector {
   static LAZY_LOAD_SIZE = 1e8;
@@ -41,7 +43,9 @@ export class Connector {
    * @throws {Error} - If a valid token is not provided.
    */
   constructor(
-    token = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN",
+    token = typeof process !== "undefined" && process.env?.DATAMESH_TOKEN
+      ? process.env.DATAMESH_TOKEN
+      : "$DATAMESH_TOKEN",
     options?: {
       service?: string;
       gateway?: string;
@@ -70,8 +74,7 @@ export class Connector {
         };
 
     /* This is for testing  the gateway service is not always the same as the service domain */
-    this._gateway =
-      options?.gateway || `${url.protocol}//gateway.${url.hostname}`;
+    this._gateway = options?.gateway || this._host;
 
     if (
       this._host.split(".").slice(-1)[0] !==
@@ -318,7 +321,7 @@ export class Connector {
     ) {
       url = `${this._gateway}/zarr/${stage.qhash}`;
     } else {
-      url = `${this._gateway}/zarr/${query.datasource}`;
+      url = `${this._gateway}/zarr/${this._isV1 ? "query/" : ""}${stage.qhash}`;
       params = query.parameters;
     }
 

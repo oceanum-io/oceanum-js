@@ -6,7 +6,8 @@ import {
   UseStore,
 } from "idb-keyval";
 import hash from "object-hash";
-import { AsyncReadable, AsyncMutable, AbsolutePath } from "@zarrita/storage";
+import { AsyncReadable, AsyncMutable, Readable } from "@zarrita/storage";
+import { Array as ZArray, Location, Attributes } from "@zarrita/core";
 
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
@@ -171,4 +172,55 @@ export class IDBStore implements AsyncMutable {
   async delete(key: AbsolutePath): Promise<void> {
     await del_cache(key, this.cache);
   }
+}
+
+//This is modified from the zarrita core library to patch for datetime support
+export async function zarr_open_v2_datetime<Store extends Readable>(
+  location: Location<Store>,
+  attrs: Attributes
+) {
+  const { path } = location.resolve(".zarray");
+  const meta = await location.store.get(path);
+  const meta_json = JSON.parse(new TextDecoder().decode(meta));
+  if (meta_json.dtype.startsWith("<M8")) {
+    attrs._dtype = meta_json.dtype;
+  }
+  const codecs: any[] = [];
+
+  if (meta_json.order === "F") {
+    codecs.push({ name: "transpose", configuration: { order: "F" } });
+  }
+  // Detect big-endian from v2 dtype string (e.g., ">i4"). If so, add a bytes codec.
+  if (typeof meta_json.dtype === "string" && meta_json.dtype.startsWith(">")) {
+    codecs.push({ name: "bytes", configuration: { endian: "big" } });
+  }
+  for (const { id, ...configuration } of meta_json.filters ?? []) {
+    codecs.push({ name: id, configuration });
+  }
+  if (meta_json.compressor) {
+    const { id, ...configuration } = meta_json.compressor;
+    codecs.push({ name: id, configuration });
+  }
+  const v3_metadata = {
+    zarr_format: 3,
+    node_type: "array",
+    shape: meta_json.shape,
+    data_type: "int8",
+    chunk_grid: {
+      name: "regular",
+      configuration: {
+        chunk_shape: meta_json.chunks,
+      },
+    },
+    chunk_key_encoding: {
+      name: "v2",
+      configuration: {
+        separator: meta_json.dimension_separator ?? ".",
+      },
+    },
+    codecs,
+    fill_value: meta_json.fill_value,
+    attributes: attrs,
+  };
+  return new ZArray(location.store, location.path, v3_metadata);
 }
