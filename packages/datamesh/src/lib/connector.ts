@@ -311,19 +311,9 @@ export class Connector {
       const dataset = await Dataset.fromArrow(table, stage.coordkeys);
       return dataset;
     }
-    let url = null;
-    let params = undefined;
-    if (
-      query.timefilter ||
-      query.geofilter ||
-      query.levelfilter ||
-      query.coordfilter
-    ) {
-      url = `${this._gateway}/zarr/${stage.qhash}`;
-    } else {
-      url = `${this._gateway}/zarr/${this._isV1 ? "query/" : ""}${stage.qhash}`;
-      params = query.parameters;
-    }
+
+    const url = `${this._gateway}/zarr/${this._isV1 ? "query/" : ""}${stage.qhash}`;
+    const params = query.parameters;
 
     // Get headers with session information if available
     const headers = await this.getSessionHeaders();

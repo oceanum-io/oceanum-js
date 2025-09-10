@@ -205,7 +205,7 @@ export async function zarr_open_v2_datetime<Store extends Readable>(
     zarr_format: 3,
     node_type: "array",
     shape: meta_json.shape,
-    data_type: "int8",
+    data_type: "int64",
     chunk_grid: {
       name: "regular",
       configuration: {

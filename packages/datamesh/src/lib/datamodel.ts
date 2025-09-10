@@ -203,23 +203,24 @@ const unravel = <T extends DataType>(
 
 const npdatetime_to_posixtime = (data: Chunk<DataType>, dtype: string) => {
   const [_, unit] = dtype.split("<M8");
-  let _data;
+  const _data = new Float64Array(data.data.length);
+  let _divisor = 1n;
   switch (unit) {
-    case "[s]":
-      _data = new Float64Array(data.data.map((d) => Number(d)));
-      break;
     case "[ms]":
-      _data = new Float64Array(data.data.map((d) => Number(d / 1000n)));
+      _divisor = 1000n;
       break;
     case "[us]":
-      _data = new Float64Array(data.data.map((d) => Number(d / 1000000n)));
+      _divisor = 1000000n;
       break;
     case "[ns]":
-      _data = new Float64Array(data.data.map((d) => Number(d / 1000000000n)));
+      _divisor = 1000000000n;
       break;
     default:
-      _data = data.data;
+      _divisor = 1n;
       break;
+  }
+  for (let i = 0; i < data.data.length; i++) {
+    _data[i] = Number(data.data[i] / _divisor);
   }
   return unravel(_data, data.shape, data.stride);
 };
