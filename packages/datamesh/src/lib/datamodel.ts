@@ -439,9 +439,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         } catch (e) {
           if (e.message.includes("<M8")) {
             //A python <M8 type fails to load
-            arr = await zarr_open_v2_datetime(root.resolve(item.path), {
-              kind: "array",
-            });
+            arr = await zarr_open_v2_datetime(root.resolve(item.path));
           } else {
             throw e;
           }

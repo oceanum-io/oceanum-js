@@ -66,7 +66,7 @@ See the [Sessions Guide](guides/sessions.md) for more detailed information on us
 
 ### Warning
 
-DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh) to learn more.
+DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. See the [Using a Proxy](guides/proxy.md) guide. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh) to learn more.
 
 ## Classes
 
@@ -85,6 +85,7 @@ DO NOT put your Datamesh token directly into browser code. For use in an SPA, yo
 ## Guides
 
 - [Using Sessions](guides/sessions.md)
+- [Using a Proxy](guides/proxy.md)
 
 ## Type Aliases
 

@@ -29,3 +29,24 @@ const data = await datamesh.query(query);
 
 [!WARNING]
 DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh) to learn more.
+
+## Using a Datamesh Proxy
+
+If you are building a browser application, we recommend using a reverse proxy to keep your Datamesh token secret and to simplify CORS. This package includes an example Cloudflare Worker you can deploy quickly and configure the `Connector` to use.
+
+- See: [`docs/proxy.md`](./docs/proxy.md)
+
+Quick setup:
+
+```ts
+import { Connector } from "@oceanum/datamesh";
+
+const PROXY_URL = "https://your-proxy.workers.dev"; // or your own domain
+
+const datamesh = new Connector("proxy", {
+  service: PROXY_URL,
+  gateway: PROXY_URL,
+});
+```
+
+Deploy the example Worker at `proxy/cloudflare/index.js` and add a secret `DATAMESH_TOKEN` with your Datamesh token in the Worker settings.
