@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, x-requested-with"
+    "Content-Type, Authorization, x-requested-with, x-datamesh-token"
   );
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
@@ -92,23 +92,25 @@ app.use(async (req, res) => {
 
     // Stream body
     if (response.body) {
-      response.body.pipeTo(
-        new WritableStream({
-          write(chunk) {
-            res.write(Buffer.from(chunk));
-          },
-          close() {
-            res.end();
-          },
-          abort(err) {
-            console.error("Proxy stream aborted:", err);
-            res.end();
-          },
-        })
-      ).catch((err) => {
-        console.error("Proxy piping error:", err);
-        res.end();
-      });
+      response.body
+        .pipeTo(
+          new WritableStream({
+            write(chunk) {
+              res.write(Buffer.from(chunk));
+            },
+            close() {
+              res.end();
+            },
+            abort(err) {
+              console.error("Proxy stream aborted:", err);
+              res.end();
+            },
+          })
+        )
+        .catch((err) => {
+          console.error("Proxy piping error:", err);
+          res.end();
+        });
     } else {
       res.end();
     }
