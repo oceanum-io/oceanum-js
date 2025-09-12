@@ -78,6 +78,11 @@ export default {
 4. (Optional) Change `DATAMESH` to point at a different upstream if needed.
 5. Deploy, and note your Worker URL, e.g. `https://your-proxy.workers.dev`.
 
+### Local testing tips
+
+- You can test the Worker locally with `wrangler dev`.
+- If you front the Worker with your own domain, ensure HTTPS is enabled and the domain is added to your app’s allowed origins if you use restrictive CORS elsewhere.
+
 ## Node/Express proxy (example)
 
 You can also run a simple Node/Express reverse proxy locally or deploy it to your own infrastructure.
@@ -126,3 +131,9 @@ Notes:
 
 - The constructor requires a `token`. When using the proxy, the token you pass here is ignored by the upstream because the proxy overwrites the `x-DATAMESH-TOKEN` header with the secret.
 - The connector will probe `GET /session` on the `gateway` to detect the API version. Ensure your proxy forwards that path.
+
+## Security considerations
+
+- Never commit your Datamesh token. Store it as a Worker Secret (or equivalent secret store) in your hosting platform.
+- Consider limiting origins or tightening CORS in production if your app does not need broad access.
+- Audit which headers you forward. The example purposely overwrites `x-DATAMESH-TOKEN` to prevent client-supplied values from leaking upstream.
