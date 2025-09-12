@@ -3,5 +3,6 @@
   "entryPoints": ["./src/index.ts"],
   "readme": "./README.md",
   "out": "../../docs/datamesh",
-  "mergeReadme": true
+  "mergeReadme": true,
+  "projectDocuments": ["proxy/guide.md"]
 }
