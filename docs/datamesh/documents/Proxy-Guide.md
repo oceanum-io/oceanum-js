@@ -1,6 +1,6 @@
 [**@oceanum/datamesh**](../README.md)
 
-***
+---
 
 [@oceanum/datamesh](../README.md) / Proxy Guide
 
@@ -111,7 +111,7 @@ Point both `service` and `gateway` to your proxy origin. The proxy injects the t
 ```ts
 import { Connector } from "@oceanum/datamesh";
 
-const PROXY_URL = "https://your-proxy.workers.dev"; // or your custom domain
+const PROXY_URL = "http://localhost:8787"; // or your custom domain
 
 const connector = new Connector("proxy", {
   service: PROXY_URL,
