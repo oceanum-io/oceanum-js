@@ -220,7 +220,10 @@ const npdatetime_to_posixtime = (data: Chunk<DataType>, dtype: string) => {
       break;
   }
   for (let i = 0; i < data.data.length; i++) {
-    _data[i] = Number(data.data[i] / _divisor);
+    // When dtype is numpy datetime (<M8...), underlying storage corresponds to int64
+    // so we can treat the chunk data as a BigInt64Array for conversion.
+    const v = (data.data as unknown as BigInt64Array)[i];
+    _data[i] = Number(v / _divisor);
   }
   return unravel(_data, data.shape, data.stride);
 };
@@ -346,9 +349,14 @@ export class DataVar<
       return _data.data as Data;
     } else if (this.arr.dtype == "bool") {
       return [..._data.data] as Data;
-    } else if (this.arr.attrs._dtype?.startsWith("<M8")) {
-      return npdatetime_to_posixtime(_data, this.arr.attrs._dtype) as Data;
     } else {
+      // Safely inspect potential numpy datetime dtype stored in attrs
+      const dtype = (this.arr.attrs as Record<string, unknown>)._dtype as
+        | string
+        | undefined;
+      if (dtype?.startsWith("<M8")) {
+        return npdatetime_to_posixtime(_data, dtype) as Data;
+      }
       return unravel(_data.data, _data.shape, _data.stride);
     }
   }
@@ -436,8 +444,12 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           arr = await zarr.open(root.resolve(item.path), {
             kind: "array",
           });
-        } catch (e) {
-          if (e.message.includes("<M8")) {
+        } catch (e: unknown) {
+          const message =
+            typeof e === "object" && e && "message" in e
+              ? String((e as { message?: unknown }).message)
+              : undefined;
+          if (message && message.includes("<M8")) {
             //A python <M8 type fails to load
             arr = await zarr_open_v2_datetime(root.resolve(item.path));
           } else {

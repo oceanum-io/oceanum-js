@@ -6,7 +6,7 @@
 
 # Interface: ZarrOptions
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:326](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L326)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:369](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L369)
 
 Represents a dataset with dimensions, data variables, and attributes.
 Implements the DatasetApi interface.
@@ -17,7 +17,7 @@ Implements the DatasetApi interface.
 
 > `optional` **chunks**: `string`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:328](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L328)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:371](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L371)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:328](https://github.com/ocea
 
 > `optional` **coordkeys**: [`Coordkeys`](../type-aliases/Coordkeys.md)
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:330](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L330)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:373](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L373)
 
 ***
 
@@ -33,7 +33,15 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:330](https://github.com/ocea
 
 > `optional` **downsample**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:329](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L329)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:372](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L372)
+
+***
+
+### nocache?
+
+> `optional` **nocache**: `boolean`
+
+Defined in: [packages/datamesh/src/lib/datamodel.ts:375](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L375)
 
 ***
 
@@ -41,7 +49,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:329](https://github.com/ocea
 
 > `optional` **parameters**: `Record`\<`string`, `string` \| `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:327](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L327)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:370](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L370)
 
 ***
 
@@ -49,4 +57,4 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:327](https://github.com/ocea
 
 > `optional` **timeout**: `number`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:331](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/datamodel.ts#L331)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:374](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/datamodel.ts#L374)

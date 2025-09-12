@@ -1,6 +1,8 @@
-# @oceanum/datamesh
+**@oceanum/datamesh**
 
-## Overview
+***
+
+# @oceanum/datamesh
 
 A typescript library for interacting with the Oceanum.io Datamesh.
 
@@ -29,44 +31,29 @@ const query = {
 const data = await datamesh.query(query);
 ```
 
-### Using Sessions
+[!WARNING]
+DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh) to learn more.
 
-Sessions provide a way to manage authentication and resource allocation for datamesh operations:
+## Using a Datamesh Proxy
 
-```javascript
+If you are building a browser application, we recommend using a reverse proxy to keep your Datamesh token secret and to simplify CORS. This package includes an example Cloudflare Worker you can deploy quickly and configure the `Connector` to use.
+
+- See: [`docs/proxy.md`](./docs/proxy.md)
+
+Quick setup:
+
+```ts
 import { Connector } from "@oceanum/datamesh";
 
-//Instantiate the Datamesh Connector with session support
-const datamesh = new Connector(process.env.DATAMESH_TOKEN, {
-  sessionDuration: 2 // Session will last for 2 hours
+const PROXY_URL = "https://your-proxy.workers.dev"; // or your own domain
+
+const datamesh = new Connector("proxy", {
+  service: PROXY_URL,
+  gateway: PROXY_URL,
 });
-
-//Create a session
-const session = await datamesh.createSession();
-
-try {
-  //Define a datamesh query
-  const query = {
-    datasource: "oceanum-sizing_giants",
-  };
-
-  //Get the data (session headers are automatically included)
-  const data = await datamesh.query(query);
-  
-  //Close the session when done
-  await datamesh.closeSession();
-} catch (error) {
-  console.error("Error:", error);
-  //Make sure to close the session even if there's an error
-  await datamesh.closeSession();
-}
 ```
 
-See the [Sessions Guide](guides/sessions.md) for more detailed information on using sessions.
-
-### Warning
-
-DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token. See the [Using a Proxy](guides/proxy.md) guide. Read the [library documentation](https://oceanum-js.oceanum.io/datamesh) to learn more.
+Deploy the example Worker at `proxy/cloudflare/index.js` and add a secret `DATAMESH_TOKEN` with your Datamesh token in the Worker settings.
 
 ## Classes
 
@@ -74,18 +61,12 @@ DO NOT put your Datamesh token directly into browser code. For use in an SPA, yo
 - [Dataset](classes/Dataset.md)
 - [DataVar](classes/DataVar.md)
 - [Query](classes/Query.md)
-- [Session](classes/Session.md)
 
 ## Interfaces
 
 - [GeoFilterFeature](interfaces/GeoFilterFeature.md)
 - [IQuery](interfaces/IQuery.md)
 - [ZarrOptions](interfaces/ZarrOptions.md)
-
-## Guides
-
-- [Using Sessions](guides/sessions.md)
-- [Using a Proxy](guides/proxy.md)
 
 ## Type Aliases
 
@@ -112,3 +93,7 @@ DO NOT put your Datamesh token directly into browser code. For use in an SPA, yo
 - [Schema](type-aliases/Schema.md)
 - [TimeFilter](type-aliases/TimeFilter.md)
 - [TimeFilterType](type-aliases/TimeFilterType.md)
+
+## Functions
+
+- [wkb\_to\_geojson](functions/wkb_to_geojson.md)

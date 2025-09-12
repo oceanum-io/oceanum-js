@@ -6,22 +6,15 @@
 
 # Class: Connector
 
-Datamesh connector class. All datamesh operations are methods of this class.
-
-## Table of Contents
-
-- [Constructors](#constructors)
-- [Properties](#properties)
-- [Accessors](#accessors)
-- [Methods](#methods)
-  - [Session Management](#session-management)
-  - [Data Operations](#data-operations)
+Defined in: [packages/datamesh/src/lib/connector.ts:19](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L19)
 
 ## Constructors
 
-### new Connector()
+### Constructor
 
-> **new Connector**(`token`, `options`?): [`Connector`](Connector.md)
+> **new Connector**(`token`, `options?`): `Connector`
+
+Defined in: [packages/datamesh/src/lib/connector.ts:45](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L45)
 
 Datamesh connector constructor
 
@@ -29,7 +22,7 @@ Datamesh connector constructor
 
 ##### token
 
-`string` = `process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN"`
+`string` = `...`
 
 Your datamesh access token. Defaults to environment variable DATAMESH_TOKEN is defined else as literal string "DATAMESH_TOKEN". DO NOT put your Datamesh token directly into public facing browser code.
 
@@ -41,7 +34,7 @@ Constructor options.
 
 `string`
 
-URL of gateway service. Defaults to "https://gateway.datamesh.oceanum.io".
+URL of gateway service. Defaults to "https://gateway.<datamesh_service_domain>".
 
 ###### jwtAuth?
 
@@ -69,7 +62,7 @@ The desired length of time for acquired datamesh sessions in hours. Will be 1 ho
 
 #### Returns
 
-[`Connector`](Connector.md)
+`Connector`
 
 #### Throws
 
@@ -77,9 +70,27 @@ The desired length of time for acquired datamesh sessions in hours. Will be 1 ho
 
 ## Properties
 
+### gateway?
+
+> `optional` **gateway**: `string`
+
+Defined in: [packages/datamesh/src/lib/connector.ts:30](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L30)
+
+***
+
+### service?
+
+> `optional` **service**: `string`
+
+Defined in: [packages/datamesh/src/lib/connector.ts:29](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L29)
+
+***
+
 ### LAZY\_LOAD\_SIZE
 
 > `static` **LAZY\_LOAD\_SIZE**: `number` = `1e8`
+
+Defined in: [packages/datamesh/src/lib/connector.ts:20](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L20)
 
 ## Accessors
 
@@ -88,6 +99,8 @@ The desired length of time for acquired datamesh sessions in hours. Will be 1 ho
 #### Get Signature
 
 > **get** **host**(): `string`
+
+Defined in: [packages/datamesh/src/lib/connector.ts:129](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L129)
 
 Get datamesh host.
 
@@ -99,119 +112,125 @@ The datamesh server host.
 
 ## Methods
 
-### Session Management
-
-#### createSession()
-
-> **createSession**(`options`): `Promise`\<[`Session`](Session.md)\>
-
-Create a new session.
-
-##### Parameters
-
-###### options
-
-`object` = `{}`
-
-Session options.
-
-####### duration?
-
-`number`
-
-The desired length of time for the session in hours. Defaults to the value set in the constructor or 1 hour.
-
-##### Returns
-
-`Promise`\<[`Session`](Session.md)\>
-
-A new session instance.
-
-***
-
-#### getSession()
-
-> **getSession**(): `Promise`\<[`Session`](Session.md)\>
-
-Get the current session or create a new one if none exists.
-
-##### Returns
-
-`Promise`\<[`Session`](Session.md)\>
-
-The current session.
-
-***
-
-#### closeSession()
+### closeSession()
 
 > **closeSession**(`finaliseWrite`): `Promise`\<`void`\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:382](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L382)
+
 Close the current session if one exists.
 
-##### Parameters
+#### Parameters
 
-###### finaliseWrite
+##### finaliseWrite
 
 `boolean` = `false`
 
 Whether to finalise any write operations. Defaults to false.
 
-##### Returns
+#### Returns
 
 `Promise`\<`void`\>
 
 A promise that resolves when the session is closed.
 
-### Data Operations
+***
 
-#### getDatasource()
+### createSession()
+
+> **createSession**(`options`): `Promise`\<`Session`\>
+
+Defined in: [packages/datamesh/src/lib/connector.ts:171](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L171)
+
+Create a new session.
+
+#### Parameters
+
+##### options
+
+Session options.
+
+###### duration?
+
+`number`
+
+The desired length of time for the session in hours. Defaults to the value set in the constructor or 1 hour.
+
+#### Returns
+
+`Promise`\<`Session`\>
+
+A new session instance.
+
+***
+
+### getDatasource()
 
 > **getDatasource**(`datasourceId`): `Promise`\<[`Datasource`](../type-aliases/Datasource.md)\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:349](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L349)
+
 Get a datasource instance from the datamesh.
 
-##### Parameters
+#### Parameters
 
-###### datasourceId
+##### datasourceId
 
 `string`
 
 Unique datasource ID.
 
-##### Returns
+#### Returns
 
 `Promise`\<[`Datasource`](../type-aliases/Datasource.md)\>
 
 The datasource instance.
 
-##### Throws
+#### Throws
 
 - If the datasource cannot be found or is not authorized.
 
 ***
 
-#### loadDatasource()
+### getSession()
+
+> **getSession**(): `Promise`\<`Session`\>
+
+Defined in: [packages/datamesh/src/lib/connector.ts:184](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L184)
+
+Get the current session or create a new one if none exists.
+
+#### Returns
+
+`Promise`\<`Session`\>
+
+The current session.
+
+***
+
+### loadDatasource()
 
 > **loadDatasource**(`datasourceId`, `parameters`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:367](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L367)
+
 Load a datasource into the work environment.
 
-##### Parameters
+#### Parameters
 
-###### datasourceId
+##### datasourceId
 
 `string`
 
 Unique datasource ID.
 
-###### parameters
+##### parameters
 
 `Record`\<`string`, `string` \| `number`\> = `{}`
 
 Additional datasource parameters.
 
-##### Returns
+#### Returns
 
 `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
 
@@ -219,31 +238,31 @@ The dataset.
 
 ***
 
-#### query()
+### query()
 
 > **query**(`query`, `options`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:298](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L298)
+
 Execute a query to the datamesh.
 
-##### Parameters
+#### Parameters
 
-###### query
+##### query
 
 [`IQuery`](../interfaces/IQuery.md)
 
 The query to execute.
 
-###### options
+##### options
 
-`object` = `{}`
-
-####### timeout?
+###### timeout?
 
 `number`
 
 Additional options for the query.
 
-##### Returns
+#### Returns
 
 `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
 
@@ -251,21 +270,23 @@ The response from the server.
 
 ***
 
-#### stageRequest()
+### stageRequest()
 
 > **stageRequest**(`query`): `Promise`\<`null` \| `Stage`\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:269](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L269)
+
 Stage a query to the datamesh.
 
-##### Parameters
+#### Parameters
 
-###### query
+##### query
 
 [`IQuery`](../interfaces/IQuery.md)
 
 The query to stage.
 
-##### Returns
+#### Returns
 
 `Promise`\<`null` \| `Stage`\>
 
@@ -273,13 +294,15 @@ The staged response.
 
 ***
 
-#### status()
+### status()
 
 > **status**(): `Promise`\<`boolean`\>
 
+Defined in: [packages/datamesh/src/lib/connector.ts:138](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/connector.ts#L138)
+
 Check the status of the metadata server.
 
-##### Returns
+#### Returns
 
 `Promise`\<`boolean`\>
 

@@ -6,7 +6,7 @@
 
 # Interface: GeoFilterFeature
 
-Defined in: [packages/datamesh/src/lib/query.ts:47](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/query.ts#L47)
+Defined in: [packages/datamesh/src/lib/query.ts:47](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/query.ts#L47)
 
 ## Extends
 
@@ -66,7 +66,7 @@ https://tools.ietf.org/html/rfc7946#section-3.2.
 
 > `optional` **properties**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/4449d4b3fac355094039d4392e96edf8345b7153/packages/datamesh/src/lib/query.ts#L48)
+Defined in: [packages/datamesh/src/lib/query.ts:48](https://github.com/oceanum-io/oceanum-js/blob/de54745f7642df8f064f1c2211b399c4854806ac/packages/datamesh/src/lib/query.ts#L48)
 
 ***
 

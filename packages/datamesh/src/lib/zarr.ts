@@ -6,8 +6,8 @@ import {
   UseStore,
 } from "idb-keyval";
 import hash from "object-hash";
-import { AsyncReadable, AsyncMutable, Readable } from "@zarrita/storage";
-import { Array as ZArray, Location, Attributes } from "@zarrita/core";
+import { AsyncReadable, AsyncMutable, Readable, AbsolutePath } from "@zarrita/storage";
+import { Array as ZArray, Location, ArrayMetadata, DataType } from "@zarrita/core";
 
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
@@ -174,7 +174,10 @@ export class IDBStore implements AsyncMutable {
   }
 }
 
-const load_meta = async (location: Location<Store>, item = ".zarray") => {
+const load_meta = async <S extends Readable>(
+  location: Location<S>,
+  item = ".zarray"
+) => {
   const { path } = location.resolve(item);
   const meta = await location.store.get(path);
   if (!meta) {
@@ -208,7 +211,7 @@ export async function zarr_open_v2_datetime<Store extends Readable>(
     const { id, ...configuration } = meta.compressor;
     codecs.push({ name: id, configuration });
   }
-  const v3_metadata = {
+  const v3_metadata: ArrayMetadata<DataType> = {
     zarr_format: 3,
     node_type: "array",
     shape: meta.shape,

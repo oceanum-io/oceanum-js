@@ -12,7 +12,7 @@ export class Session {
   creationTime!: Date;
   endTime!: Date;
   write!: boolean;
-  verified: boolean = false;
+  verified = false;
   private _connection!: any;
 
   /**
@@ -55,9 +55,11 @@ export class Session {
     try {
       const headers = { ...connection._authHeaders };
       headers["Cache-Control"] = "no-store";
-      const params = { duration: options.duration || 1 };
+      const qs = new URLSearchParams({
+        duration: String(options.duration ?? 1),
+      });
       const response = await fetch(
-        `${connection._gateway}/session/?` + new URLSearchParams(params),
+        `${connection._gateway}/session/?${qs.toString()}`,
         { headers }
       );
 
@@ -113,7 +115,7 @@ export class Session {
    * @param finaliseWrite - Whether to finalise any write operations. Defaults to false.
    * @throws {Error} - If the session cannot be closed and finaliseWrite is true.
    */
-  async close(finaliseWrite: boolean = false): Promise<void> {
+  async close(finaliseWrite = false): Promise<void> {
     // Back-compatibility with beta version (ignoring)
     if (!this._connection._isV1) {
       return;
