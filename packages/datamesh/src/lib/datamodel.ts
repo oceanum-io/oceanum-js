@@ -432,8 +432,8 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       parameters: options.parameters,
       timeout: options.timeout,
       nocache: options.nocache,
-    }) as AsyncReadable;
-    const _zarr = await zarr.withConsolidated(store);
+    });
+    const _zarr = await zarr.withConsolidated(store as AsyncReadable);
     const root = await zarr.open(_zarr, { kind: "group" });
     const vars = {} as Record<string, DataVar<DataType, HttpZarr>>;
     const dims = {} as Record<string, number>;
@@ -479,6 +479,10 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     }
     const coords = (JSON.parse(root.attrs["_coordinates"] as string) ||
       {}) as Coordkeys;
+    const cache_hash = root.attrs["_datamesh_cache_hash"] as string | null;
+    if (cache_hash) {
+      store.set_cache_hash(cache_hash);
+    }
     return new Dataset<HttpZarr>(
       dims,
       vars,

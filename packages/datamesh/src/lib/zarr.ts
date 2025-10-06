@@ -38,28 +38,33 @@ export class CachedHTTPStore implements AsyncReadable {
     // Create a copy of the auth headers to avoid modifying the original
     // Important: We need to preserve all auth headers, including session headers
     const headers = { ...authHeaders };
-
-    // Add parameters, chunks, and downsample as headers if provided
-    if (options.parameters)
-      headers["x-parameters"] = JSON.stringify(options.parameters);
-    if (options.chunks) headers["x-chunks"] = options.chunks;
-    if (options.downsample)
-      headers["x-downsample"] = JSON.stringify(options.downsample);
-    headers["x-filtered"] = "True";
-
+    
     this.params = {};
+    // Add parameters, chunks, and downsample as headers if provided
+    if (options.parameters) {
+      headers["x-parameters"] = JSON.stringify(options.parameters);
+      this.params['parameters']= JSON.stringify(options.parameters);
+    }
+    if (options.chunks) {
+      headers["x-chunks"] = JSON.stringify(options.chunks);
+      this.params["chunks"] = JSON.stringify(options.chunks);
+    }
+    if (options.downsample) {
+      headers["x-downsample"] = JSON.stringify(options.downsample);
+      this.params["downsample"] = JSON.stringify(options.downsample);
+    }
+    
+    headers["x-filtered"] = "True";
     if (authHeaders["x-datamesh-auth"]) {
       this.params["auth"] = authHeaders["x-datamesh-auth"];
     }
     if (authHeaders["x-datamesh-sig"]) {
       this.params["sig"] = authHeaders["x-datamesh-sig"];
     }
-
     this.fetchOptions = { headers };
-
     this.url = root;
     const datasource = root.split("/").pop();
-
+    
     // Determine if caching should be used
     if (options.nocache || typeof window === "undefined") {
       this.cache = undefined;
@@ -76,6 +81,14 @@ export class CachedHTTPStore implements AsyncReadable {
       downsample: options.downsample,
     });
     this.timeout = options.timeout || 60000;
+  }
+
+  set_cache_hash(cache_hash: string) {
+    // Amend the cache prefix with the cache hash to invalidate old cache entries
+    console.log("Setting cache hash:", cache_hash);
+    const cache_prefix = this.cache_prefix;
+    this.cache_prefix = hash({ cache_prefix, cache_hash });
+    this.params = { ...this.params, cache: cache_hash };
   }
 
   async get(
