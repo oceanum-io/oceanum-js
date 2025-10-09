@@ -98,7 +98,11 @@ export class CachedHTTPStore implements AsyncReadable {
   ): Promise<Uint8Array | undefined> {
     const key = `${this.cache_prefix}${item}`;
     let data = null;
-    if (this.cache) {
+    const not_time = !item.split('/')[1].includes('time');
+    const not_metadata = !(item.endsWith(".zmetadata") || item.endsWith(".zattrs"));
+    const should_cache = this.cache && not_time && not_metadata;
+    console.log("Should cache:", should_cache, item, not_time, not_metadata);
+    if (should_cache) {
       data = await get_cache(key, this.cache);
       if (data) delete this._pending[key];
       if (this._pending[key]) {
@@ -135,21 +139,21 @@ export class CachedHTTPStore implements AsyncReadable {
 
         if (response.status === 404) {
           // Item is not found
-          if (this.cache) await del_cache(key, this.cache);
+          if (should_cache) await del_cache(key, this.cache);
           return undefined;
         }
         if (response.status >= 400) {
           throw new Error(`HTTP error: ${response.status}`);
         }
         data = new Uint8Array(await response.arrayBuffer());
-        if (this.cache) await set_cache(key, data, this.cache);
+        if (should_cache) await set_cache(key, data, this.cache);
       } catch (e) {
         console.debug("Zarr retry:" + key);
         if (retry < this.timeout / 200) {
           delete this._pending[key];
           return await this.get(item, options, retry + 200);
         }
-        if (this.cache) await del_cache(key, this.cache);
+        if (should_cache) await del_cache(key, this.cache);
         console.error(e);
         return undefined;
       } finally {

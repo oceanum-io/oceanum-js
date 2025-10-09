@@ -341,6 +341,7 @@ export class DataVar<
           return i;
         }
       });
+    
     const _data: Chunk<DType> | Scalar = await get(
       this.arr as zarr.Array<DType, AsyncReadable>,
       _index as SliceDef
