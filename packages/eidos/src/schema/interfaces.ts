@@ -9,12 +9,14 @@
  * npx nx run eidos:generate-types
  */
 
+const 07Constant = "0.7" as const;
 const WorldNodeType = "world" as const;
 const PlotNodeType = "plot" as const;
 const DocumentNodeType = "document" as const;
 const GridNodeType = "grid" as const;
 const MenuNodeType = "menu" as const;
 const WorldlayerNodeType = "worldlayer" as const;
+const ControlgroupNodeType = "controlgroup" as const;
 
 /**
  * EIDOS specification
@@ -24,7 +26,7 @@ export interface EidosSpec {
   /**
    * Version of EIDOS
    */
-  version?: string;
+  version?: 07Constant;
   /**
    * Unique identifier for this specification. Must be URL-safe using only lowercase letters, numbers, hyphens, and underscores. This ID is used for referencing the specification in URLs, file systems, and databases. It should be descriptive but concise.
    * 
@@ -69,8 +71,8 @@ export interface EidosSpec {
    * [{"id":"sig-wave-height-trki","dataType":"oceanumDatamesh","dataSpec":{"datasource":"oceanum_wave_trki_era5_v1_grid","variables":["hs","tps"],"geofilter":{"type":"feature","geom":{"type":"Feature","geometry":{"type":"Point","coordinates":[174.3,-38.5]}}},"timefilter":{"times":["2018-01-01 00:00:00Z","2019-01-01 00:00:00Z"]}}}]
    */
   data?: EidosData[];
-  root: Node;
-  panels?: Panel[];
+  root: World | Plot | Document | Grid | Menu;
+  panels?: EidosPanel[];
 }
 
 /**
@@ -100,12 +102,6 @@ export interface PlotSpec {
   config?: object;
   [key: string]: any;
 }
-
-/**
- * Node
- * Spec for node (world, plot, document, grid or menu)
- */
-export type Node = World | Plot | Document | Grid | Menu;
 
 /**
  * Eidos theme
@@ -145,41 +141,6 @@ export interface EidosData {
 }
 
 /**
- * Spec for panel node (world, plot, document, grid or menu)
- */
-export interface Panel {
-  /**
-   * Unique ID of the panel
-   */
-  id: string;
-  node: Node;
-  /**
-   * event object that triggers panel
-   */
-  trigger?: object;
-  /**
-   * If true, this panel is exclusive and will close other panels when opened
-   */
-  exclusive?: boolean;
-  /**
-   * Height of panel (CSS string or pixels)
-   */
-  height?: CssSpec;
-  /**
-   * Width of panel (CSS string or pixels)
-   */
-  width?: CssSpec;
-  /**
-   * Location of panel relative to content
-   */
-  position?: Position;
-  /**
-   * Title of panel
-   */
-  title?: string;
-}
-
-/**
  * World
  * Interactive 2D/3D map node for displaying geospatial and oceanic data. World nodes can contain multiple data layers (gridded data, features, tracks, etc.) and provide map controls, time navigation, and spatial interaction capabilities. Ideal for visualizing spatial data, environmental conditions, and geographic features.
  */
@@ -198,9 +159,9 @@ export interface World {
    */
   nodeType?: WorldNodeType;
   /**
-   * Array of world layers to display on this map. Each layer represents a different data visualization (e.g., gridded data, vector features, tracks, 3D objects). Layers are rendered in order with later layers appearing on top.
+   * Array of world layers and controls to display on this map. Each layer represents a different data visualization (e.g., gridded data, vector features, tracks, 3D objects). Layers are rendered in order with later layers appearing on top.
    */
-  children?: Worldlayer[];
+  children?: Worldlayer | ControlGroup[];
   /**
    * Base map layer providing the background cartography. Can be a preset like 'oceanum' or 'terrain', or a custom tile layer configuration.
    */
@@ -316,66 +277,42 @@ export interface Menu {
 }
 
 /**
+ * Eidos panel
+ * Spec for panel node (world, plot, document, grid or menu). A panel node is displayed as a modal window on top of the parent element. Opening can be triggered by an event.
+ */
+export interface EidosPanel {
+  /**
+   * Unique ID of the panel
+   */
+  id: string;
+  node: World | Plot | Document | Grid | Menu;
+  /**
+   * event object that triggers panel
+   */
+  trigger?: object;
+  /**
+   * If true, this panel is exclusive and will close other panels when opened
+   */
+  exclusive?: boolean;
+  height?: Geojson;
+  width?: Geojson;
+  position?: Geojson;
+  /**
+   * Title of panel
+   */
+  title?: string;
+}
+
+/**
  * Eidos style
- * Style properties
+ * Style properties organized by category
  */
 export interface EidosStyle {
-  /**
-   * Primary color of the view
-   */
-  primaryColor?: string;
-  /**
-   * Secondary color of the view
-   */
-  secondaryColor?: string;
-  /**
-   * Accent color of the view
-   */
-  accentColor?: string;
-  /**
-   * Background color of the view
-   */
-  backgroundColor?: string;
-  /**
-   * Text color of the view
-   */
-  textColor?: string;
-  /**
-   * Font family of the view
-   */
-  fontFamily?: string;
-  /**
-   * Font size of the view
-   */
-  fontSize?: string;
-  /**
-   * Font weight of the text
-   */
-  textFontWeight?: number;
-  /**
-   * Line height of the text
-   */
-  textLineHeight?: number;
-  /**
-   * Text alignment of the view
-   */
-  textAlign?: string;
-  /**
-   * Width of the border
-   */
-  borderWidth?: string;
-  /**
-   * Style of the border
-   */
-  borderStyle?: string;
-  /**
-   * Radius of the border
-   */
-  borderRadius?: string;
-  /**
-   * Size of the title
-   */
-  titleSize?: string;
+  color?: ColorStyle;
+  text?: TextStyle;
+  control?: ControlStyle;
+  panel?: PanelStyle;
+  grid?: GridStyle;
 }
 
 /**
@@ -499,19 +436,6 @@ export interface Zarr {
 }
 
 /**
- * CSS spec
- * CSS string or pixels as integer or null
- */
-export type CssSpec = number | string | null;
-
-export interface Position {
-  top?: CssSpec;
-  left?: CssSpec;
-  bottom?: CssSpec;
-  right?: CssSpec;
-}
-
-/**
  * WorldLayer
  * A data layer displayed on a world map. World layers visualize different types of geospatial data including gridded datasets (like temperature, wave height), vector features (points, lines, polygons), tracks (moving objects), and 3D scene elements.
  */
@@ -573,6 +497,26 @@ export interface Worldlayer {
    * Time selection criteria for layer
    */
   timeSelect?: Timeselect;
+}
+
+/**
+ * Control group
+ */
+export interface ControlGroup {
+  /**
+   * Control group id
+   */
+  id: string;
+  nodeType?: ControlgroupNodeType;
+  orientation?: "horizontal" | "vertical";
+  /**
+   * Control list
+   */
+  children: Control[];
+  /**
+   * Visibility of control group
+   */
+  visible?: boolean;
 }
 
 export type Baselayer = Baselayerpreset | object;
@@ -641,25 +585,6 @@ export interface LayerSelector {
 }
 
 /**
- * Control group
- */
-export interface ControlGroup {
-  /**
-   * Control group id
-   */
-  id: string;
-  orientation?: "horizontal" | "vertical";
-  /**
-   * Control list
-   */
-  controls: Control[];
-  /**
-   * Visibility of control group
-   */
-  visible?: boolean;
-}
-
-/**
  * Document style
  * Document style overrides
  */
@@ -696,6 +621,197 @@ export interface DocumentStyle {
    * Justify content
    */
   justifyContent?: "left" | "center" | "right";
+}
+
+/**
+ * Color style
+ * Color palette configuration
+ */
+export interface ColorStyle {
+  /**
+   * Primary color of the view
+   */
+  primary?: string;
+  /**
+   * Secondary color of the view
+   */
+  secondary?: string;
+  /**
+   * Accent color of the view
+   */
+  accent?: string;
+  /**
+   * Background color of the view
+   */
+  background?: string;
+}
+
+/**
+ * Text style
+ * Typography configuration
+ */
+export interface TextStyle {
+  /**
+   * Text color of the view
+   */
+  color?: string;
+  /**
+   * Font family of the view
+   */
+  fontFamily?: string;
+  /**
+   * Font size of the text
+   */
+  fontSize?: any;
+  /**
+   * Font weight of the text
+   */
+  fontWeight?: string;
+  /**
+   * Line height of the text
+   */
+  lineHeight?: any;
+  /**
+   * Text alignment of the view
+   */
+  align?: string;
+  /**
+   * Size of the title
+   */
+  titleSize?: any;
+  /**
+   * Size of the subtitle
+   */
+  subtitleSize?: any;
+  /**
+   * Size of the heading
+   */
+  headingSize?: any;
+}
+
+/**
+ * Control style
+ * Control element styling
+ */
+export interface ControlStyle {
+  /**
+   * Opacity of control elements
+   */
+  opacity?: string;
+  /**
+   * Border color of control elements
+   */
+  borderColor?: string;
+  /**
+   * Background color of control elements
+   */
+  backgroundColor?: string;
+  /**
+   * Text color of control elements
+   */
+  textColor?: string;
+  /**
+   * Border width of control elements
+   */
+  borderWidth?: any;
+  /**
+   * Border style of control elements
+   */
+  borderStyle?: string;
+  /**
+   * Border radius of control elements
+   */
+  borderRadius?: any;
+  /**
+   * Backdrop filter effect for controls
+   */
+  backdropFilter?: string;
+  /**
+   * Box shadow effect for controls
+   */
+  boxShadow?: string;
+  /**
+   * Inset box shadow effect for controls
+   */
+  boxShadowInset?: string;
+}
+
+/**
+ * Panel style
+ * Panel element styling
+ */
+export interface PanelStyle {
+  /**
+   * Opacity of panel elements
+   */
+  opacity?: string;
+  /**
+   * Border color of panel elements
+   */
+  borderColor?: string;
+  /**
+   * Background color of panel elements
+   */
+  backgroundColor?: string;
+  /**
+   * Text color of panel elements
+   */
+  textColor?: string;
+  /**
+   * Border width of panel elements
+   */
+  borderWidth?: any;
+  /**
+   * Border style of panel elements
+   */
+  borderStyle?: string;
+  /**
+   * Border radius of panel elements
+   */
+  borderRadius?: any;
+  /**
+   * Backdrop filter effect for panels
+   */
+  backdropFilter?: string;
+  /**
+   * Box shadow effect for panels
+   */
+  boxShadow?: string;
+  /**
+   * Inset box shadow effect for panels
+   */
+  boxShadowInset?: string;
+}
+
+/**
+ * Grid style
+ * Grid element styling
+ */
+export interface GridStyle {
+  /**
+   * Border width of grid elements
+   */
+  borderWidth?: any;
+  /**
+   * Border radius of grid elements
+   */
+  borderRadius?: any;
+  /**
+   * Border style of grid elements
+   */
+  borderStyle?: string;
+  /**
+   * Border color of grid elements
+   */
+  borderColor?: string;
+  /**
+   * Padding of grid elements
+   */
+  padding?: any;
+  /**
+   * Margin of grid elements
+   */
+  margin?: any;
 }
 
 /**
@@ -815,11 +931,6 @@ export interface Timeselect {
 }
 
 /**
- * Base layer type
- */
-export type Baselayerpreset = "oceanum" | "terrain";
-
-/**
  * Control
  * Control properties
  */
@@ -827,7 +938,7 @@ export interface Control {
   /**
    * Control type
    */
-  type: "points" | "polygon" | "bbox" | "radius" | "drop" | "measure";
+  nodeType: "points" | "polygon" | "bbox" | "radius" | "drop" | "measure";
   /**
    * Control id
    */
@@ -854,6 +965,11 @@ export interface Control {
   tooltip?: string;
   config?: object;
 }
+
+/**
+ * Base layer type
+ */
+export type Baselayerpreset = "oceanum" | "terrain";
 
 /**
  * ResampleType
