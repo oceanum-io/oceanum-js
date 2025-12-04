@@ -36,7 +36,7 @@ export class Session {
       session.user = "dummy_user";
       session.creationTime = new Date();
       session.endTime = new Date(
-        Date.now() + (options.duration || 1) * 60 * 60 * 1000
+        Date.now() + (options.duration || 3600) * 1000
       );
       session.write = false;
       session.verified = false;
@@ -56,7 +56,7 @@ export class Session {
       const headers = { ...connection._authHeaders };
       headers["Cache-Control"] = "no-store";
       const qs = new URLSearchParams({
-        duration: String(options.duration ?? 1),
+        duration: String(options.duration ?? 3600),
       });
       const response = await fetch(
         `${connection._gateway}/session/?${qs.toString()}`,

@@ -170,7 +170,7 @@ export class Connector {
    */
   async createSession(options: { duration?: number } = {}): Promise<Session> {
     const sessionOptions = {
-      duration: options.duration || this._sessionParams.duration || 1,
+      duration: options.duration || this._sessionParams.duration || 3600,
     };
     this._currentSession = await Session.acquire(this, sessionOptions);
     return this._currentSession;

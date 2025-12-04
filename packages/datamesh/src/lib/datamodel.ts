@@ -18,6 +18,7 @@ import { Buffer } from "buffer/index";
 import { CachedHTTPStore, zarr_open_v2_datetime } from "./zarr";
 import { Schema, Coordkeys } from "./datasource";
 import { measureTime } from "./observe";
+import { hasCFTimeUnits, cftimeToUnixSeconds } from "./cftime";
 
 export type ATypedArray =
   | Int8Array
@@ -228,6 +229,25 @@ const npdatetime_to_posixtime = (data: Chunk<DataType>, dtype: string) => {
   return unravel(_data, data.shape, data.stride);
 };
 
+/**
+ * Convert CF time chunk to Unix seconds, with fallback for unsupported calendars.
+ */
+const cftime_to_posixtime = (
+  data: Chunk<DataType>,
+  units: string,
+  calendar = "standard"
+) => {
+  const converted = cftimeToUnixSeconds(data.data, units, calendar);
+  if (converted === null) {
+    console.warn(
+      `Unsupported calendar "${calendar}" for cftime conversion. ` +
+        `Returning raw values. Supported: standard, gregorian, proleptic_gregorian`
+    );
+    return unravel(data.data, data.shape, data.stride);
+  }
+  return unravel(converted, data.shape, data.stride);
+};
+
 const flatten = (
   data: Record<string, DataVariable>,
   dims: Record<string, number>,
@@ -350,13 +370,21 @@ export class DataVar<
     } else if (this.arr.dtype == "bool") {
       return [..._data.data] as Data;
     } else {
-      // Safely inspect potential numpy datetime dtype stored in attrs
-      const dtype = (this.arr.attrs as Record<string, unknown>)._dtype as
-        | string
-        | undefined;
+      const attrs = this.arr.attrs as Record<string, unknown>;
+
+      // Check for numpy datetime dtype stored in attrs
+      const dtype = attrs._dtype as string | undefined;
       if (dtype?.startsWith("<M8")) {
         return npdatetime_to_posixtime(_data, dtype) as Data;
       }
+
+      // Check for CF time units (e.g., "days since 1970-01-01")
+      if (hasCFTimeUnits(attrs)) {
+        const units = attrs.units as string;
+        const calendar = (attrs.calendar as string) || "standard";
+        return cftime_to_posixtime(_data, units, calendar) as Data;
+      }
+
       return unravel(_data.data, _data.shape, _data.stride);
     }
   }
@@ -477,8 +505,9 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           });
       }
     }
-    const coords = (JSON.parse(root.attrs["_coordinates"] as string) ||
-      {}) as Coordkeys;
+    const coords = (JSON.parse(
+      (root.attrs["_coordinates"] || "{}") as string
+    ) || {}) as Coordkeys;
     return new Dataset<HttpZarr>(
       dims,
       vars,

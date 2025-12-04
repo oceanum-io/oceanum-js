@@ -6,8 +6,43 @@ import {
   UseStore,
 } from "idb-keyval";
 import hash from "object-hash";
-import { AsyncReadable, AsyncMutable, Readable, AbsolutePath } from "@zarrita/storage";
-import { Array as ZArray, Location, ArrayMetadata, DataType } from "@zarrita/core";
+import { decode } from "@msgpack/msgpack";
+import {
+  AsyncReadable,
+  AsyncMutable,
+  Readable,
+  AbsolutePath,
+} from "@zarrita/storage";
+import {
+  Array as ZArray,
+  Location,
+  ArrayMetadata,
+  DataType,
+  registry,
+} from "@zarrita/core";
+
+registry.set("msgpack2", async () => ({
+  kind: "array_to_bytes",
+  fromConfig: (_config, meta) => {
+    return {
+      kind: "array_to_bytes",
+      async encode(_data: any): Promise<Uint8Array> {
+        throw new Error("msgpack2 encode not implemented");
+      },
+      async decode(data: Uint8Array): Promise<any> {
+        const decoded = decode(data);
+        const { shape } = meta;
+        const stride = new Array(shape.length);
+        let s = 1;
+        for (let i = shape.length - 1; i >= 0; i--) {
+          stride[i] = s;
+          s *= shape[i];
+        }
+        return { data: decoded, shape, stride };
+      },
+    };
+  },
+}));
 
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
