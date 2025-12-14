@@ -63,6 +63,71 @@ export type DataVariable = {
    * Data associated with the variable.
    */
   data?: Data;
+  /**
+   * Chunk sizes for the variable dimensions.
+   * If not specified, uses the global chunk configuration or defaults to the full shape.
+   */
+  chunks?: number[];
+};
+
+/**
+ * Configuration for chunking when writing zarr data.
+ */
+export type ChunkConfig = {
+  /**
+   * Global chunk sizes by dimension name.
+   * These apply to all variables unless overridden per-variable.
+   */
+  dimensions?: Record<string, number>;
+  /**
+   * Per-variable chunk size overrides.
+   * Keys are variable names, values are arrays of chunk sizes matching the variable dimensions.
+   */
+  variables?: Record<string, number[]>;
+};
+
+/**
+ * Options for writing dataset to zarr format.
+ */
+export type ZarrWriteOptions = {
+  /**
+   * Chunk configuration for the output zarr.
+   */
+  chunks?: ChunkConfig;
+  /**
+   * Whether to consolidate metadata (zarr v2 compatible).
+   */
+  consolidated?: boolean;
+};
+
+/**
+ * Computes chunk sizes for a variable based on the chunk configuration.
+ * Priority: per-variable chunks > global dimension chunks > variable-defined chunks > full shape
+ */
+const computeChunks = (
+  varid: string,
+  dims: string[],
+  shape: number[],
+  chunkConfig?: ChunkConfig,
+  variableChunks?: number[]
+): number[] => {
+  // Check for per-variable override first
+  if (chunkConfig?.variables?.[varid]) {
+    return chunkConfig.variables[varid];
+  }
+
+  // Use variable-defined chunks if provided
+  if (variableChunks) {
+    return variableChunks;
+  }
+
+  // Apply global dimension-based chunks
+  if (chunkConfig?.dimensions) {
+    return dims.map((dim, i) => chunkConfig.dimensions?.[dim] ?? shape[i]);
+  }
+
+  // Default to full shape (single chunk)
+  return shape;
 };
 
 export const wkb_to_geojson = (wkb: string) => {
@@ -628,10 +693,13 @@ export class Dataset<S extends HttpZarr | TempZarr> {
   /**
    * Initializes an in memory Dataset instance from a data object.
    * @param datasource - An object containing id, dimensions, data variables, and attributes.
+   * @param coordkeys - Optional coordinate key mappings.
+   * @param chunkConfig - Optional chunk configuration for global and per-variable chunking.
    */
   static async init(
     datasource: Schema,
-    coordkeys?: Coordkeys
+    coordkeys?: Coordkeys,
+    chunkConfig?: ChunkConfig
   ): Promise<Dataset<TempZarr>> {
     const root = (await zarr.create(new Map(), {
       attributes: { created: new Date() },
@@ -644,14 +712,23 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       root
     );
     for (const k in datasource.variables) {
-      const { dimensions, attributes, data, dtype }: DataVariable =
+      const { dimensions, attributes, data, dtype, chunks }: DataVariable =
         datasource.variables[k];
+      const shape = getShape(data);
+      const computedChunks = computeChunks(
+        k,
+        dimensions,
+        shape,
+        chunkConfig,
+        chunks
+      );
       await ds.assign(
         k,
         dimensions,
         data as Data,
         attributes,
-        dtype && (dtype as string) === "string" ? "v2:object" : dtype
+        dtype && (dtype as string) === "string" ? "v2:object" : dtype,
+        computedChunks
       );
     }
     return ds;
@@ -845,5 +922,105 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       );
     }
     this.variables[varid] = new DataVar(varid, dims, attrs || {}, arr);
+  }
+
+  /**
+   * Exports the dataset to a zarr format represented as a Map of path-to-data.
+   * This can be used for serialization or writing to a zarr store.
+   *
+   * @param options - Optional configuration for the zarr output.
+   * @returns A promise that resolves to a Map containing the zarr store data.
+   *
+   * @example
+   * ```typescript
+   * const zarrStore = await dataset.toZarr();
+   * // zarrStore is a Map<string, Uint8Array>
+   * ```
+   */
+  async toZarr(options?: ZarrWriteOptions): Promise<Map<string, Uint8Array>> {
+    const chunkConfig = options?.chunks;
+
+    // Create a new zarr group with consolidated metadata support
+    const store = new Map<string, Uint8Array>();
+    const root = await zarr.create(store as Mutable, {
+      attributes: {
+        ...this.attributes,
+        _coordinates: JSON.stringify(this.coordkeys),
+      },
+    });
+
+    // Write each variable to the store
+    for (const varid in this.variables) {
+      const variable = this.variables[varid];
+      const data = await variable.get();
+      const shape = getShape(data);
+      const dims = variable.dimensions;
+
+      // Compute chunks based on configuration
+      // For export, only use existing variable chunks as fallback if no config provided
+      const chunks = computeChunks(
+        varid,
+        dims,
+        shape,
+        chunkConfig,
+        chunkConfig ? undefined : (variable.arr.chunks as number[] | undefined)
+      );
+
+      // Create the array with proper chunking
+      const dtype = variable.arr.dtype;
+      const arr = await zarr.create(root.resolve(varid) as Location<Mutable>, {
+        shape,
+        data_type: dtype,
+        chunk_shape: chunks,
+        codecs:
+          dtype === "v2:object"
+            ? [{ name: "json2" } as CodecMetadata]
+            : undefined,
+        attributes: {
+          ...variable.attributes,
+          _ARRAY_DIMENSIONS: dims,
+        },
+      });
+
+      // Write the data
+      let _data = ravel(data);
+      if (_data && _data.length > 0) {
+        if (dtype === "bool") {
+          _data = new BoolArray(_data);
+        } else if (Array.isArray(_data) && dtype === "float32") {
+          _data = Float32Array.from(_data, (n) => (n == null ? NaN : n));
+        } else if (Array.isArray(_data) && dtype === "float64") {
+          _data = Float64Array.from(_data, (n) => (n == null ? NaN : n));
+        } else if (Array.isArray(_data) && dtype === "int8") {
+          _data = Int8Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "int16") {
+          _data = Int16Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "int32") {
+          _data = Int32Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "int64") {
+          _data = BigInt64Array.from(_data.map((d) => BigInt(d)));
+        } else if (Array.isArray(_data) && dtype === "uint8") {
+          _data = Uint8Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "uint16") {
+          _data = Uint16Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "uint32") {
+          _data = Uint32Array.from(_data);
+        } else if (Array.isArray(_data) && dtype === "uint64") {
+          _data = BigUint64Array.from(_data.map((d) => BigInt(d)));
+        }
+
+        await set(
+          arr,
+          shape.map(() => null),
+          {
+            data: _data,
+            shape: shape,
+            stride: get_strides(shape),
+          }
+        );
+      }
+    }
+
+    return store;
   }
 }
