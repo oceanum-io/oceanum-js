@@ -108,7 +108,6 @@ export class CachedHTTPStore implements AsyncReadable {
     this.fetchOptions = { headers };
 
     this.url = root;
-    const datasource = root.split("/").pop();
 
     // Determine if caching should be used
     // ttl === 0 means no caching, nocache is deprecated
