@@ -140,7 +140,7 @@ const isArray = (data?: Data) => {
   return data && (Array.isArray(data) || ArrayBuffer.isView(data));
 };
 
-const getShape = (a: Data) => {
+const getShape = (a: Data | undefined) => {
   const dim = [] as number[];
   if (!isArray(a)) return dim;
   for (;;) {
@@ -302,7 +302,11 @@ const cftime_to_posixtime = (
   units: string,
   calendar = "standard"
 ) => {
-  const converted = cftimeToUnixSeconds(data.data, units, calendar);
+  const converted = cftimeToUnixSeconds(
+    data.data as ArrayLike<number | bigint>,
+    units,
+    calendar
+  );
   if (converted === null) {
     console.warn(
       `Unsupported calendar "${calendar}" for cftime conversion. ` +
@@ -311,6 +315,67 @@ const cftime_to_posixtime = (
     return unravel(data.data, data.shape, data.stride);
   }
   return unravel(converted, data.shape, data.stride);
+};
+
+/**
+ * Check if a fill_value represents NaN.
+ * Zarr v2 can store NaN as string "NaN" or null for floats.
+ * Zarr v3 uses "nan" string.
+ */
+const isNaNFillValue = (fillValue: unknown): boolean => {
+  if (fillValue === null || fillValue === undefined) return true;
+  if (typeof fillValue === "string") {
+    const lower = fillValue.toLowerCase();
+    return lower === "nan" || lower === "-nan" || lower === "+nan";
+  }
+  if (typeof fillValue === "number") {
+    return Number.isNaN(fillValue);
+  }
+  return false;
+};
+
+/**
+ * Normalize fill_value to JavaScript NaN for float arrays.
+ * This handles sentinel values (like -9999) and ensures consistent NaN representation.
+ *
+ * @param data - The typed array data
+ * @param fillValue - The fill_value from zarr metadata
+ * @param dtype - The data type string
+ * @returns A new typed array with fill values replaced by NaN, or the original if no normalization needed
+ */
+const normalizeFillValue = <T extends DataType>(
+  data: TypedArray<T>,
+  fillValue: unknown,
+  dtype: string
+): TypedArray<T> => {
+  // Only process float types
+  if (!dtype.startsWith("float")) {
+    return data;
+  }
+
+  // If fill_value is already NaN-like, zarrita should handle it
+  // But we need to handle sentinel values (numeric fill values that aren't NaN)
+  if (isNaNFillValue(fillValue)) {
+    return data;
+  }
+
+  // Handle numeric sentinel fill values (e.g., -9999, 1e20)
+  if (typeof fillValue === "number" && !Number.isNaN(fillValue)) {
+    const result =
+      dtype === "float64"
+        ? new Float64Array(data.length)
+        : new Float32Array(data.length);
+
+    for (let i = 0; i < data.length; i++) {
+      const val = (data as unknown as Float32Array | Float64Array)[i];
+      // Use approximate comparison for float precision issues
+      result[i] =
+        Math.abs(val - fillValue) < Math.abs(fillValue * 1e-6) ? NaN : val;
+    }
+    return result as TypedArray<T>;
+  }
+
+  return data;
 };
 
 const flatten = (
@@ -436,11 +501,12 @@ export class DataVar<
       return [..._data.data] as Data;
     } else {
       const attrs = this.arr.attrs as Record<string, unknown>;
+      const dtype = this.arr.dtype as string;
 
       // Check for numpy datetime dtype stored in attrs
-      const dtype = attrs._dtype as string | undefined;
-      if (dtype?.startsWith("<M8")) {
-        return npdatetime_to_posixtime(_data, dtype) as Data;
+      const attrsDtype = attrs._dtype as string | undefined;
+      if (attrsDtype?.startsWith("<M8")) {
+        return npdatetime_to_posixtime(_data, attrsDtype) as Data;
       }
 
       // Check for CF time units (e.g., "days since 1970-01-01")
@@ -450,7 +516,15 @@ export class DataVar<
         return cftime_to_posixtime(_data, units, calendar) as Data;
       }
 
-      return unravel(_data.data, _data.shape, _data.stride);
+      // Normalize fill_value to NaN for float types
+      // This handles sentinel values (e.g., -9999, 1e20) that should be treated as missing
+      // Note: _fill_value is injected from raw .zarray metadata since zarrita doesn't expose it
+      const fillValue = this.attributes._fill_value;
+      const normalizedData = fillValue
+        ? normalizeFillValue(_data.data, fillValue, dtype)
+        : _data.data;
+
+      return unravel(normalizedData, _data.shape, _data.stride);
     }
   }
 }
@@ -465,7 +539,17 @@ export interface ZarrOptions {
   downsample?: Record<string, number>;
   coordkeys?: Coordkeys;
   timeout?: number;
+  /**
+   * @deprecated Use `ttl: 0` instead to disable caching
+   */
   nocache?: boolean;
+  /**
+   * Time to live for cache entries in seconds.
+   * - If undefined, cache never expires
+   * - If 0, caching is disabled entirely
+   * - If > 0, cache will be invalidated after this many seconds
+   */
+  ttl?: number;
 }
 
 export class Dataset<S extends HttpZarr | TempZarr> {
@@ -525,6 +609,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       parameters: options.parameters,
       timeout: options.timeout,
       nocache: options.nocache,
+      ttl: options.ttl,
     }) as AsyncReadable;
     const _zarr = await zarr.withConsolidated(store);
     const root = await zarr.open(_zarr, { kind: "group" });
@@ -549,12 +634,26 @@ export class Dataset<S extends HttpZarr | TempZarr> {
             throw e;
           }
         }
-        const array_dims = arr.attrs._ARRAY_DIMENSIONS as string[] | null;
+
+        // Read fill_value from raw metadata since zarrita doesn't expose it
+        const attrs = { ...(arr.attrs as Record<string, unknown>) };
+        if (attrs._fill_value === undefined) {
+          const zarrayPath = `${item.path}/.zarray`.replace(/^\//, "");
+          const zarrayBytes = await _zarr.get(`/${zarrayPath}`);
+          if (zarrayBytes) {
+            const zarray = JSON.parse(new TextDecoder().decode(zarrayBytes));
+            if (zarray.fill_value !== undefined) {
+              attrs._fill_value = zarray.fill_value;
+            }
+          }
+        }
+
+        const array_dims = attrs._ARRAY_DIMENSIONS as string[] | null;
         const vid = item.path.split("/").pop() as string;
         vars[vid] = new DataVar<DataType, HttpZarr>(
           vid,
           array_dims || [],
-          arr.attrs as Record<string, unknown>,
+          attrs,
           arr
         );
         if (array_dims)

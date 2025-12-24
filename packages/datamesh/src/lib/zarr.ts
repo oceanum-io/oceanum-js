@@ -52,9 +52,22 @@ interface CachedHTTPStoreOptions {
   parameters?: Record<string, string | number>;
   chunks?: string;
   downsample?: Record<string, number>;
+  /**
+   * @deprecated Use `ttl: 0` instead to disable caching
+   */
   nocache?: boolean;
+  /**
+   * Time to live for cache entries in seconds.
+   * - If undefined, cache never expires
+   * - If 0, caching is disabled entirely
+   * - If > 0, cache will be invalidated after this many seconds
+   */
+  ttl?: number;
   timeout?: number;
 }
+
+// Special key suffix for tracking cache creation time
+const CACHE_TIMESTAMP_SUFFIX = "__cache_created_at";
 
 export class CachedHTTPStore implements AsyncReadable {
   cache: UseStore | undefined;
@@ -63,7 +76,9 @@ export class CachedHTTPStore implements AsyncReadable {
   cache_prefix: string;
   fetchOptions: RequestInit;
   timeout: number;
+  ttl: number | undefined;
   _pending: Record<string, boolean> = {};
+  _cacheValid: boolean | undefined;
 
   constructor(
     root: string,
@@ -96,7 +111,15 @@ export class CachedHTTPStore implements AsyncReadable {
     const datasource = root.split("/").pop();
 
     // Determine if caching should be used
-    if (options.nocache || typeof window === "undefined") {
+    // ttl === 0 means no caching, nocache is deprecated
+    if (options.nocache) {
+      console.warn(
+        "CachedHTTPStore: 'nocache' option is deprecated, use 'ttl: 0' instead"
+      );
+    }
+    const disableCache =
+      options.ttl === 0 || options.nocache || typeof window === "undefined";
+    if (disableCache) {
       this.cache = undefined;
     } else {
       this.cache = createStore("zarr", "cache");
@@ -105,12 +128,72 @@ export class CachedHTTPStore implements AsyncReadable {
     // Create a cache prefix based on datasource and options
     // Note: We don't include auth headers in the cache key to avoid leaking sensitive information
     this.cache_prefix = hash({
-      datasource,
+      root,
       ...options.parameters,
       chunks: options.chunks,
       downsample: options.downsample,
     });
     this.timeout = options.timeout || 60000;
+    this.ttl = options.ttl;
+  }
+
+  /**
+   * Check if the cache is still valid based on TTL.
+   * Returns true if cache is valid, false if expired.
+   */
+  private async checkCacheTTL(): Promise<boolean> {
+    // If no TTL set or no cache, cache is always valid
+    if (!this.ttl || !this.cache) return true;
+
+    // Use cached validity check to avoid repeated IDB lookups
+    if (this._cacheValid !== undefined) return this._cacheValid;
+
+    const timestampKey = `${this.cache_prefix}${CACHE_TIMESTAMP_SUFFIX}`;
+    const createdAt = await get_cache(timestampKey, this.cache);
+
+    if (!createdAt) {
+      // No timestamp found, cache is new - will be set on first write
+      this._cacheValid = true;
+      return true;
+    }
+
+    const now = Date.now();
+    const age = (now - createdAt) / 1000; // age in seconds
+
+    if (age > this.ttl) {
+      // Cache expired - invalidate it
+      this._cacheValid = false;
+      return false;
+    }
+
+    this._cacheValid = true;
+    return true;
+  }
+
+  /**
+   * Set the cache creation timestamp if not already set.
+   */
+  private async setCacheTimestamp(): Promise<void> {
+    if (!this.cache || !this.ttl) return;
+
+    const timestampKey = `${this.cache_prefix}${CACHE_TIMESTAMP_SUFFIX}`;
+    const existing = await get_cache(timestampKey, this.cache);
+
+    if (!existing) {
+      await set_cache(timestampKey, Date.now(), this.cache);
+    }
+  }
+
+  /**
+   * Invalidate the cache by removing all entries with this prefix.
+   * Note: This only removes the timestamp, individual entries will be refreshed on next access.
+   */
+  private async invalidateCache(): Promise<void> {
+    if (!this.cache) return;
+
+    const timestampKey = `${this.cache_prefix}${CACHE_TIMESTAMP_SUFFIX}`;
+    await del_cache(timestampKey, this.cache);
+    this._cacheValid = undefined;
   }
 
   async get(
@@ -121,7 +204,14 @@ export class CachedHTTPStore implements AsyncReadable {
     const key = `${this.cache_prefix}${item}`;
     let data = null;
     if (this.cache) {
-      data = await get_cache(key, this.cache);
+      // Check if cache is still valid based on TTL
+      const cacheValid = await this.checkCacheTTL();
+      if (!cacheValid) {
+        // Cache expired, invalidate and fetch fresh
+        await this.invalidateCache();
+      } else {
+        data = await get_cache(key, this.cache);
+      }
       if (data) delete this._pending[key];
       if (this._pending[key]) {
         await delay(200);
@@ -164,7 +254,10 @@ export class CachedHTTPStore implements AsyncReadable {
           throw new Error(`HTTP error: ${response.status}`);
         }
         data = new Uint8Array(await response.arrayBuffer());
-        if (this.cache) await set_cache(key, data, this.cache);
+        if (this.cache) {
+          await set_cache(key, data, this.cache);
+          await this.setCacheTimestamp();
+        }
       } catch (e) {
         console.debug("Zarr retry:" + key);
         if (retry < this.timeout / 200) {
@@ -229,6 +322,10 @@ export async function zarr_open_v2_datetime<Store extends Readable>(
   const meta = await load_meta(location);
   if (meta.dtype.startsWith("<M8")) {
     attrs._dtype = meta.dtype;
+  }
+  // Preserve fill_value in attributes so it's accessible after zarrita hides it
+  if (meta.fill_value !== undefined) {
+    attrs._fill_value = meta.fill_value;
   }
   const codecs: any[] = [];
 
