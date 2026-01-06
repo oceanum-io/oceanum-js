@@ -1,22 +1,22 @@
 /**
  * Auto-generated TypeScript interfaces for EIDOS schemas
  * Generated from: https://schemas.oceanum.io/eidos/root.json
- * 
+ *
  * Each interface corresponds to a definition in the EIDOS schema bundle.
  * These interfaces can be used for type validation and IDE support.
- * 
+ *
  * Do not modify this file directly - regenerate using:
  * npx nx run eidos:generate-types
  */
 
-const 07Constant = "0.7" as const;
-const WorldNodeType = "world" as const;
-const PlotNodeType = "plot" as const;
-const DocumentNodeType = "document" as const;
-const GridNodeType = "grid" as const;
-const MenuNodeType = "menu" as const;
-const WorldlayerNodeType = "worldlayer" as const;
-const ControlgroupNodeType = "controlgroup" as const;
+const Constant = '0.9' as const;
+const WorldNodeType = 'world' as const;
+const PlotNodeType = 'plot' as const;
+const DocumentNodeType = 'document' as const;
+const GridNodeType = 'grid' as const;
+const MenuNodeType = 'menu' as const;
+const WorldlayerNodeType = 'worldlayer' as const;
+const ControlgroupNodeType = 'controlgroup' as const;
 
 /**
  * EIDOS specification
@@ -26,10 +26,10 @@ export interface EidosSpec {
   /**
    * Version of EIDOS
    */
-  version?: 07Constant;
+  version?: Constant;
   /**
    * Unique identifier for this specification. Must be URL-safe using only lowercase letters, numbers, hyphens, and underscores. This ID is used for referencing the specification in URLs, file systems, and databases. It should be descriptive but concise.
-   * 
+   *
    * @example
    * "seastate-demo"
    * "plot-demo"
@@ -38,7 +38,7 @@ export interface EidosSpec {
   id: string;
   /**
    * Human-readable display name for this specification. This is the name shown to users in lists, menus, and interfaces. It can contain spaces, special characters, and mixed case. Should be descriptive and meaningful to end users.
-   * 
+   *
    * @example
    * "DemoOverlay"
    * "DemoPlot"
@@ -47,7 +47,7 @@ export interface EidosSpec {
   name: string;
   /**
    * Detailed description of what this specification does and its purpose. This is primarily for documentation and metadata purposes - it's not typically displayed in the main interface but may be shown in tooltips, help text, or specification listings. Useful for developers and content creators.
-   * 
+   *
    * @example
    * "Demonstration overlay"
    * "Demonstration grid layout"
@@ -61,12 +61,12 @@ export interface EidosSpec {
   /**
    * URL of logo image
    */
-  logo?: string;
+  logo?: string | object;
   theme?: EidosTheme;
   /**
    * Data Sources
    * Array of data source definitions that provide data to the visualization components. Each data source can be a static dataset, OceanQL query, Oceanum Datamesh source, or other supported data provider. Data sources are referenced by ID throughout the specification.
-   * 
+   *
    * @example
    * [{"id":"sig-wave-height-trki","dataType":"oceanumDatamesh","dataSpec":{"datasource":"oceanum_wave_trki_era5_v1_grid","variables":["hs","tps"],"geofilter":{"type":"feature","geom":{"type":"Feature","geometry":{"type":"Point","coordinates":[174.3,-38.5]}}},"timefilter":{"times":["2018-01-01 00:00:00Z","2019-01-01 00:00:00Z"]}}}]
    */
@@ -110,7 +110,7 @@ export interface EidosTheme {
   /**
    * Color scheme for the view
    */
-  preset?: "default" | "dark";
+  preset?: 'default' | 'dark';
   style?: EidosStyle;
 }
 
@@ -121,7 +121,7 @@ export interface EidosTheme {
 export interface EidosData {
   /**
    * Unique identifier for this data source within the specification. Must be alphanumeric with hyphens and underscores only. This ID is used to reference the data source from visualization layers and components.
-   * 
+   *
    * @example
    * "sig-wave-height-trki"
    * "ship-positions"
@@ -130,13 +130,13 @@ export interface EidosData {
   id: string;
   /**
    * Type of data source that determines how the data is accessed and processed. Each type requires different configuration in the dataSpec property.
-   * 
+   *
    * @example
    * "dataset"
    * "geojson"
    * "transform"
    */
-  dataType: "oceanql" | "zarr" | "dataset" | "geojson" | "transform";
+  dataType: 'oceanql' | 'zarr' | 'dataset' | 'geojson' | 'transform';
   dataSpec: Dataset | Transform | Geojson | Oceanquery | Zarr;
 }
 
@@ -147,13 +147,17 @@ export interface EidosData {
 export interface World {
   /**
    * Unique identifier for this world node within the specification. Used for referencing this node in events, interactions, and programmatic access.
-   * 
+   *
    * @example
    * "map-1"
    * "world-view"
    * "main-map"
    */
   id: string;
+  /**
+   * Human-readable title for this world node.
+   */
+  title?: string;
   /**
    * Node type identifier. Must be 'world' for map/globe visualizations.
    */
@@ -173,6 +177,11 @@ export interface World {
   timezone?: Geojson;
   currentTime?: Geojson;
   timeControl?: Geojson;
+  levelControl?: Geojson;
+  /**
+   * Current level value for the world view
+   */
+  currentLevel?: number;
   /**
    * Layer selector control configuration. Set to true/false to show/hide the layer selector, or provide an object to customize its appearance and behavior.
    */
@@ -192,8 +201,12 @@ export interface Plot {
    * Unique id of the node
    */
   id: string;
+  /**
+   * Title of the plot
+   */
+  title?: string;
   nodeType?: PlotNodeType;
-  plotType?: "vega" | "vega-lite";
+  plotType?: 'vega' | 'vega-lite';
   plotSpec: any & PlotSpec;
   /**
    * Actions to enable for the plot
@@ -213,6 +226,10 @@ export interface Document {
    * Unique id of the node
    */
   id: string;
+  /**
+   * Title of the document
+   */
+  title?: string;
   nodeType?: DocumentNodeType;
   /**
    * Document content as templated markdown
@@ -228,7 +245,7 @@ export interface Document {
 export interface Grid {
   /**
    * Unique identifier for this grid node within the specification. Used for referencing this node in events, interactions, and programmatic access.
-   * 
+   *
    * @example
    * "main-grid"
    * "dashboard-layout"
@@ -266,7 +283,7 @@ export interface Menu {
   /**
    * Location of menu relative to content
    */
-  position?: "top" | "left" | "bottom" | "right";
+  position?: 'top' | 'left' | 'bottom' | 'right';
   /**
    * Whether menu is open
    */
@@ -339,7 +356,7 @@ export interface Dataset {
 
 /**
  * Transform
- * Specification for data transform. 
+ * Specification for data transform.
  */
 export interface Transform {
   /**
@@ -357,7 +374,7 @@ export interface Transform {
   /**
    * Output data type
    */
-  outputType?: "dataset" | "geojson";
+  outputType?: 'dataset' | 'geojson';
   /**
    * Transform code
    * Transform code as body of function
@@ -433,6 +450,7 @@ export interface Zarr {
    */
   headers?: object;
   coordkeys: Coordkeys;
+  ttl?: number | null;
 }
 
 /**
@@ -442,7 +460,7 @@ export interface Zarr {
 export interface Worldlayer {
   /**
    * Unique identifier for this layer within the world node. Used for layer management, visibility control, and programmatic access.
-   * 
+   *
    * @example
    * "wave-height"
    * "ship-tracks"
@@ -451,7 +469,7 @@ export interface Worldlayer {
   id: string;
   /**
    * Display name for this layer shown in the layer selector and legend. Should be descriptive and user-friendly.
-   * 
+   *
    * @example
    * "Significant Wave Height"
    * "Ship Positions"
@@ -461,7 +479,7 @@ export interface Worldlayer {
   nodeType: WorldlayerNodeType;
   /**
    * Reference to a data source defined in the root 'data' array. This connects the layer to its data source for visualization.
-   * 
+   *
    * @example
    * "hs-1"
    * "sig-wave-height-trki"
@@ -473,9 +491,9 @@ export interface Worldlayer {
    */
   visible?: boolean;
   /**
-   * Other layers than can be shown at same time as this layer
+   * Layer IDs that this layer can be shown with. An empty array means it the layer is exclusive and cannot be shown with any other layer. If this iproperty is missing or null, the layer can be shown with any other layer
    */
-  showWith?: any[];
+  showWith?: string[] | null;
   /**
    * Linked layer id which controls this layer visibility
    */
@@ -497,6 +515,10 @@ export interface Worldlayer {
    * Time selection criteria for layer
    */
   timeSelect?: Timeselect;
+  /**
+   * Level selection criteria for layer
+   */
+  levelSelect?: Levelselect;
 }
 
 /**
@@ -508,7 +530,7 @@ export interface ControlGroup {
    */
   id: string;
   nodeType?: ControlgroupNodeType;
-  orientation?: "horizontal" | "vertical";
+  orientation?: 'horizontal' | 'vertical';
   /**
    * Control list
    */
@@ -528,10 +550,10 @@ export interface View {
   /**
    * Type of world view
    */
-  viewType?: "map" | "globe";
+  viewType?: 'map' | 'globe';
   /**
    * Longitude coordinate of the map center in decimal degrees (-180 to 180). Positive values are East, negative values are West.
-   * 
+   *
    * @example
    * 174.3
    * -122.4
@@ -540,7 +562,7 @@ export interface View {
   longitude: number;
   /**
    * Latitude coordinate of the map center in decimal degrees (-90 to 90). Positive values are North, negative values are South.
-   * 
+   *
    * @example
    * -38.5
    * 37.7
@@ -561,7 +583,7 @@ export interface View {
   maxZoom?: number;
   /**
    * Initial zoom level of the map. Higher values show more detail. Typically ranges from 0 (world view) to 20+ (street level).
-   * 
+   *
    * @example
    * 2
    * 8
@@ -620,7 +642,7 @@ export interface DocumentStyle {
   /**
    * Justify content
    */
-  justifyContent?: "left" | "center" | "right";
+  justifyContent?: 'left' | 'center' | 'right';
 }
 
 /**
@@ -911,23 +933,48 @@ export interface MapHoverInfo {
 /**
  * Layer specification
  */
-export type Layerspec = Feature | Gridded | Label | Scenegraph | Seasurface | Track;
+export type Layerspec =
+  | Feature
+  | Gridded
+  | Label
+  | Scenegraph
+  | Seasurface
+  | Track
+  | Wmts;
 
 export interface Timeselect {
-  mode: "nearest" | "exact" | "range";
+  mode: 'nearest' | 'exact' | 'range';
   /**
-   * Time toleration duration for nearest time select
+   * Time tolerance duration for nearest time select
    */
-  toleration?: string;
+  tolerance?: string;
   /**
    * Time aggregation
    * Aggregation method for time range
    */
-  aggregate?: "last" | "first" | "sum" | "mean" | "max" | "min";
+  aggregate?: 'last' | 'first' | 'sum' | 'mean' | 'max' | 'min';
   /**
    * Data field to group by
    */
   groupby?: string;
+}
+
+/**
+ * Level selection criteria for layer
+ */
+export interface Levelselect {
+  /**
+   * Level selection mode
+   */
+  mode?: 'nearest' | 'exact' | 'range';
+  /**
+   * Level tolerance for nearest level select
+   */
+  tolerance?: number;
+  /**
+   * Default level value for this layer
+   */
+  level?: number;
 }
 
 /**
@@ -938,7 +985,7 @@ export interface Control {
   /**
    * Control type
    */
-  nodeType: "points" | "polygon" | "bbox" | "radius" | "drop" | "measure";
+  nodeType: 'points' | 'polygon' | 'bbox' | 'radius' | 'drop' | 'measure';
   /**
    * Control id
    */
@@ -969,17 +1016,17 @@ export interface Control {
 /**
  * Base layer type
  */
-export type Baselayerpreset = "oceanum" | "terrain";
+export type Baselayerpreset = 'oceanum' | 'terrain';
 
 /**
  * ResampleType
  */
-export type Resampletype = "mean" | "nearest";
+export type Resampletype = 'mean' | 'nearest';
 
 /**
  * Aggregate Ops
  */
-export type AggregateOps = "mean" | "min" | "max" | "std" | "sum";
+export type AggregateOps = 'mean' | 'min' | 'max' | 'std' | 'sum';
 
 /**
  * Feature
@@ -989,7 +1036,7 @@ export interface Feature {
   /**
    * Type
    */
-  type: "Feature";
+  type: 'Feature';
   geometry: Geometry;
   /**
    * Properties
@@ -1009,7 +1056,14 @@ export interface Feature {
  * Geometry
  * Geometry Model
  */
-export type Geometry = Point | Multipoint | Linestring | Multilinestring | Polygon | Multipolygon | Geometrycollection;
+export type Geometry =
+  | Point
+  | Multipoint
+  | Linestring
+  | Multilinestring
+  | Polygon
+  | Multipolygon
+  | Geometrycollection;
 
 /**
  * Point
