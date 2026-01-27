@@ -14,6 +14,9 @@ export class Session {
   write!: boolean;
   verified = false;
   private _connection!: any;
+  private _closePromise: Promise<void> | null = null;
+  private _closed = false;
+  private _beforeExitHandler: (() => void) | null = null;
 
   /**
    * Acquire a session from the connection.
@@ -27,7 +30,7 @@ export class Session {
   @measureTime
   static async acquire(
     connection: any,
-    options: { duration?: number } = {}
+    options: { duration?: number } = {},
   ): Promise<Session> {
     // Check if the connection supports sessions (v1 API)
     if (!connection._isV1) {
@@ -36,7 +39,7 @@ export class Session {
       session.user = "dummy_user";
       session.creationTime = new Date();
       session.endTime = new Date(
-        Date.now() + (options.duration || 3600) * 1000
+        Date.now() + (options.duration || 3600) * 1000,
       );
       session.write = false;
       session.verified = false;
@@ -44,9 +47,10 @@ export class Session {
 
       // Register cleanup function for when the process exits
       if (typeof process !== "undefined" && process.on) {
-        process.on("beforeExit", () => {
-          session.close();
-        });
+        session._beforeExitHandler = () => {
+          void session.close();
+        };
+        process.once("beforeExit", session._beforeExitHandler);
       }
 
       return session;
@@ -60,7 +64,7 @@ export class Session {
       });
       const response = await fetch(
         `${connection._gateway}/session/?${qs.toString()}`,
-        { headers }
+        { headers },
       );
 
       if (response.status !== 200) {
@@ -79,9 +83,10 @@ export class Session {
 
       // Register cleanup function for when the process exits
       if (typeof process !== "undefined" && process.on) {
-        process.on("beforeExit", () => {
-          session.close();
-        });
+        session._beforeExitHandler = () => {
+          void session.close();
+        };
+        process.once("beforeExit", session._beforeExitHandler);
       }
 
       return session;
@@ -121,33 +126,63 @@ export class Session {
       return;
     }
 
-    try {
-      // Remove the beforeExit handler if possible
-      if (typeof process !== "undefined" && process.off) {
-        process.off("beforeExit", this.close);
-      }
-
-      const response = await fetch(
-        `${this._connection._gateway}/session/${this.id}`,
-        {
-          method: "DELETE",
-          headers: this.header,
-          body: JSON.stringify({ finalise_write: finaliseWrite }),
-        }
-      );
-
-      if (response.status !== 204) {
-        if (finaliseWrite) {
-          throw new Error(`Failed to finalise write: ${await response.text()}`);
-        }
-        console.warn(`Failed to close session: ${await response.text()}`);
-      }
-    } catch (error) {
-      if (finaliseWrite) {
-        throw new Error(`Error when closing datamesh session: ${error}`);
-      }
-      console.warn(`Error when closing datamesh session: ${error}`);
+    if (this._closed) {
+      return;
     }
+
+    if (this._closePromise) {
+      return this._closePromise;
+    }
+
+    this._closePromise = (async () => {
+      try {
+        // Remove the beforeExit handler if possible
+        if (
+          this._beforeExitHandler &&
+          typeof process !== "undefined" &&
+          process.off
+        ) {
+          process.off("beforeExit", this._beforeExitHandler);
+          this._beforeExitHandler = null;
+        }
+
+        const response = await fetch(
+          `${this._connection._gateway}/session/${this.id}`,
+          {
+            method: "DELETE",
+            headers: this.header,
+            body: JSON.stringify({ finalise_write: finaliseWrite }),
+          },
+        );
+
+        if (response.status === 204) {
+          this._closed = true;
+          return;
+        }
+
+        const body = await response.text();
+
+        if (response.status === 404 && body.includes("Session not found")) {
+          this._closed = true;
+          return;
+        }
+
+        if (finaliseWrite) {
+          throw new Error(`Failed to finalise write: ${body}`);
+        }
+
+        console.warn(`Failed to close session: ${body}`);
+      } catch (error) {
+        if (finaliseWrite) {
+          throw new Error(`Error when closing datamesh session: ${error}`);
+        }
+        console.warn(`Error when closing datamesh session: ${error}`);
+      } finally {
+        this._closePromise = null;
+      }
+    })();
+
+    return this._closePromise;
   }
 
   /**

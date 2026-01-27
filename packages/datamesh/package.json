@@ -1,12 +1,16 @@
 {
   "name": "@oceanum/datamesh",
-  "version": "0.6.1",
+  "version": "0.7.1",
   "scripts": {
+    "build": "vite build",
     "build:docs": "typedoc"
   },
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@msgpack/msgpack": "^3.1.2",
     "@types/geojson": "^7946.0.16",
@@ -21,5 +25,13 @@
   },
   "type": "module",
   "main": "./dist/index.js",
-  "typings": "./dist/index.d.ts"
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  }
 }

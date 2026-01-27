@@ -109,7 +109,7 @@ const computeChunks = (
   dims: string[],
   shape: number[],
   chunkConfig?: ChunkConfig,
-  variableChunks?: number[]
+  variableChunks?: number[],
 ): number[] => {
   // Check for per-variable override first
   if (chunkConfig?.variables?.[varid]) {
@@ -243,7 +243,7 @@ const unravel = <T extends DataType>(
   data: TypedArray<T>,
   shape: number[],
   stride: number[],
-  offset = 0
+  offset = 0,
 ): Data => {
   // @ts-expect-error: Is array
   if (shape.length === 0) return data[0];
@@ -261,7 +261,7 @@ const unravel = <T extends DataType>(
       data,
       shape.slice(1),
       stride.slice(1),
-      offset + i * stride[0]
+      offset + i * stride[0],
     );
   }
   return arr;
@@ -300,17 +300,17 @@ const npdatetime_to_posixtime = (data: Chunk<DataType>, dtype: string) => {
 const cftime_to_posixtime = (
   data: Chunk<DataType>,
   units: string,
-  calendar = "standard"
+  calendar = "standard",
 ) => {
   const converted = cftimeToUnixSeconds(
     data.data as ArrayLike<number | bigint>,
     units,
-    calendar
+    calendar,
   );
   if (converted === null) {
     console.warn(
       `Unsupported calendar "${calendar}" for cftime conversion. ` +
-        `Returning raw values. Supported: standard, gregorian, proleptic_gregorian`
+        `Returning raw values. Supported: standard, gregorian, proleptic_gregorian`,
     );
     return unravel(data.data, data.shape, data.stride);
   }
@@ -346,7 +346,7 @@ const isNaNFillValue = (fillValue: unknown): boolean => {
 const normalizeFillValue = <T extends DataType>(
   data: TypedArray<T>,
   fillValue: unknown,
-  dtype: string
+  dtype: string,
 ): TypedArray<T> => {
   // Only process float types
   if (!dtype.startsWith("float")) {
@@ -381,7 +381,7 @@ const normalizeFillValue = <T extends DataType>(
 const flatten = (
   data: Record<string, DataVariable>,
   dims: Record<string, number>,
-  rows: Record<string, unknown>[]
+  rows: Record<string, unknown>[],
 ): Record<string, unknown>[] => {
   const dim = Object.keys(dims);
   const arrays = {} as Record<string, boolean>;
@@ -458,7 +458,7 @@ export class DataVar<
     attributes: Record<string, unknown>,
     arr: S extends TempZarr
       ? zarr.Array<DType, Mutable>
-      : zarr.Array<DType, AsyncReadable>
+      : zarr.Array<DType, AsyncReadable>,
   ) {
     this.id = id;
     this.dimensions = dimensions;
@@ -485,7 +485,7 @@ export class DataVar<
           return slice(
             parseInt(start),
             parseInt(stop),
-            parseInt(step)
+            parseInt(step),
           ) as Slice;
         } else {
           return i;
@@ -493,7 +493,7 @@ export class DataVar<
       });
     const _data: Chunk<DType> | Scalar = await get(
       this.arr as zarr.Array<DType, AsyncReadable>,
-      _index as SliceDef
+      _index as SliceDef,
     );
     if (this.arr.dtype == "v2:object" || !_data.shape) {
       return _data.data as Data;
@@ -576,7 +576,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       : Record<string, DataVar<DataType, HttpZarr>>,
     attributes: Record<string, unknown>,
     coordkeys: Coordkeys,
-    root: S
+    root: S,
   ) {
     this.dimensions = dimensions;
     this.variables = variables;
@@ -601,7 +601,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
   static async zarr(
     url: string,
     authHeaders: Record<string, string>,
-    options: ZarrOptions = {}
+    options: ZarrOptions = {},
   ): Promise<Dataset<HttpZarr>> {
     const store = new CachedHTTPStore(url, authHeaders, {
       chunks: options.chunks,
@@ -654,14 +654,14 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           vid,
           array_dims || [],
           attrs,
-          arr
+          arr,
         );
         if (array_dims)
           array_dims.map((dim: string, i: number) => {
             const n = (arr.shape as number[])[i];
             if (dims[dim] && dims[dim] != n) {
               throw new Error(
-                `Inconsistent dimension size for ${dim}: ${dims[dim]} != ${n}`
+                `Inconsistent dimension size for ${dim}: ${dims[dim]} != ${n}`,
               );
             } else {
               dims[dim] = n;
@@ -670,20 +670,20 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       }
     }
     const coords = (JSON.parse(
-      (root.attrs["_coordinates"] || "{}") as string
+      (root.attrs["_coordinates"] || "{}") as string,
     ) || {}) as Coordkeys;
     return new Dataset<HttpZarr>(
       dims,
       vars,
       root.attrs,
       options.coordkeys || coords,
-      root
+      root,
     );
   }
 
   static async fromArrow(
     data: Table,
-    coordkeys: Coordkeys
+    coordkeys: Coordkeys,
   ): Promise<Dataset<TempZarr>> {
     const attributes = {};
     const dimensions = { record: data.numRows };
@@ -723,7 +723,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
 
   static async fromGeojson(
     geojson: FeatureCollection | Feature,
-    coordkeys?: Coordkeys
+    coordkeys?: Coordkeys,
   ): Promise<Dataset<TempZarr>> {
     if (
       !("features" in geojson && Array.isArray(geojson.features)) &&
@@ -757,7 +757,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           Object.assign(record, feature.properties);
         }
         return record;
-      }
+      },
     );
 
     // Create schema with dimensions and variables
@@ -775,7 +775,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       "geometry",
       ["index"],
       records.map((r) => r.geometry) as Data,
-      { description: "GeoJSON geometry" }
+      { description: "GeoJSON geometry" },
     );
 
     // Add property variables
@@ -798,7 +798,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
   static async init(
     datasource: Schema,
     coordkeys?: Coordkeys,
-    chunkConfig?: ChunkConfig
+    chunkConfig?: ChunkConfig,
   ): Promise<Dataset<TempZarr>> {
     const root = (await zarr.create(new Map(), {
       attributes: { created: new Date() },
@@ -808,7 +808,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       {},
       datasource.attributes || {},
       coordkeys || {},
-      root
+      root,
     );
     for (const k in datasource.variables) {
       const { dimensions, attributes, data, dtype, chunks }: DataVariable =
@@ -819,7 +819,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         dimensions,
         shape,
         chunkConfig,
-        chunks
+        chunks,
       );
       await ds.assign(
         k,
@@ -827,7 +827,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         data as Data,
         attributes,
         dtype && (dtype as string) === "string" ? "v2:object" : dtype,
-        computedChunks
+        computedChunks,
       );
     }
     return ds;
@@ -861,7 +861,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         dimensions: this.variables[k].dimensions,
       };
       data[k].data = (await this.variables[k].get()) as Data;
-      if (this.variables[k].arr.dtype == "int64") {
+      if (this.variables[k].arr.dtype == "int64" && k != this.coordkeys.t) {
         bigint.push(k);
       }
     }
@@ -869,7 +869,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     if (this.coordkeys.t) {
       for (let i = 0; i < df.length; i++) {
         df[i][this.coordkeys.t] = new Date(
-          1000 * (df[i][this.coordkeys.t] as number)
+          1000 * (df[i][this.coordkeys.t] as number),
         ).toISOString();
       }
     }
@@ -955,7 +955,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
     data: Data,
     attrs?: Record<string, unknown>,
     dtype?: DataType,
-    chunks?: number[]
+    chunks?: number[],
   ): Promise<void> {
     const shape = getShape(data);
     if (shape.length != dims.length) {
@@ -965,7 +965,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       if (this.dimensions[dim]) {
         if (this.dimensions[dim] != shape[i]) {
           throw new Error(
-            `Existing size of dimension ${dim} does not match new data`
+            `Existing size of dimension ${dim} does not match new data`,
           );
         }
       } else {
@@ -981,7 +981,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         chunk_shape: chunks || shape,
         codecs:
           _dtype == "v2:object" ? [{ name: "json2" } as CodecMetadata] : [],
-      }
+      },
     );
     let _data = ravel(data);
     if (_data.length == 0) {
@@ -1017,7 +1017,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
           data: _data,
           shape: shape,
           stride: get_strides(shape),
-        }
+        },
       );
     }
     this.variables[varid] = new DataVar(varid, dims, attrs || {}, arr);
@@ -1062,7 +1062,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         dims,
         shape,
         chunkConfig,
-        chunkConfig ? undefined : (variable.arr.chunks as number[] | undefined)
+        chunkConfig ? undefined : (variable.arr.chunks as number[] | undefined),
       );
 
       // Create the array with proper chunking
@@ -1115,7 +1115,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
             data: _data,
             shape: shape,
             stride: get_strides(shape),
-          }
+          },
         );
       }
     }

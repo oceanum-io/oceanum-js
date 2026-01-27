@@ -1,7 +1,7 @@
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
 import { Dataset, HttpZarr, TempZarr } from "./datamodel";
-import { measureTime } from "./observe";
+import { isDatameshDebugEnabled, measureTime } from "./observe";
 import { tableFromIPC, Table } from "apache-arrow";
 import { Session } from "./session";
 
@@ -52,11 +52,11 @@ export class Connector {
       jwtAuth?: string;
       nocache?: boolean;
       sessionDuration?: number;
-    }
+    },
   ) {
     if (!token && !options?.jwtAuth) {
       throw new Error(
-        "A valid datamesh token must be supplied as a connector constructor argument or defined in environment variables as DATAMESH_TOKEN"
+        "A valid datamesh token must be supplied as a connector constructor argument or defined in environment variables as DATAMESH_TOKEN",
       );
     }
 
@@ -195,7 +195,7 @@ export class Connector {
    * @returns Headers with session information.
    */
   private async getSessionHeaders(
-    additionalHeaders: Record<string, string> = {}
+    additionalHeaders: Record<string, string> = {},
   ): Promise<Record<string, string>> {
     if (this._isV1 && !this._currentSession) {
       await this.createSession();
@@ -220,11 +220,11 @@ export class Connector {
    */
   private async metadataRequest(
     datasourceId = "",
-    params = {} as Record<string, string>
+    params = {} as Record<string, string>,
   ): Promise<Response> {
     const url = new URL(`${this._host}/datasource/${datasourceId}`);
     Object.keys(params).forEach((key) =>
-      url.searchParams.append(key, params[key])
+      url.searchParams.append(key, params[key]),
     );
 
     const headers = await this.getSessionHeaders();
@@ -249,7 +249,7 @@ export class Connector {
    */
   private async dataRequest(
     qhash: string,
-    dataFormat = "application/vnd.apache.arrow.file"
+    dataFormat = "application/vnd.apache.arrow.file",
   ): Promise<Table> {
     const headers = await this.getSessionHeaders({ Accept: dataFormat });
     const response = await fetch(`${this._gateway}/oceanql/${qhash}?f=arrow`, {
@@ -267,6 +267,10 @@ export class Connector {
    */
   @measureTime
   async stageRequest(query: IQuery): Promise<Stage | null> {
+    if (isDatameshDebugEnabled()) {
+      console.debug(`@oceanum/datamesh debug: stageRequest query`, query);
+    }
+
     const data = JSON.stringify(query);
     const headers = await this.getSessionHeaders({
       "Content-Type": "application/json",
@@ -297,8 +301,12 @@ export class Connector {
   @measureTime
   async query(
     query: IQuery,
-    options: { timeout?: number } = {}
+    options: { timeout?: number } = {},
   ): Promise<Dataset<HttpZarr | TempZarr> | null> {
+    if (isDatameshDebugEnabled()) {
+      console.debug(`@oceanum/datamesh debug: query called`, query);
+    }
+
     //Stage the query
     const stage = await this.stageRequest(query);
     if (!stage) {
@@ -366,7 +374,7 @@ export class Connector {
   //@measureTime
   async loadDatasource(
     datasourceId: string,
-    parameters: Record<string, string | number> = {}
+    parameters: Record<string, string | number> = {},
   ): Promise<Dataset<HttpZarr | TempZarr> | null> {
     const query = { datasource: datasourceId, parameters };
     const dataset = await this.query(query);
