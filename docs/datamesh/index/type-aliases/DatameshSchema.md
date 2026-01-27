@@ -8,7 +8,7 @@
 
 > **DatameshSchema** = `object`
 
-Defined in: [packages/datamesh/src/lib/datasource.ts:59](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datasource.ts#L59)
+Defined in: [packages/datamesh/src/lib/datasource.ts:59](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datasource.ts#L59)
 
 Datamesh schema
 
@@ -18,7 +18,7 @@ Datamesh schema
 
 > `optional` **attrs**: `Record`\<`string`, `string` \| `number`\>
 
-Defined in: [packages/datamesh/src/lib/datasource.ts:63](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datasource.ts#L63)
+Defined in: [packages/datamesh/src/lib/datasource.ts:63](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datasource.ts#L63)
 
 Attributes of the schema.
 
@@ -28,7 +28,7 @@ Attributes of the schema.
 
 > `optional` **coords**: `Record`\<`string`, `DatameshSchema`\>
 
-Defined in: [packages/datamesh/src/lib/datasource.ts:73](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datasource.ts#L73)
+Defined in: [packages/datamesh/src/lib/datasource.ts:73](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datasource.ts#L73)
 
 Coordinate map of the schema.
 
@@ -38,7 +38,7 @@ Coordinate map of the schema.
 
 > `optional` **data\_vars**: `Record`\<`string`, `DatameshSchema`\>
 
-Defined in: [packages/datamesh/src/lib/datasource.ts:78](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datasource.ts#L78)
+Defined in: [packages/datamesh/src/lib/datasource.ts:78](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datasource.ts#L78)
 
 Data variables of the schema.
 
@@ -48,6 +48,6 @@ Data variables of the schema.
 
 > **dims**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/datamesh/src/lib/datasource.ts:68](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datasource.ts#L68)
+Defined in: [packages/datamesh/src/lib/datasource.ts:68](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datasource.ts#L68)
 
 Dimensions of the schema.

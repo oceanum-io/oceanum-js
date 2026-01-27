@@ -6,7 +6,7 @@
 
 # Class: Dataset\<S\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:378](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L378)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:555](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L555)
 
 ## Type Parameters
 
@@ -20,7 +20,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:378](https://github.com/ocea
 
 > **new Dataset**\<`S`\>(`dimensions`, `variables`, `attributes`, `coordkeys`, `root`): `Dataset`\<`S`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:395](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L395)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:572](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L572)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:395](https://github.com/ocea
 
 > **attributes**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:391](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L391)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:568](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L568)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:391](https://github.com/ocea
 
 > **coordkeys**: [`Coordkeys`](../type-aliases/Coordkeys.md)
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:392](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L392)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:569](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L569)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:392](https://github.com/ocea
 
 > **dimensions**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:387](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L387)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:564](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L564)
 
 Creates an instance of Dataset.
 
@@ -100,7 +100,7 @@ The coordinates map of the dataset.
 
 > **root**: `S`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:393](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L393)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:570](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L570)
 
 ***
 
@@ -108,7 +108,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:393](https://github.com/ocea
 
 > **variables**: `S` *extends* `TempZarr` ? `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `TempZarr`\>\> : `Record`\<`string`, [`DataVar`](DataVar.md)\<`DataType`, `HttpZarr`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:388](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L388)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:565](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L565)
 
 ## Methods
 
@@ -116,7 +116,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:388](https://github.com/ocea
 
 > **asDataframe**(): `Promise`\<`Record`\<`string`, `unknown`\>[]\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:650](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L650)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:855](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L855)
 
 Converts the dataset into a dataframe format.
 
@@ -147,7 +147,7 @@ console.log(dataframe);
 
 > **asGeojson**(`geometry?`): `Promise`\<`FeatureCollection`\<`Geometry`, `GeoJsonProperties`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:701](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L701)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:906](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L906)
 
 Converts the dataset into a GeoJSON Feature.
 
@@ -188,7 +188,7 @@ console.log(dataframe);
 
 > **assign**(`varid`, `dims`, `data`, `attrs?`, `dtype?`, `chunks?`): `Promise`\<`void`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:747](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L747)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:952](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L952)
 
 Asynchronously assigns data to a variable in the dataset.
 
@@ -246,11 +246,43 @@ Will throw an error if an existing dimension size does not match the new data.
 
 ***
 
+### toZarr()
+
+> **toZarr**(`options?`): `Promise`\<`Map`\<`string`, `Uint8Array`\<`ArrayBufferLike`\>\>\>
+
+Defined in: [packages/datamesh/src/lib/datamodel.ts:1039](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L1039)
+
+Exports the dataset to a zarr format represented as a Map of path-to-data.
+This can be used for serialization or writing to a zarr store.
+
+#### Parameters
+
+##### options?
+
+[`ZarrWriteOptions`](../type-aliases/ZarrWriteOptions.md)
+
+Optional configuration for the zarr output.
+
+#### Returns
+
+`Promise`\<`Map`\<`string`, `Uint8Array`\<`ArrayBufferLike`\>\>\>
+
+A promise that resolves to a Map containing the zarr store data.
+
+#### Example
+
+```typescript
+const zarrStore = await dataset.toZarr();
+// zarrStore is a Map<string, Uint8Array>
+```
+
+***
+
 ### fromArrow()
 
 > `static` **fromArrow**(`data`, `coordkeys`): `Promise`\<`Dataset`\<`TempZarr`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:491](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L491)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:684](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L684)
 
 #### Parameters
 
@@ -272,7 +304,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:491](https://github.com/ocea
 
 > `static` **fromGeojson**(`geojson`, `coordkeys?`): `Promise`\<`Dataset`\<`TempZarr`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:531](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L531)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:724](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L724)
 
 #### Parameters
 
@@ -292,9 +324,9 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:531](https://github.com/ocea
 
 ### init()
 
-> `static` **init**(`datasource`, `coordkeys?`): `Promise`\<`Dataset`\<`TempZarr`\>\>
+> `static` **init**(`datasource`, `coordkeys?`, `chunkConfig?`): `Promise`\<`Dataset`\<`TempZarr`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:603](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L603)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:798](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L798)
 
 Initializes an in memory Dataset instance from a data object.
 
@@ -310,6 +342,14 @@ An object containing id, dimensions, data variables, and attributes.
 
 [`Coordkeys`](../type-aliases/Coordkeys.md)
 
+Optional coordinate key mappings.
+
+##### chunkConfig?
+
+[`ChunkConfig`](../type-aliases/ChunkConfig.md)
+
+Optional chunk configuration for global and per-variable chunking.
+
 #### Returns
 
 `Promise`\<`Dataset`\<`TempZarr`\>\>
@@ -320,7 +360,7 @@ An object containing id, dimensions, data variables, and attributes.
 
 > `static` **zarr**(`url`, `authHeaders`, `options`): `Promise`\<`Dataset`\<`HttpZarr`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:424](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L424)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:601](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L601)
 
 Creates a Dataset instance from a Zarr store.
 

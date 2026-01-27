@@ -6,7 +6,7 @@
 
 # Interface: ZarrOptions
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:369](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L369)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:536](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L536)
 
 Represents a dataset with dimensions, data variables, and attributes.
 Implements the DatasetApi interface.
@@ -17,7 +17,7 @@ Implements the DatasetApi interface.
 
 > `optional` **chunks**: `string`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:371](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L371)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:538](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L538)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:371](https://github.com/ocea
 
 > `optional` **coordkeys**: [`Coordkeys`](../type-aliases/Coordkeys.md)
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:373](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L373)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:540](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L540)
 
 ***
 
@@ -33,15 +33,19 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:373](https://github.com/ocea
 
 > `optional` **downsample**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:372](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L372)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:539](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L539)
 
 ***
 
-### nocache?
+### ~~nocache?~~
 
 > `optional` **nocache**: `boolean`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:375](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L375)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:545](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L545)
+
+#### Deprecated
+
+Use `ttl: 0` instead to disable caching
 
 ***
 
@@ -49,7 +53,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:375](https://github.com/ocea
 
 > `optional` **parameters**: `Record`\<`string`, `string` \| `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:370](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L370)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:537](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L537)
 
 ***
 
@@ -57,4 +61,17 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:370](https://github.com/ocea
 
 > `optional` **timeout**: `number`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:374](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/datamodel.ts#L374)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:541](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L541)
+
+***
+
+### ttl?
+
+> `optional` **ttl**: `number`
+
+Defined in: [packages/datamesh/src/lib/datamodel.ts:552](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L552)
+
+Time to live for cache entries in seconds.
+- If undefined, cache never expires
+- If 0, caching is disabled entirely
+- If > 0, cache will be invalidated after this many seconds

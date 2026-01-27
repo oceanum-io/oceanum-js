@@ -1,6 +1,6 @@
 [**@oceanum/datamesh**](../README.md)
 
----
+***
 
 [@oceanum/datamesh](../README.md) / Proxy Guide
 
@@ -8,7 +8,7 @@
 
 A reverse proxy lets you call Datamesh from a public web app without exposing your Datamesh token and helps you avoid CORS issues.
 
-[This repo](https://github.com/oceanum-io/oceanum-js/tree/main) includes example proxies you can deploy quickly, and shows how to point the `Connector` to them.
+This repo includes example proxies you can deploy quickly, and shows how to point the `Connector` to them.
 
 - Cloudflare Worker: `packages/datamesh/proxy/cloudflare/index.js`
 - Node/Express: `packages/datamesh/proxy/express/index.js`
@@ -63,7 +63,8 @@ export default {
         ...response.headers,
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Headers":
+          "Content-Type, Authorization, x-requested-with, x-datamesh-token",
       },
     });
   },
@@ -116,7 +117,7 @@ Point both `service` and `gateway` to your proxy origin. The proxy injects the t
 ```ts
 import { Connector } from "@oceanum/datamesh";
 
-const PROXY_URL = "http://localhost:8787"; // or your custom domain
+const PROXY_URL = "https://your-proxy.workers.dev"; // or your custom domain
 
 const connector = new Connector("proxy", {
   service: PROXY_URL,

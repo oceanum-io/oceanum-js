@@ -8,7 +8,7 @@
 
 > **TimeFilter** = `object`
 
-Defined in: [packages/datamesh/src/lib/query.ts:74](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L74)
+Defined in: [packages/datamesh/src/lib/query.ts:74](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L74)
 
 TimeFilter type representing a temporal subset or interpolation.
 
@@ -18,7 +18,7 @@ TimeFilter type representing a temporal subset or interpolation.
 
 > `optional` **resample**: [`ResampleType`](ResampleType.md)
 
-Defined in: [packages/datamesh/src/lib/query.ts:78](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L78)
+Defined in: [packages/datamesh/src/lib/query.ts:78](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L78)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/datamesh/src/lib/query.ts:78](https://github.com/oceanum-i
 
 > `optional` **resolution**: `string`
 
-Defined in: [packages/datamesh/src/lib/query.ts:77](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L77)
+Defined in: [packages/datamesh/src/lib/query.ts:77](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L77)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/datamesh/src/lib/query.ts:77](https://github.com/oceanum-i
 
 > **times**: (`Date` \| `dayjs.Dayjs` \| `duration.Duration` \| `string`)[]
 
-Defined in: [packages/datamesh/src/lib/query.ts:76](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L76)
+Defined in: [packages/datamesh/src/lib/query.ts:76](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L76)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [packages/datamesh/src/lib/query.ts:76](https://github.com/oceanum-i
 
 > `optional` **type**: [`TimeFilterType`](TimeFilterType.md)
 
-Defined in: [packages/datamesh/src/lib/query.ts:75](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L75)
+Defined in: [packages/datamesh/src/lib/query.ts:75](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L75)

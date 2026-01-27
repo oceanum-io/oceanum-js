@@ -17,6 +17,7 @@
 
 - [GeoFilterFeature](interfaces/GeoFilterFeature.md)
 - [IQuery](interfaces/IQuery.md)
+- [ParsedCFUnits](interfaces/ParsedCFUnits.md)
 - [ZarrOptions](interfaces/ZarrOptions.md)
 
 ## Type Aliases
@@ -24,6 +25,9 @@
 - [Aggregate](type-aliases/Aggregate.md)
 - [AggregateOps](type-aliases/AggregateOps.md)
 - [ATypedArray](type-aliases/ATypedArray.md)
+- [CFCalendar](type-aliases/CFCalendar.md)
+- [CFTimeUnit](type-aliases/CFTimeUnit.md)
+- [ChunkConfig](type-aliases/ChunkConfig.md)
 - [Container](type-aliases/Container.md)
 - [Coordinate](type-aliases/Coordinate.md)
 - [Coordkeys](type-aliases/Coordkeys.md)
@@ -44,7 +48,15 @@
 - [Schema](type-aliases/Schema.md)
 - [TimeFilter](type-aliases/TimeFilter.md)
 - [TimeFilterType](type-aliases/TimeFilterType.md)
+- [ZarrWriteOptions](type-aliases/ZarrWriteOptions.md)
 
 ## Functions
 
+- [cftimeToUnixSeconds](functions/cftimeToUnixSeconds.md)
+- [date2num](functions/date2num.md)
+- [getSupportedCalendars](functions/getSupportedCalendars.md)
+- [hasCFTimeUnits](functions/hasCFTimeUnits.md)
+- [isCalendarSupported](functions/isCalendarSupported.md)
+- [num2date](functions/num2date.md)
+- [parseCFUnits](functions/parseCFUnits.md)
 - [wkb\_to\_geojson](functions/wkb_to_geojson.md)

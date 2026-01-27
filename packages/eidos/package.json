@@ -1,20 +1,24 @@
 {
   "name": "@oceanum/eidos",
   "private": false,
-  "version": "0.9.0",
+  "version": "0.9.5",
   "type": "module",
   "main": "./dist/index.js",
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "generate-types": "node ./scripts/generate-interfaces.js"
   },
   "dependencies": {
     "ajv": "^8.17.1",
-    "valtio": "^2.1.5"
+    "valtio": "^2.3.0"
   },
   "devDependencies": {
-    "json-schema-to-typescript": "^15.0.4"
+    "json-schema-to-typescript": "^15.0.4",
+    "@vitejs/plugin-react": "^5.0.4"
   },
   "peerDependencies": {
-    "react": "^19.1.0"
+    "react": "^19.2.3"
   }
 }

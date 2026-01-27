@@ -1,7 +1,9 @@
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
+  plugins: [react()],
   define: {
     "process.env": {},
   },
@@ -23,7 +25,7 @@ export default defineConfig({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ["react"],
+      external: ["react", "react/jsx-runtime"],
     },
     watch: true,
   },

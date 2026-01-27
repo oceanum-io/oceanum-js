@@ -6,7 +6,7 @@
 
 # Class: Connector
 
-Defined in: [packages/datamesh/src/lib/connector.ts:19](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L19)
+Defined in: [packages/datamesh/src/lib/connector.ts:19](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L19)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [packages/datamesh/src/lib/connector.ts:19](https://github.com/ocean
 
 > **new Connector**(`token`, `options?`): `Connector`
 
-Defined in: [packages/datamesh/src/lib/connector.ts:45](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L45)
+Defined in: [packages/datamesh/src/lib/connector.ts:45](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L45)
 
 Datamesh connector constructor
 
@@ -74,7 +74,7 @@ The desired length of time for acquired datamesh sessions in hours. Will be 1 ho
 
 > `optional` **gateway**: `string`
 
-Defined in: [packages/datamesh/src/lib/connector.ts:30](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L30)
+Defined in: [packages/datamesh/src/lib/connector.ts:30](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L30)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [packages/datamesh/src/lib/connector.ts:30](https://github.com/ocean
 
 > `optional` **service**: `string`
 
-Defined in: [packages/datamesh/src/lib/connector.ts:29](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L29)
+Defined in: [packages/datamesh/src/lib/connector.ts:29](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L29)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [packages/datamesh/src/lib/connector.ts:29](https://github.com/ocean
 
 > `static` **LAZY\_LOAD\_SIZE**: `number` = `1e8`
 
-Defined in: [packages/datamesh/src/lib/connector.ts:20](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L20)
+Defined in: [packages/datamesh/src/lib/connector.ts:20](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L20)
 
 ## Accessors
 
@@ -100,7 +100,7 @@ Defined in: [packages/datamesh/src/lib/connector.ts:20](https://github.com/ocean
 
 > **get** **host**(): `string`
 
-Defined in: [packages/datamesh/src/lib/connector.ts:129](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L129)
+Defined in: [packages/datamesh/src/lib/connector.ts:129](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L129)
 
 Get datamesh host.
 
@@ -116,7 +116,7 @@ The datamesh server host.
 
 > **closeSession**(`finaliseWrite`): `Promise`\<`void`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:382](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L382)
+Defined in: [packages/datamesh/src/lib/connector.ts:382](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L382)
 
 Close the current session if one exists.
 
@@ -140,7 +140,7 @@ A promise that resolves when the session is closed.
 
 > **createSession**(`options`): `Promise`\<`Session`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:171](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L171)
+Defined in: [packages/datamesh/src/lib/connector.ts:171](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L171)
 
 Create a new session.
 
@@ -168,7 +168,7 @@ A new session instance.
 
 > **getDatasource**(`datasourceId`): `Promise`\<[`Datasource`](../type-aliases/Datasource.md)\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:349](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L349)
+Defined in: [packages/datamesh/src/lib/connector.ts:349](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L349)
 
 Get a datasource instance from the datamesh.
 
@@ -196,7 +196,7 @@ The datasource instance.
 
 > **getSession**(): `Promise`\<`Session`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:184](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L184)
+Defined in: [packages/datamesh/src/lib/connector.ts:184](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L184)
 
 Get the current session or create a new one if none exists.
 
@@ -210,9 +210,9 @@ The current session.
 
 ### loadDatasource()
 
-> **loadDatasource**(`datasourceId`, `parameters`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
+> **loadDatasource**(`datasourceId`, `parameters`): `Promise`\<[`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\> \| `null`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:367](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L367)
+Defined in: [packages/datamesh/src/lib/connector.ts:367](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L367)
 
 Load a datasource into the work environment.
 
@@ -232,7 +232,7 @@ Additional datasource parameters.
 
 #### Returns
 
-`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
+`Promise`\<[`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\> \| `null`\>
 
 The dataset.
 
@@ -240,9 +240,9 @@ The dataset.
 
 ### query()
 
-> **query**(`query`, `options`): `Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
+> **query**(`query`, `options`): `Promise`\<[`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\> \| `null`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:298](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L298)
+Defined in: [packages/datamesh/src/lib/connector.ts:298](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L298)
 
 Execute a query to the datamesh.
 
@@ -264,7 +264,7 @@ Additional options for the query.
 
 #### Returns
 
-`Promise`\<`null` \| [`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\>\>
+`Promise`\<[`Dataset`](Dataset.md)\<`HttpZarr` \| `TempZarr`\> \| `null`\>
 
 The response from the server.
 
@@ -272,9 +272,9 @@ The response from the server.
 
 ### stageRequest()
 
-> **stageRequest**(`query`): `Promise`\<`null` \| `Stage`\>
+> **stageRequest**(`query`): `Promise`\<`Stage` \| `null`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:269](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L269)
+Defined in: [packages/datamesh/src/lib/connector.ts:269](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L269)
 
 Stage a query to the datamesh.
 
@@ -288,7 +288,7 @@ The query to stage.
 
 #### Returns
 
-`Promise`\<`null` \| `Stage`\>
+`Promise`\<`Stage` \| `null`\>
 
 The staged response.
 
@@ -298,7 +298,7 @@ The staged response.
 
 > **status**(): `Promise`\<`boolean`\>
 
-Defined in: [packages/datamesh/src/lib/connector.ts:138](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/connector.ts#L138)
+Defined in: [packages/datamesh/src/lib/connector.ts:138](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/connector.ts#L138)
 
 Check the status of the metadata server.
 

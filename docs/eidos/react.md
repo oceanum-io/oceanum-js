@@ -14,8 +14,8 @@ Create a custom hook for managing EIDOS instances:
 
 ```typescript
 // hooks/useEidos.ts
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { embed } from '@oceanum/eidos';
+import { useEffect, useRef, useState, useCallback } from "react";
+import { embed } from "@oceanum/eidos";
 
 export interface UseEidosOptions {
   spec: any;
@@ -36,14 +36,14 @@ export function useEidos({ spec, onEvent, renderer }: UseEidosOptions) {
       try {
         setLoading(true);
         setError(null);
-        
+
         const instance = await embed(
           containerRef.current!,
           spec,
           onEvent,
           renderer
         );
-        
+
         setEidos(instance);
       } catch (err: any) {
         setError(err.message);
@@ -55,19 +55,22 @@ export function useEidos({ spec, onEvent, renderer }: UseEidosOptions) {
     initEidos();
   }, [spec, onEvent, renderer]);
 
-  const updateSpec = useCallback((updates: any) => {
-    if (!eidos) return;
-    
-    // Natural object mutation - changes propagate automatically
-    Object.assign(eidos, updates);
-  }, [eidos]);
+  const updateSpec = useCallback(
+    (updates: any) => {
+      if (!eidos) return;
+
+      // Natural object mutation - changes propagate automatically
+      Object.assign(eidos, updates);
+    },
+    [eidos]
+  );
 
   return {
     containerRef,
     eidos,
     loading,
     error,
-    updateSpec
+    updateSpec,
   };
 }
 ```
@@ -76,17 +79,16 @@ export function useEidos({ spec, onEvent, renderer }: UseEidosOptions) {
 
 ```typescript
 // components/EidosViewer.tsx
-import React from 'react';
+import { CSSProperties } from 'react';
 import { useEidos } from '../hooks/useEidos';
 
 interface EidosViewerProps {
   spec: any;
   onEvent?: (event: any) => void;
   className?: string;
-  style?: React.CSSProperties;
 }
 
-export function EidosViewer({ spec, onEvent, className, style }: EidosViewerProps) {
+export function EidosViewer({ spec, onEvent, className }: EidosViewerProps) {
   const { containerRef, loading, error } = useEidos({ spec, onEvent });
 
   if (error) {
@@ -99,10 +101,10 @@ export function EidosViewer({ spec, onEvent, className, style }: EidosViewerProp
   }
 
   return (
-    <div className={className} style={style}>
+    <div className={className}>
       {loading && <div className="eidos-loading">Loading visualization...</div>}
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         style={{ width: '100%', height: '100%' }}
       />
     </div>
@@ -131,7 +133,7 @@ const initialSpec = {
 
 export function InteractiveEidos() {
   const [events, setEvents] = useState<any[]>([]);
-  
+
   const { containerRef, eidos, loading, error } = useEidos({
     spec: initialSpec,
     onEvent: (event) => {
@@ -141,7 +143,7 @@ export function InteractiveEidos() {
 
   const addLayer = () => {
     if (!eidos) return;
-    
+
     // Add a new layer to the visualization
     eidos.root.children.push({
       id: `layer-${Date.now()}`,
@@ -153,7 +155,7 @@ export function InteractiveEidos() {
 
   const updateTitle = () => {
     if (!eidos) return;
-    
+
     // Update the visualization title
     eidos.name = `Updated at ${new Date().toLocaleTimeString()}`;
   };
@@ -166,13 +168,13 @@ export function InteractiveEidos() {
         {loading && <div>Loading...</div>}
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       </div>
-      
+
       {/* Controls */}
       <div style={{ width: '300px', padding: '20px' }}>
         <h3>Controls</h3>
         <button onClick={addLayer}>Add Layer</button>
         <button onClick={updateTitle}>Update Title</button>
-        
+
         <h4>Recent Events</h4>
         <div style={{ height: '200px', overflow: 'auto' }}>
           {events.map((event, i) => (
@@ -193,23 +195,23 @@ export function InteractiveEidos() {
 
 ```typescript
 // store/eidosSlice.ts
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { embed } from '@oceanum/eidos';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { embed } from "@oceanum/eidos";
 
 export const createEidosInstance = createAsyncThunk(
-  'eidos/create',
+  "eidos/create",
   async ({ container, spec }: { container: HTMLElement; spec: any }) => {
     return await embed(container, spec);
   }
 );
 
 const eidosSlice = createSlice({
-  name: 'eidos',
+  name: "eidos",
   initialState: {
     instance: null,
     loading: false,
     error: null,
-    events: []
+    events: [],
   },
   reducers: {
     addEvent: (state, action) => {
@@ -219,7 +221,7 @@ const eidosSlice = createSlice({
       if (state.instance) {
         Object.assign(state.instance, action.payload);
       }
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -234,7 +236,7 @@ const eidosSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       });
-  }
+  },
 });
 
 export const { addEvent, updateSpec } = eidosSlice.actions;
@@ -245,15 +247,15 @@ export default eidosSlice.reducer;
 
 ```typescript
 // store/eidosStore.ts
-import { create } from 'zustand';
-import { embed } from '@oceanum/eidos';
+import { create } from "zustand";
+import { embed } from "@oceanum/eidos";
 
 interface EidosStore {
   instance: any;
   loading: boolean;
   error: string | null;
   events: any[];
-  
+
   createInstance: (container: HTMLElement, spec: any) => Promise<void>;
   updateSpec: (updates: any) => void;
   addEvent: (event: any) => void;
@@ -264,7 +266,7 @@ export const useEidosStore = create<EidosStore>((set, get) => ({
   loading: false,
   error: null,
   events: [],
-  
+
   createInstance: async (container, spec) => {
     set({ loading: true, error: null });
     try {
@@ -276,19 +278,19 @@ export const useEidosStore = create<EidosStore>((set, get) => ({
       set({ error: error.message, loading: false });
     }
   },
-  
+
   updateSpec: (updates) => {
     const { instance } = get();
     if (instance) {
       Object.assign(instance, updates);
     }
   },
-  
+
   addEvent: (event) => {
-    set((state) => ({ 
-      events: [...state.events.slice(-50), event] 
+    set((state) => ({
+      events: [...state.events.slice(-50), event],
     }));
-  }
+  },
 }));
 ```
 
@@ -296,11 +298,11 @@ export const useEidosStore = create<EidosStore>((set, get) => ({
 
 ```typescript
 // components/EidosErrorBoundary.tsx
-import React, { ErrorBoundary } from 'react';
+import { ErrorBoundary, ReactNode, ComponentType } from 'react';
 
 interface EidosErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error }>;
+  children: ReactNode;
+  fallback?: ComponentType<{ error: Error }>;
 }
 
 const DefaultErrorFallback = ({ error }: { error: Error }) => (
@@ -313,9 +315,9 @@ const DefaultErrorFallback = ({ error }: { error: Error }) => (
   </div>
 );
 
-export function EidosErrorBoundary({ 
-  children, 
-  fallback: Fallback = DefaultErrorFallback 
+export function EidosErrorBoundary({
+  children,
+  fallback: Fallback = DefaultErrorFallback
 }: EidosErrorBoundaryProps) {
   return (
     <ErrorBoundary fallback={Fallback}>
@@ -340,7 +342,7 @@ export interface EidosSpec {
 
 export interface EidosNode {
   id: string;
-  nodeType: 'grid' | 'world' | 'plot' | 'worldlayer' | 'menu';
+  nodeType: "grid" | "world" | "plot" | "worldlayer" | "menu";
   children: EidosNode[];
   [key: string]: any;
 }
@@ -382,7 +384,7 @@ import dynamic from 'next/dynamic';
 // Dynamically import to avoid SSR issues
 const EidosViewer = dynamic(
   () => import('./EidosViewer').then(mod => mod.EidosViewer),
-  { 
+  {
     ssr: false,
     loading: () => <div>Loading EIDOS visualization...</div>
   }

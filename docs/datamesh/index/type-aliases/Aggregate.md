@@ -8,7 +8,7 @@
 
 > **Aggregate** = `object`
 
-Defined in: [packages/datamesh/src/lib/query.ts:113](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L113)
+Defined in: [packages/datamesh/src/lib/query.ts:113](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L113)
 
 Aggregate type representing aggregation operations.
 
@@ -18,7 +18,7 @@ Aggregate type representing aggregation operations.
 
 > **operations**: [`AggregateOps`](AggregateOps.md)[]
 
-Defined in: [packages/datamesh/src/lib/query.ts:114](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L114)
+Defined in: [packages/datamesh/src/lib/query.ts:114](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L114)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/datamesh/src/lib/query.ts:114](https://github.com/oceanum-
 
 > `optional` **spatial**: `boolean`
 
-Defined in: [packages/datamesh/src/lib/query.ts:115](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L115)
+Defined in: [packages/datamesh/src/lib/query.ts:115](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L115)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [packages/datamesh/src/lib/query.ts:115](https://github.com/oceanum-
 
 > `optional` **temporal**: `boolean`
 
-Defined in: [packages/datamesh/src/lib/query.ts:116](https://github.com/oceanum-io/oceanum-js/blob/3690a65f9299651d3a3a5e315b93a4a92e341aa0/packages/datamesh/src/lib/query.ts#L116)
+Defined in: [packages/datamesh/src/lib/query.ts:116](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L116)

@@ -11,6 +11,16 @@
     ],
     "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"]
   },
+  "targetDefaults": {
+    "nx-release-publish": {
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self"
+        }
+      ]
+    }
+  },
   "plugins": [
     {
       "plugin": "@nx/js/typescript",

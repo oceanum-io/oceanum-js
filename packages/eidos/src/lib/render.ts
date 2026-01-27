@@ -48,11 +48,18 @@ const render = async (
 ): Promise<RenderResult> => {
   const { id, eventListener, renderer = DEFAULT_RENDERER, authToken } = options;
 
-  // Check if an EIDOS iframe already exists in this container
+  // Check if this container is already initialized
+  // We check both for an existing iframe and a marker on the container itself
+  // This prevents double-mounting even if destroy() was called but the container is being reused
   const existingIframe = element.querySelector('iframe[data-eidos-renderer]');
-  if (existingIframe) {
+  const isInitialized = element.getAttribute('data-eidos-initialized') === 'true';
+
+  if (existingIframe || isInitialized) {
     throw new Error('EIDOS renderer already mounted in this container. Call destroy() before re-rendering.');
   }
+
+  // Mark container as initialized
+  element.setAttribute('data-eidos-initialized', 'true');
 
   // Validate the spec before creating proxy
   try {
@@ -99,7 +106,10 @@ const render = async (
 
       messageHandler = (event: MessageEvent) => {
         if (event.source !== win) return;
-        if (event.data.id !== _id) return;
+
+        // Check ID only if both message and expected ID exist
+        // Some EIDOS renderers may not include ID in event messages
+        if (event.data.id && event.data.id !== _id) return;
 
         if (event.data.type === 'init') {
           // Send initial spec
@@ -115,8 +125,9 @@ const render = async (
           if (authToken) {
             sendAuth(authToken);
           }
-        } else {
-          eventListener?.(event.data.payload);
+        } else if (event.data.type || event.data.action || event.data.control) {
+          // Process as event - EIDOS events may not have 'type' but have 'action' and 'control'
+          eventListener?.(event.data);
         }
       };
       window.addEventListener('message', messageHandler);
@@ -150,6 +161,8 @@ const render = async (
             unsubscribe();
           }
           iframe.remove();
+          // Clear the initialization marker when explicitly destroyed
+          element.removeAttribute('data-eidos-initialized');
         },
       });
     };
