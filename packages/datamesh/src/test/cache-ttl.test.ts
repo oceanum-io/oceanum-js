@@ -44,7 +44,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 0 }
+        { ttl: 0 },
       );
       expect(store.cache).toBeUndefined();
     });
@@ -58,7 +58,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 3600 }
+        { ttl: 3600 },
       );
       expect(store.cache).toBeDefined();
     });
@@ -73,11 +73,11 @@ describe("CachedHTTPStore TTL", () => {
       new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { nocache: true }
+        { nocache: true },
       );
 
       expect(warnSpy).toHaveBeenCalledWith(
-        "CachedHTTPStore: 'nocache' option is deprecated, use 'ttl: 0' instead"
+        "CachedHTTPStore: 'nocache' option is deprecated, use 'ttl: 0' instead",
       );
     });
 
@@ -88,7 +88,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { nocache: true }
+        { nocache: true },
       );
       expect(store.cache).toBeUndefined();
     });
@@ -104,7 +104,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 3600 }
+        { ttl: 3600 },
       );
 
       await store.get("/.zmetadata");
@@ -112,7 +112,7 @@ describe("CachedHTTPStore TTL", () => {
       // Check that timestamp was set
       const keys = Array.from(mockIdbStore.keys());
       const timestampKey = keys.find((k: string) =>
-        k.includes("__cache_created_at")
+        k.includes("__cache_created_at"),
       );
       expect(timestampKey).toBeDefined();
     });
@@ -131,7 +131,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 3600 }
+        { ttl: 3600 },
       );
 
       // Override cache prefix to match our test data
@@ -148,7 +148,7 @@ describe("CachedHTTPStore TTL", () => {
       const store = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 1 }
+        { ttl: 1 },
       );
       const cachePrefix = (store as unknown as { cache_prefix: string })
         .cache_prefix;
@@ -167,6 +167,30 @@ describe("CachedHTTPStore TTL", () => {
       // Fetch should have been called since cache is expired
       expect(mockFetch).toHaveBeenCalled();
     });
+
+    test("cache is invalidated when no timestamp exists", async () => {
+      const store = new CachedHTTPStore(
+        "http://example.com/data.zarr",
+        {},
+        { ttl: 3600 },
+      );
+      const cachePrefix = (store as unknown as { cache_prefix: string })
+        .cache_prefix;
+
+      // Pre-populate cache with data but NO timestamp
+      mockIdbStore.set(`${cachePrefix}/.zmetadata`, new Uint8Array([1, 2, 3]));
+      // Intentionally NOT setting a timestamp
+
+      mockFetch.mockResolvedValueOnce({
+        status: 200,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      });
+
+      await store.get("/.zmetadata");
+
+      // Fetch should have been called since cache has no timestamp (considered invalid)
+      expect(mockFetch).toHaveBeenCalled();
+    });
   });
 
   describe("TTL values", () => {
@@ -174,21 +198,21 @@ describe("CachedHTTPStore TTL", () => {
       const store1 = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 3600 }
+        { ttl: 3600 },
       );
       expect(store1.ttl).toBe(3600);
 
       const store2 = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        { ttl: 0 }
+        { ttl: 0 },
       );
       expect(store2.ttl).toBe(0);
 
       const store3 = new CachedHTTPStore(
         "http://example.com/data.zarr",
         {},
-        {}
+        {},
       );
       expect(store3.ttl).toBeUndefined();
     });

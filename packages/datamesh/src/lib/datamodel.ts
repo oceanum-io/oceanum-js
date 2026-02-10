@@ -550,6 +550,13 @@ export interface ZarrOptions {
    * - If > 0, cache will be invalidated after this many seconds
    */
   ttl?: number;
+  /**
+   * Path to a specific group within the zarr hierarchy to open as a dataset.
+   * If not specified, the root group is used.
+   * Supports both Datamesh zarr groups and external zarr archives with nested groups.
+   * Example: "/group1" or "group1"
+   */
+  group?: string;
 }
 
 export class Dataset<S extends HttpZarr | TempZarr> {
@@ -594,7 +601,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
    * @param options.parameters - Optional parameters for the request.
    * @param options.coordkeys - Optional coordinates for the request.
    * @param options.timeout - Optional timeout for the request.
-   * @param options.nocache - Disable caching
+   * @param options.ttl - Time to live for cache entries in seconds.
    * @returns A promise that resolves to a Dataset instance.
    */
   //@measureTime
@@ -611,67 +618,121 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       nocache: options.nocache,
       ttl: options.ttl,
     }) as AsyncReadable;
-    const _zarr = await zarr.withConsolidated(store);
-    const root = await zarr.open(_zarr, { kind: "group" });
+
+    // Use tryWithConsolidated to gracefully handle stores without consolidated metadata
+    const _store = await zarr.tryWithConsolidated(store);
+
+    // Check if we have consolidated metadata for content discovery
+    const hasContents =
+      "contents" in _store &&
+      typeof (_store as Listable<AsyncReadable>).contents === "function";
+    if (!hasContents) {
+      throw new Error(
+        "Zarr store does not have consolidated metadata (.zmetadata). " +
+          "Consolidated metadata is required for auto-discovery of variables. " +
+          "For zarr v2 stores, run `zarr.consolidate_metadata(store)` in Python.",
+      );
+    }
+    const _zarr = _store as Listable<AsyncReadable>;
+
+    // Determine the target group path
+    const groupPath = options.group
+      ? options.group.startsWith("/")
+        ? options.group
+        : `/${options.group}`
+      : undefined;
+
+    // Open root group from consolidated store, then navigate to sub-group if specified
+    const rootGroup = await zarr.open(_zarr, { kind: "group" });
+    const root = groupPath
+      ? await zarr.open(rootGroup.resolve(groupPath), { kind: "group" })
+      : rootGroup;
+
     const vars = {} as Record<string, DataVar<DataType, HttpZarr>>;
     const dims = {} as Record<string, number>;
     for (const item of _zarr.contents()) {
-      if (item.kind == "array") {
-        let arr;
-        try {
-          arr = await zarr.open(root.resolve(item.path), {
-            kind: "array",
-          });
-        } catch (e: unknown) {
-          const message =
-            typeof e === "object" && e && "message" in e
-              ? String((e as { message?: unknown }).message)
-              : undefined;
-          if (message && message.includes("<M8")) {
-            //A python <M8 type fails to load
-            arr = await zarr_open_v2_datetime(root.resolve(item.path));
-          } else {
-            throw e;
-          }
-        }
+      if (item.kind != "array") continue;
 
-        // Read fill_value from raw metadata since zarrita doesn't expose it
-        const attrs = { ...(arr.attrs as Record<string, unknown>) };
-        if (attrs._fill_value === undefined) {
-          const zarrayPath = `${item.path}/.zarray`.replace(/^\//, "");
-          const zarrayBytes = await _zarr.get(`/${zarrayPath}`);
-          if (zarrayBytes) {
-            const zarray = JSON.parse(new TextDecoder().decode(zarrayBytes));
-            if (zarray.fill_value !== undefined) {
-              attrs._fill_value = zarray.fill_value;
-            }
-          }
-        }
+      // Filter to arrays under the target group
+      if (groupPath && !item.path.startsWith(groupPath + "/")) continue;
 
-        const array_dims = attrs._ARRAY_DIMENSIONS as string[] | null;
-        const vid = item.path.split("/").pop() as string;
-        vars[vid] = new DataVar<DataType, HttpZarr>(
-          vid,
-          array_dims || [],
-          attrs,
-          arr,
-        );
-        if (array_dims)
-          array_dims.map((dim: string, i: number) => {
-            const n = (arr.shape as number[])[i];
-            if (dims[dim] && dims[dim] != n) {
-              throw new Error(
-                `Inconsistent dimension size for ${dim}: ${dims[dim]} != ${n}`,
-              );
-            } else {
-              dims[dim] = n;
-            }
-          });
+      // Compute variable ID relative to the target group
+      // For flat stores: "/temperature" → "temperature" (unchanged behavior)
+      // For nested groups: "/group1/temperature" → "group1/temperature" (preserves hierarchy)
+      // With group option: "/group1/temperature" relative to "/group1" → "temperature"
+      let vid: string;
+      if (groupPath) {
+        vid = item.path.slice(groupPath.length + 1);
+      } else {
+        vid = item.path.replace(/^\//, "");
       }
+
+      let arr;
+      try {
+        arr = await zarr.open(rootGroup.resolve(item.path), {
+          kind: "array",
+        });
+      } catch (e: unknown) {
+        const message =
+          typeof e === "object" && e && "message" in e
+            ? String((e as { message?: unknown }).message)
+            : undefined;
+        if (message && message.includes("<M8")) {
+          //A python <M8 type fails to load
+          arr = await zarr_open_v2_datetime(rootGroup.resolve(item.path));
+        } else {
+          throw e;
+        }
+      }
+
+      // Read fill_value from raw metadata since zarrita doesn't expose it
+      const attrs = { ...(arr.attrs as Record<string, unknown>) };
+      if (attrs._fill_value === undefined) {
+        const zarrayPath = `${item.path}/.zarray`.replace(/^\//, "");
+        const zarrayBytes = await _zarr.get(`/${zarrayPath}`);
+        if (zarrayBytes) {
+          const zarray = JSON.parse(new TextDecoder().decode(zarrayBytes));
+          if (zarray.fill_value !== undefined) {
+            attrs._fill_value = zarray.fill_value;
+          }
+        }
+      }
+
+      // Use _ARRAY_DIMENSIONS if available (xarray convention),
+      // otherwise generate default dimension names from shape
+      let array_dims = attrs._ARRAY_DIMENSIONS as string[] | null;
+      if (!array_dims || !Array.isArray(array_dims)) {
+        array_dims = (arr.shape as number[]).map(
+          (_: number, i: number) => `dim_${i}`,
+        );
+      }
+      vars[vid] = new DataVar<DataType, HttpZarr>(vid, array_dims, attrs, arr);
+      array_dims.map((dim: string, i: number) => {
+        const n = (arr.shape as number[])[i];
+        if (dims[dim] && dims[dim] != n) {
+          throw new Error(
+            `Inconsistent dimension size for ${dim}: ${dims[dim]} != ${n}`,
+          );
+        } else {
+          dims[dim] = n;
+        }
+      });
     }
-    const coords = (JSON.parse(
-      (root.attrs["_coordinates"] || "{}") as string,
-    ) || {}) as Coordkeys;
+
+    // Parse coordinates from group attributes - handle both JSON strings and objects
+    let coords: Coordkeys;
+    try {
+      const rawCoords = root.attrs["_coordinates"];
+      if (typeof rawCoords === "string") {
+        coords = (JSON.parse(rawCoords) || {}) as Coordkeys;
+      } else if (rawCoords && typeof rawCoords === "object") {
+        coords = rawCoords as Coordkeys;
+      } else {
+        coords = {} as Coordkeys;
+      }
+    } catch {
+      coords = {} as Coordkeys;
+    }
     return new Dataset<HttpZarr>(
       dims,
       vars,

@@ -23,7 +23,7 @@ export class Connector {
   private _authHeaders: Record<string, string>;
   private _gateway: string;
   private _nocache = false;
-  private _isV1 = false;
+  private _isV1 = true;
   private _sessionParams: Record<string, number> = {};
   private _currentSession: Session | null = null;
   service?: string;

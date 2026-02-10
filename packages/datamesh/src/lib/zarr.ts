@@ -83,7 +83,7 @@ export class CachedHTTPStore implements AsyncReadable {
   constructor(
     root: string,
     authHeaders: Record<string, string>,
-    options: CachedHTTPStoreOptions = {}
+    options: CachedHTTPStoreOptions = {},
   ) {
     // Create a copy of the auth headers to avoid modifying the original
     // Important: We need to preserve all auth headers, including session headers
@@ -113,7 +113,7 @@ export class CachedHTTPStore implements AsyncReadable {
     // ttl === 0 means no caching, nocache is deprecated
     if (options.nocache) {
       console.warn(
-        "CachedHTTPStore: 'nocache' option is deprecated, use 'ttl: 0' instead"
+        "CachedHTTPStore: 'nocache' option is deprecated, use 'ttl: 0' instead",
       );
     }
     const disableCache =
@@ -141,8 +141,8 @@ export class CachedHTTPStore implements AsyncReadable {
    * Returns true if cache is valid, false if expired.
    */
   private async checkCacheTTL(): Promise<boolean> {
-    // If no TTL set or no cache, cache is always valid
-    if (!this.ttl || !this.cache) return true;
+    // If no TTL set or no cache, cache is not valid
+    if (!this.ttl || !this.cache) return false;
 
     // Use cached validity check to avoid repeated IDB lookups
     if (this._cacheValid !== undefined) return this._cacheValid;
@@ -151,9 +151,9 @@ export class CachedHTTPStore implements AsyncReadable {
     const createdAt = await get_cache(timestampKey, this.cache);
 
     if (!createdAt) {
-      // No timestamp found, cache is new - will be set on first write
-      this._cacheValid = true;
-      return true;
+      // No timestamp found, cache is not valid
+      this._cacheValid = false;
+      return false;
     }
 
     const now = Date.now();
@@ -192,13 +192,13 @@ export class CachedHTTPStore implements AsyncReadable {
 
     const timestampKey = `${this.cache_prefix}${CACHE_TIMESTAMP_SUFFIX}`;
     await del_cache(timestampKey, this.cache);
-    this._cacheValid = undefined;
+    this._cacheValid = false;
   }
 
   async get(
     item: AbsolutePath,
     options?: RequestInit,
-    retry = 0
+    retry = 0,
   ): Promise<Uint8Array | undefined> {
     const key = `${this.cache_prefix}${item}`;
     let data = null;
@@ -241,7 +241,7 @@ export class CachedHTTPStore implements AsyncReadable {
         const query = new URLSearchParams(this.params).toString();
         const response = await fetch(
           `${this.url}${item}?${query}`,
-          requestOptions
+          requestOptions,
         );
 
         if (response.status === 404) {
@@ -303,7 +303,7 @@ export class IDBStore implements AsyncMutable {
 
 const load_meta = async <S extends Readable>(
   location: Location<S>,
-  item = ".zarray"
+  item = ".zarray",
 ) => {
   const { path } = location.resolve(item);
   const meta = await location.store.get(path);
@@ -315,7 +315,7 @@ const load_meta = async <S extends Readable>(
 
 //This is modified from the zarrita core library to patch for datetime support
 export async function zarr_open_v2_datetime<Store extends Readable>(
-  location: Location<Store>
+  location: Location<Store>,
 ) {
   const attrs = await load_meta(location, ".zattrs");
   const meta = await load_meta(location);
