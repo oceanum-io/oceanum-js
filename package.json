@@ -36,7 +36,8 @@
   "dependencies": {
     "@nx/node": "^22.1.0",
     "@oceanum/datamesh": "^0.5.1",
-    "@oceanum/eidos": "^0.1.0"
+    "@oceanum/eidos": "^0.1.0",
+    "@oceanum/layers": "^0.1.0"
   },
   "workspaces": [
     "packages/*"

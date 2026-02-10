@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deck-gl-datamesh-layers Example</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      #app { width: 100vw; height: 100vh; }
+      .controls {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        z-index: 1;
+        font-size: 14px;
+      }
+      .controls label { display: block; margin-bottom: 8px; }
+      .controls input[type="range"] { width: 200px; vertical-align: middle; }
+      .controls select { margin-left: 8px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./app.jsx"></script>
+  </body>
+</html>

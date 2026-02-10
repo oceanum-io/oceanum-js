@@ -1,0 +1,35 @@
+{
+  "name": "@oceanum/layers",
+  "version": "0.1.0",
+  "description": "deck.gl layers for visualising gridded data from Oceanum datamesh zarr datasets",
+  "scripts": {
+    "build": "vite build",
+    "build:docs": "typedoc"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@oceanum/datamesh": "^0.8.0",
+    "@oceanum/deck-gl-grid": "^9.2.2"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@luma.gl/core": "^9.2.0"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  }
+}

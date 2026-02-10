@@ -6,3 +6,4 @@ Typescript libraries for interacting with the Oceanum.io Datamesh and Eidos.
 
 - [datamesh](datamesh/README.md)
 - [eidos](eidos/README.md)
+- [layers](layers/README.md)

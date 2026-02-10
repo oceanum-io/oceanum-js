@@ -15,6 +15,9 @@
     },
     {
       "path": "./packages/eidos"
+    },
+    {
+      "path": "./packages/layers"
     }
   ]
 }

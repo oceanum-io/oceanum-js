@@ -1,0 +1,7 @@
+{
+  "plugin": ["typedoc-plugin-markdown", "../../ignore-type-params.mjs"],
+  "entryPoints": ["./src/index.ts"],
+  "readme": "./README.md",
+  "out": "../../docs/layers",
+  "mergeReadme": true
+}

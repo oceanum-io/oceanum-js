@@ -30,7 +30,8 @@
     "strict": true,
     "target": "es2022",
     "paths": {
-      "@oceanum/datamesh": ["./packages/datamesh"]
+      "@oceanum/datamesh": ["./packages/datamesh"],
+      "@oceanum/layers": ["./packages/layers"]
     }
   }
 }
