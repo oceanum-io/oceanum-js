@@ -99,7 +99,7 @@ interface OceanumLayerState {
 type DeckDefaultProp = { type: string; value: any } | boolean;
 
 const defaultProps: Record<string, DeckDefaultProp> = {
-  serviceUrl: { type: "string", value: "https://layers.aoo.oceanum.io" },
+  serviceUrl: { type: "string", value: "https://layers.app.oceanum.io" },
   authHeaders: { type: "object", value: {} },
   layerId: { type: "string", value: null },
   instance: { type: "string", value: null },
