@@ -21,6 +21,11 @@
     "@deck.gl/layers": "^9.2.0",
     "@luma.gl/core": "^9.2.0"
   },
+  "devDependencies": {
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@luma.gl/core": "^9.2.0"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
