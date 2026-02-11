@@ -1,0 +1,27 @@
+{
+  "name": "@oceanum/layers-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^9.2.0",
+    "@deck.gl/layers": "^9.2.0",
+    "@deck.gl/react": "^9.2.0",
+    "@luma.gl/core": "^9.2.0",
+    "@luma.gl/webgl": "^9.2.0",
+    "@oceanum/layers": "^0.1.1",
+    "mapbox-gl": "^3.9.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-map-gl": "^7.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "vite": "^6.0.0"
+  }
+}

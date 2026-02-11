@@ -27,7 +27,7 @@ const MAPBOX_STYLE =
   import.meta.env.VITE_MAPBOX_STYLE || "mapbox://styles/mapbox/dark-v11";
 
 // Replace with your zarr service URL and auth token
-const SERVICE_URL = "http://localhost:8001"; // e.g. 'https://layers.apps.oceanum.io'
+const SERVICE_URL = "https://layers.apps.oceanum.io";
 const AUTH_HEADERS = {
   "X-DATAMESH-TOKEN": import.meta.env.VITE_DATAMESH_TOKEN,
 };
@@ -40,7 +40,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 function App() {
-  const [time, setTime] = useState("2024-01-15T00:00:00Z");
+  const [time, setTime] = useState(null);
   const [level, setLevel] = useState(0);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [nlevels, setNlevels] = useState(0);
@@ -122,7 +122,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         id: "wave-height",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
-        layerId: "ecmwf_australia",
+        layerId: "ecmwf_wind10m_0p25",
         xvector: "u10",
         yvector: "v10",
         time,
@@ -143,7 +143,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         id: "wind",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
-        layerId: "ecmwf_australia",
+        layerId: "ecmwf_wind10m_0p25",
         xvector: "u10",
         yvector: "v10",
         time,
@@ -162,7 +162,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         id: "wind-mesh",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
-        layerId: "ecmwf_australia",
+        layerId: "ecmwf_wind10m_0p25",
         xvector: "u10",
         yvector: "v10",
         time,
@@ -181,7 +181,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         id: "pressure",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
-        layerId: "ecmwf_australia",
+        layerId: "ecmwf_wind10m_0p25",
         xvector: "u10",
         yvector: "v10",
         time,

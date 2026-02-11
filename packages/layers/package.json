@@ -1,6 +1,6 @@
 {
   "name": "@oceanum/layers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "deck.gl layers for visualising gridded data from Oceanum datamesh zarr datasets",
   "scripts": {
     "build": "vite build",
