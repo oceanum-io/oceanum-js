@@ -2,7 +2,12 @@
 import { CompositeLayer } from "@deck.gl/core";
 import { Dataset, type HttpZarr } from "@oceanum/datamesh";
 import { getVariableNames } from "./utils/coordinates";
-import type { CoordNames, VariableProps, ScalarDatakeys, VectorDatakeys } from "./utils/coordinates";
+import type {
+  CoordNames,
+  VariableProps,
+  ScalarDatakeys,
+  VectorDatakeys,
+} from "./utils/coordinates";
 import {
   nearestTimeIndex,
   clampLevelIndex,
@@ -94,7 +99,7 @@ interface OceanumLayerState {
 type DeckDefaultProp = { type: string; value: any } | boolean;
 
 const defaultProps: Record<string, DeckDefaultProp> = {
-  serviceUrl: { type: "string", value: null },
+  serviceUrl: { type: "string", value: "https://layers.aoo.oceanum.io" },
   authHeaders: { type: "object", value: {} },
   layerId: { type: "string", value: null },
   instance: { type: "string", value: null },
@@ -128,7 +133,9 @@ function getState(layer: OceanumBaseLayer): OceanumLayerState {
   return (layer as any).state;
 }
 
-function getContext(layer: OceanumBaseLayer): { viewport?: { getBounds: () => [[number, number], [number, number]] } } {
+function getContext(layer: OceanumBaseLayer): {
+  viewport?: { getBounds: () => [[number, number], [number, number]] };
+} {
   return (layer as any).context;
 }
 
@@ -176,10 +183,7 @@ export default class OceanumBaseLayer extends CompositeLayer {
     if (p.debounceWait !== op.debounceWait) {
       if (s.debouncedSlice) s.debouncedSlice.cancel();
       this.setState({
-        debouncedSlice: debounce(
-          () => this._requestSlice(),
-          p.debounceWait,
-        ),
+        debouncedSlice: debounce(() => this._requestSlice(), p.debounceWait),
       });
     }
 
@@ -198,9 +202,7 @@ export default class OceanumBaseLayer extends CompositeLayer {
     let needsSlice = false;
 
     if (p.time !== op.time && s.times) {
-      const timeIndex = p.time
-        ? nearestTimeIndex(s.times, p.time)
-        : 0;
+      const timeIndex = p.time ? nearestTimeIndex(s.times, p.time) : 0;
       if (timeIndex !== s.timeIndex) {
         this.setState({ timeIndex });
         needsSlice = true;
@@ -243,7 +245,10 @@ export default class OceanumBaseLayer extends CompositeLayer {
     }
   }
 
-  _variablePropsChanged(props: OceanumLayerProps, oldProps: OceanumLayerProps): boolean {
+  _variablePropsChanged(
+    props: OceanumLayerProps,
+    oldProps: OceanumLayerProps,
+  ): boolean {
     return (
       props.magnitude !== oldProps.magnitude ||
       props.direction !== oldProps.direction ||
@@ -263,7 +268,10 @@ export default class OceanumBaseLayer extends CompositeLayer {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _createInnerLayer(_slicedData: SlicedData, _datakeys: ScalarDatakeys | VectorDatakeys): any {
+  _createInnerLayer(
+    _slicedData: SlicedData,
+    _datakeys: ScalarDatakeys | VectorDatakeys,
+  ): any {
     return null;
   }
 
@@ -272,7 +280,8 @@ export default class OceanumBaseLayer extends CompositeLayer {
     this.setState({ error: err });
 
     const hooks = getProps(this).errorHandlers || {};
-    const hookName = `on${type.charAt(0).toUpperCase() + type.slice(1)}Error` as keyof ErrorHandlers;
+    const hookName =
+      `on${type.charAt(0).toUpperCase() + type.slice(1)}Error` as keyof ErrorHandlers;
     const handler = hooks[hookName] || DEFAULT_ERROR_HANDLERS[hookName];
     if (handler) handler(err);
   }
@@ -348,11 +357,22 @@ export default class OceanumBaseLayer extends CompositeLayer {
         p.time && times ? nearestTimeIndex(times as number[], p.time) : 0;
       const levelIndex = clampLevelIndex(p.level || 0, nlevels);
 
-      const cn: CoordNames = { x: coordNames.x!, y: coordNames.y!, t: coordNames.t, z: coordNames.z };
+      const cn: CoordNames = {
+        x: coordNames.x!,
+        y: coordNames.y!,
+        t: coordNames.t,
+        z: coordNames.z,
+      };
       const datakeys = this._buildDatakeys(cn);
 
-      let latRange: [number, number] = [0, lats ? (lats as any[]).length - 1 : 0];
-      let lonRange: [number, number] = [0, lons ? (lons as any[]).length - 1 : 0];
+      let latRange: [number, number] = [
+        0,
+        lats ? (lats as any[]).length - 1 : 0,
+      ];
+      let lonRange: [number, number] = [
+        0,
+        lons ? (lons as any[]).length - 1 : 0,
+      ];
       let fetchedBbox: Bbox | null = null;
 
       if (getContext(this).viewport) {
@@ -361,7 +381,8 @@ export default class OceanumBaseLayer extends CompositeLayer {
           p.viewportPadding,
         );
         if (lons) lonRange = indexRange(lons as number[], bbox.west, bbox.east);
-        if (lats) latRange = indexRange(lats as number[], bbox.south, bbox.north);
+        if (lats)
+          latRange = indexRange(lats as number[], bbox.south, bbox.north);
         fetchedBbox = bbox;
       }
 
@@ -384,7 +405,10 @@ export default class OceanumBaseLayer extends CompositeLayer {
 
       if (p.onDataLoad) {
         const timeDates = times
-          ? Array.from(times as ArrayLike<number>, (t: number) => new Date(t * 1000))
+          ? Array.from(
+              times as ArrayLike<number>,
+              (t: number) => new Date(t * 1000),
+            )
           : [];
         p.onDataLoad({
           dataset,
@@ -414,7 +438,9 @@ export default class OceanumBaseLayer extends CompositeLayer {
         headers: authHeaders,
       });
       if (!resp.ok) return [];
-      const meta = await resp.json() as { metadata?: Record<string, unknown> };
+      const meta = (await resp.json()) as {
+        metadata?: Record<string, unknown>;
+      };
       if (!meta.metadata) return [];
 
       const groups = new Set<string>();
@@ -432,7 +458,8 @@ export default class OceanumBaseLayer extends CompositeLayer {
 
   private async _requestSlice(): Promise<void> {
     const s = getState(this);
-    const { dataset, coordNames, timeIndex, levelIndex, latRange, lonRange } = s;
+    const { dataset, coordNames, timeIndex, levelIndex, latRange, lonRange } =
+      s;
 
     if (!dataset || !coordNames) return;
 
