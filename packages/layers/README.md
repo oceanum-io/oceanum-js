@@ -185,6 +185,29 @@ The zarr archives are expected to have:
 - Dimensions: `(time, [level], latitude, longitude)`
 - One or more instance groups at the root level (optional)
 
+## Using a Proxy
+
+If you are building a public web app, **do not expose your Datamesh token in client-side code**. Instead, put a small reverse proxy between the browser and the zarr service. The proxy injects the token server-side, so your layers need no `authHeaders` at all:
+
+```ts
+new OceanumPcolorLayer({
+  id: 'wave-height',
+  serviceUrl: 'https://your-proxy.workers.dev', // proxy URL instead of default
+  // No authHeaders needed
+  datasource: 'oceanum_wave_glob05',
+  variable: 'hs',
+  time: '2024-01-15T00:00:00Z',
+  colormap: { scale: [...], domain: [...] },
+});
+```
+
+This repo includes ready-to-deploy proxy examples:
+
+- **Cloudflare Worker**: `packages/layers/proxy/cloudflare/index.js`
+- **Node/Express**: `packages/layers/proxy/express/index.js`
+
+See the full [Proxy Guide](proxy/guide.md) for setup instructions and security considerations.
+
 ## Error Hooks
 
 The `onError` prop accepts per-state callbacks:
