@@ -8,7 +8,7 @@
 
 > **hasCFTimeUnits**(`attrs`): `boolean`
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:350](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L350)
+Defined in: [packages/datamesh/src/lib/cftime.ts:350](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L350)
 
 Check if attributes indicate CF time units.
 CF time units follow the pattern: "<unit> since <reference_time>"

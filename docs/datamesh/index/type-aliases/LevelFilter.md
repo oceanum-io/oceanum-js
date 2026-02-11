@@ -8,7 +8,7 @@
 
 > **LevelFilter** = `object`
 
-Defined in: [packages/datamesh/src/lib/query.ts:65](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L65)
+Defined in: [packages/datamesh/src/lib/query.ts:65](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L65)
 
 LevelFilter type representing a vertical subset or interpolation.
 
@@ -18,7 +18,7 @@ LevelFilter type representing a vertical subset or interpolation.
 
 > `optional` **interp**: [`LevelFilterInterp`](LevelFilterInterp.md)
 
-Defined in: [packages/datamesh/src/lib/query.ts:68](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L68)
+Defined in: [packages/datamesh/src/lib/query.ts:68](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L68)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/datamesh/src/lib/query.ts:68](https://github.com/oceanum-i
 
 > **levels**: (`number` \| `null`)[]
 
-Defined in: [packages/datamesh/src/lib/query.ts:67](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L67)
+Defined in: [packages/datamesh/src/lib/query.ts:67](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L67)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [packages/datamesh/src/lib/query.ts:67](https://github.com/oceanum-i
 
 > **type**: [`LevelFilterType`](LevelFilterType.md)
 
-Defined in: [packages/datamesh/src/lib/query.ts:66](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L66)
+Defined in: [packages/datamesh/src/lib/query.ts:66](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L66)

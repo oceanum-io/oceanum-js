@@ -8,7 +8,7 @@
 
 > **DataVariable** = `object`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:49](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L49)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:49](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L49)
 
 Represents a data variable.
 
@@ -18,7 +18,7 @@ Represents a data variable.
 
 > **attributes**: `Record`\<`string`, `string` \| `unknown`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:53](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L53)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:53](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L53)
 
 Attributes of the variable.
 
@@ -28,7 +28,7 @@ Attributes of the variable.
 
 > `optional` **chunks**: `number`[]
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:70](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L70)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:70](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L70)
 
 Chunk sizes for the variable dimensions.
 If not specified, uses the global chunk configuration or defaults to the full shape.
@@ -39,7 +39,7 @@ If not specified, uses the global chunk configuration or defaults to the full sh
 
 > `optional` **data**: [`Data`](Data.md)
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:65](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L65)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:65](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L65)
 
 Data associated with the variable.
 
@@ -49,7 +49,7 @@ Data associated with the variable.
 
 > **dimensions**: `string`[]
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:57](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L57)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:57](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L57)
 
 Dimensions of the variable
 
@@ -59,6 +59,6 @@ Dimensions of the variable
 
 > `optional` **dtype**: `DataType`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:61](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/datamodel.ts#L61)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:61](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L61)
 
 Datatype of the variable.

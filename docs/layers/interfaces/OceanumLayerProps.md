@@ -6,7 +6,7 @@
 
 # Interface: OceanumLayerProps
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:50
+Defined in: [packages/layers/src/oceanum-base-layer.ts:50](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L50)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:50
 
 > **altitude**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:59
+Defined in: [packages/layers/src/oceanum-base-layer.ts:59](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L59)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:59
 
 > **authHeaders**: `Record`\<`string`, `string`\>
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:52
+Defined in: [packages/layers/src/oceanum-base-layer.ts:52](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L52)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:52
 
 > **colormap**: [`Colormap`](Colormap.md) \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:57
+Defined in: [packages/layers/src/oceanum-base-layer.ts:57](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L57)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:57
 
 > **debounceWait**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:66
+Defined in: [packages/layers/src/oceanum-base-layer.ts:66](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L66)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:66
 
 > `optional` **direction**: `string`
 
-Defined in: packages/layers/src/utils/coordinates.ts:12
+Defined in: [packages/layers/src/utils/coordinates.ts:12](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/utils/coordinates.ts#L12)
 
 #### Inherited from
 
@@ -62,7 +62,7 @@ Defined in: packages/layers/src/utils/coordinates.ts:12
 
 > **directionConvention**: `string`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:69
+Defined in: [packages/layers/src/oceanum-base-layer.ts:69](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L69)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:69
 
 > **errorHandlers**: [`ErrorHandlers`](ErrorHandlers.md) \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:68
+Defined in: [packages/layers/src/oceanum-base-layer.ts:68](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L68)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:68
 
 > **globalWrap**: `boolean`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:60
+Defined in: [packages/layers/src/oceanum-base-layer.ts:60](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L60)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:60
 
 > **id**: `string`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:70
+Defined in: [packages/layers/src/oceanum-base-layer.ts:70](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L70)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:70
 
 > **instance**: `string` \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:54
+Defined in: [packages/layers/src/oceanum-base-layer.ts:54](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L54)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:54
 
 > **layerId**: `string` \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:53
+Defined in: [packages/layers/src/oceanum-base-layer.ts:53](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L53)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:53
 
 > **level**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:56
+Defined in: [packages/layers/src/oceanum-base-layer.ts:56](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L56)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:56
 
 > `optional` **magnitude**: `string`
 
-Defined in: packages/layers/src/utils/coordinates.ts:9
+Defined in: [packages/layers/src/utils/coordinates.ts:9](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/utils/coordinates.ts#L9)
 
 #### Inherited from
 
@@ -130,7 +130,7 @@ Defined in: packages/layers/src/utils/coordinates.ts:9
 
 > **offset**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:62
+Defined in: [packages/layers/src/oceanum-base-layer.ts:62](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L62)
 
 ***
 
@@ -138,7 +138,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:62
 
 > **onDataLoad**: (`info`) => `void` \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:67
+Defined in: [packages/layers/src/oceanum-base-layer.ts:67](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L67)
 
 ***
 
@@ -146,7 +146,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:67
 
 > **opacity**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:58
+Defined in: [packages/layers/src/oceanum-base-layer.ts:58](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L58)
 
 ***
 
@@ -154,7 +154,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:58
 
 > **pickable**: `boolean`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:63
+Defined in: [packages/layers/src/oceanum-base-layer.ts:63](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L63)
 
 ***
 
@@ -162,7 +162,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:63
 
 > **scale**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:61
+Defined in: [packages/layers/src/oceanum-base-layer.ts:61](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L61)
 
 ***
 
@@ -170,7 +170,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:61
 
 > **serviceUrl**: `string` \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:51
+Defined in: [packages/layers/src/oceanum-base-layer.ts:51](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L51)
 
 ***
 
@@ -178,7 +178,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:51
 
 > **time**: `string` \| `Date` \| `null`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:55
+Defined in: [packages/layers/src/oceanum-base-layer.ts:55](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L55)
 
 ***
 
@@ -186,7 +186,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:55
 
 > **viewportPadding**: `number`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:65
+Defined in: [packages/layers/src/oceanum-base-layer.ts:65](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L65)
 
 ***
 
@@ -194,7 +194,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:65
 
 > **visible**: `boolean`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:64
+Defined in: [packages/layers/src/oceanum-base-layer.ts:64](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L64)
 
 ***
 
@@ -202,7 +202,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:64
 
 > `optional` **xvector**: `string`
 
-Defined in: packages/layers/src/utils/coordinates.ts:10
+Defined in: [packages/layers/src/utils/coordinates.ts:10](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/utils/coordinates.ts#L10)
 
 #### Inherited from
 
@@ -214,7 +214,7 @@ Defined in: packages/layers/src/utils/coordinates.ts:10
 
 > `optional` **yvector**: `string`
 
-Defined in: packages/layers/src/utils/coordinates.ts:11
+Defined in: [packages/layers/src/utils/coordinates.ts:11](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/utils/coordinates.ts#L11)
 
 #### Inherited from
 

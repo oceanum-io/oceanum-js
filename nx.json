@@ -54,13 +54,8 @@
     }
   ],
   "targets": {
-    "build-docs": {
-      "executor": "@nx/workspace-run-script:run",
-      "options": {
-        "command": "build:docs",
-        "cwd": "{projectRoot}"
-      },
-      "dependsOn": ["build"]
+    "build:docs": {
+      "dependsOn": ["^build"]
     }
   }
 }

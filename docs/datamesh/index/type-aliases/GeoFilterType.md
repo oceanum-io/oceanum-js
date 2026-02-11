@@ -8,6 +8,6 @@
 
 > **GeoFilterType** = `"feature"` \| `"bbox"`
 
-Defined in: [packages/datamesh/src/lib/query.ts:10](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/query.ts#L10)
+Defined in: [packages/datamesh/src/lib/query.ts:10](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L10)
 
 GeoFilterType type representing types of geofilters.

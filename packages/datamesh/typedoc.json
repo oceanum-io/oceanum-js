@@ -4,5 +4,7 @@
   "readme": "./README.md",
   "out": "../../docs/datamesh",
   "mergeReadme": true,
-  "projectDocuments": ["proxy/guide.md"]
+  "projectDocuments": ["proxy/guide.md"],
+  "tsconfig": "./tsconfig.docs.json",
+  "skipErrorChecking": true
 }

@@ -6,7 +6,7 @@
 
 # Interface: ErrorHandlers
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:36
+Defined in: [packages/layers/src/oceanum-base-layer.ts:36](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L36)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:36
 
 > `optional` **onChunkError**: (`err`) => `void`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:38
+Defined in: [packages/layers/src/oceanum-base-layer.ts:38](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L38)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:38
 
 > `optional` **onMetadataError**: (`err`) => `void`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:37
+Defined in: [packages/layers/src/oceanum-base-layer.ts:37](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L37)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:37
 
 > `optional` **onValidationError**: (`err`) => `void`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:40
+Defined in: [packages/layers/src/oceanum-base-layer.ts:40](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L40)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: packages/layers/src/oceanum-base-layer.ts:40
 
 > `optional` **onVariableError**: (`err`) => `void`
 
-Defined in: packages/layers/src/oceanum-base-layer.ts:39
+Defined in: [packages/layers/src/oceanum-base-layer.ts:39](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L39)
 
 #### Parameters
 

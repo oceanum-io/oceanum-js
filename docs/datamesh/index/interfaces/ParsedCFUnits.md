@@ -6,7 +6,7 @@
 
 # Interface: ParsedCFUnits
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:29](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L29)
+Defined in: [packages/datamesh/src/lib/cftime.ts:29](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L29)
 
 Parsed CF time units
 
@@ -16,7 +16,7 @@ Parsed CF time units
 
 > **original**: `string`
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:37](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L37)
+Defined in: [packages/datamesh/src/lib/cftime.ts:37](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L37)
 
 Original units string
 
@@ -26,7 +26,7 @@ Original units string
 
 > **referenceDate**: `Date`
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:33](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L33)
+Defined in: [packages/datamesh/src/lib/cftime.ts:33](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L33)
 
 Reference date as JavaScript Date
 
@@ -36,7 +36,7 @@ Reference date as JavaScript Date
 
 > **referenceMs**: `number`
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:35](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L35)
+Defined in: [packages/datamesh/src/lib/cftime.ts:35](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L35)
 
 Reference date as milliseconds since Unix epoch
 
@@ -46,6 +46,6 @@ Reference date as milliseconds since Unix epoch
 
 > **unit**: [`CFTimeUnit`](../type-aliases/CFTimeUnit.md)
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:31](https://github.com/oceanum-io/oceanum-js/blob/3d9750577de57d3e495eb0e5df74fb0258cdb8b6/packages/datamesh/src/lib/cftime.ts#L31)
+Defined in: [packages/datamesh/src/lib/cftime.ts:31](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L31)
 
 The time unit (days, hours, etc.)
