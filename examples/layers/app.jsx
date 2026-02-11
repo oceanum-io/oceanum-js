@@ -27,9 +27,11 @@ const MAPBOX_STYLE =
   import.meta.env.VITE_MAPBOX_STYLE || "mapbox://styles/mapbox/dark-v11";
 
 // Replace with your zarr service URL and auth token
-const SERVICE_URL = "https://layers.apps.oceanum.io";
+const SERVICE_URL = "https://layers.app.oceanum.io";
+const DATAMESH_TOKEN = import.meta.env.VITE_DATAMESH_TOKEN;
 const AUTH_HEADERS = {
-  "X-DATAMESH-TOKEN": import.meta.env.VITE_DATAMESH_TOKEN,
+  Authorization: `Token ${DATAMESH_TOKEN}`,
+  "X-DATAMESH-TOKEN": DATAMESH_TOKEN,
 };
 const INITIAL_VIEW_STATE = {
   longitude: 124,
@@ -119,7 +121,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
   if (activeLayer === "pcolor") {
     layers.push(
       new OceanumPcolorLayer({
-        id: "wave-height",
+        id: "pcolor-layer",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
         layerId: "ecmwf_wind10m_0p25",
@@ -140,7 +142,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
   if (activeLayer === "particle") {
     layers.push(
       new OceanumParticleLayer({
-        id: "wind",
+        id: "particle-layer",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
         layerId: "ecmwf_wind10m_0p25",
@@ -159,7 +161,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
   if (activeLayer === "partmesh") {
     layers.push(
       new OceanumPartmeshLayer({
-        id: "wind-mesh",
+        id: "partmesh-layer",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
         layerId: "ecmwf_wind10m_0p25",
@@ -178,7 +180,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
   if (activeLayer === "contour") {
     layers.push(
       new OceanumContourLayer({
-        id: "pressure",
+        id: "contour-layer",
         serviceUrl: SERVICE_URL,
         authHeaders: AUTH_HEADERS,
         layerId: "ecmwf_wind10m_0p25",
@@ -254,6 +256,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
           <Map
             mapboxAccessToken={MAPBOX_TOKEN}
             mapStyle={MAPBOX_STYLE}
+            projection={{ name: "mercator" }}
             reuseMaps
           />
         )}

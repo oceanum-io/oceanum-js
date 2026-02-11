@@ -31,6 +31,7 @@ export default defineConfig({
       external: [
         "@deck.gl/core",
         "@deck.gl/layers",
+        "@deck.gl/geo-layers",
         "@luma.gl/core",
         "@oceanum/deck-gl-grid",
         "@oceanum/datamesh",

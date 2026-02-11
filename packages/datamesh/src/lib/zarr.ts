@@ -299,6 +299,21 @@ export class IDBStore implements AsyncMutable {
   }
 }
 
+/**
+ * Custom JSON parser that converts BigInt values to numbers.
+ * This prevents "Cannot mix BigInt and other types" errors when zarr metadata
+ * contains large integers that JSON.parse converts to BigInt.
+ */
+const parseJSONWithBigInt = (text: string): any => {
+  return JSON.parse(text, (key, value) => {
+    // Convert BigInt to number for shape, chunks, and other numeric metadata
+    if (typeof value === "bigint") {
+      return Number(value);
+    }
+    return value;
+  });
+};
+
 const load_meta = async <S extends Readable>(
   location: Location<S>,
   item = ".zarray",
@@ -308,7 +323,7 @@ const load_meta = async <S extends Readable>(
   if (!meta) {
     return {};
   }
-  return JSON.parse(new TextDecoder().decode(meta));
+  return parseJSONWithBigInt(new TextDecoder().decode(meta));
 };
 
 //This is modified from the zarrita core library to patch for datetime support

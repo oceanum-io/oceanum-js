@@ -228,9 +228,6 @@ export default class OceanumBaseLayer extends CompositeLayer {
         p.viewportPadding,
       );
       if (!bboxContained(bbox, s.fetchedBbox)) {
-        const lonR = indexRange(s.lons!, bbox.west, bbox.east);
-        const latR = indexRange(s.lats!, bbox.south, bbox.north);
-        this.setState({ latRange: latR, lonRange: lonR, fetchedBbox: bbox });
         if (s.debouncedSlice) {
           s.debouncedSlice();
         }
@@ -458,13 +455,24 @@ export default class OceanumBaseLayer extends CompositeLayer {
 
   private async _requestSlice(): Promise<void> {
     const s = getState(this);
-    const { dataset, coordNames, timeIndex, levelIndex, latRange, lonRange } =
-      s;
+    const { dataset, coordNames, timeIndex, levelIndex } = s;
 
     if (!dataset || !coordNames) return;
 
     const variableNames = getVariableNames(getProps(this));
     if (variableNames.length === 0) return;
+
+    // Recompute ranges from the current viewport so that the slice
+    // covers the actual view at the moment the (debounced) request fires,
+    // and update fetchedBbox only now to prevent premature debounce fires.
+    let { latRange, lonRange } = s;
+    const viewport = getContext(this).viewport;
+    if (viewport && s.lons && s.lats) {
+      const bbox = getViewportBbox(viewport, getProps(this).viewportPadding);
+      lonRange = indexRange(s.lons as number[], bbox.west, bbox.east);
+      latRange = indexRange(s.lats as number[], bbox.south, bbox.north);
+      this.setState({ latRange, lonRange, fetchedBbox: bbox });
+    }
 
     this.setState({ slicing: true });
 
