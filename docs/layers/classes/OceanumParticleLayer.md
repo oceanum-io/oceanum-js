@@ -6,7 +6,7 @@
 
 # Class: OceanumParticleLayer
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:26](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L26)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:26](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L26)
 
 ## Extends
 
@@ -136,7 +136,7 @@ Defined in: node\_modules/@deck.gl/core/dist/lib/layer.d.ts:39
 
 > `static` **defaultProps**: `object`
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:28](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L28)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:28](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L28)
 
 #### color
 
@@ -208,7 +208,7 @@ Defined in: [packages/layers/src/oceanum-particle-layer.ts:28](https://github.co
 
 > `static` **layerName**: `string` = `"OceanumParticleLayer"`
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:27](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L27)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:27](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L27)
 
 #### Overrides
 
@@ -336,7 +336,7 @@ Defined in: node\_modules/@deck.gl/core/dist/lib/layer.d.ts:35
 
 > **\_buildDatakeys**(`coordNames`): `VectorDatakeys`
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:43](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L43)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:43](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L43)
 
 #### Parameters
 
@@ -358,7 +358,7 @@ Defined in: [packages/layers/src/oceanum-particle-layer.ts:43](https://github.co
 
 > **\_createInnerLayer**(`slicedData`, `datakeys`): `ParticleLayer`
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:47](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L47)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:47](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L47)
 
 #### Parameters
 
@@ -687,7 +687,7 @@ Update sub layers to highlight the hovered object
 
 > **\_validateVariableProps**(`props`): `string` \| `null`
 
-Defined in: [packages/layers/src/oceanum-particle-layer.ts:30](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-particle-layer.ts#L30)
+Defined in: [packages/layers/src/oceanum-particle-layer.ts:30](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-particle-layer.ts#L30)
 
 #### Parameters
 
@@ -709,7 +709,7 @@ Defined in: [packages/layers/src/oceanum-particle-layer.ts:30](https://github.co
 
 > **\_variablePropsChanged**(`props`, `oldProps`): `boolean`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:246](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L246)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:246](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L246)
 
 #### Parameters
 
@@ -930,7 +930,7 @@ Filters sub layers at draw time. Return true if the sub layer should be drawn.
 
 > **finalizeState**(): `void`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:239](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L239)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:239](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L239)
 
 Called once when layer is no longer matched and state will be discarded. Layers can destroy WebGL resources here.
 
@@ -1401,7 +1401,7 @@ Checks if this layer has ongoing uniform transition
 
 > **initializeState**(): `void`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:139](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L139)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:139](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L139)
 
 #### Returns
 
@@ -1753,7 +1753,7 @@ Defined in: node\_modules/@deck.gl/core/dist/lib/layer.d.ts:134
 
 > **renderLayers**(): `any`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:470](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L470)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:470](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L470)
 
 #### Returns
 
@@ -1923,7 +1923,7 @@ Returns true if sub layer needs to be rendered
 
 > **shouldUpdateState**(`__namedParameters`): `boolean`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:167](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L167)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:167](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L167)
 
 Controls if updateState should be called. By default returns true if any prop has changed
 
@@ -2086,7 +2086,7 @@ Defined in: node\_modules/@deck.gl/core/dist/lib/layer.d.ts:199
 
 > **updateState**(`__namedParameters`): `void`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:171](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L171)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:171](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L171)
 
 Default implementation, all attributes will be invalidated and updated when data changes
 

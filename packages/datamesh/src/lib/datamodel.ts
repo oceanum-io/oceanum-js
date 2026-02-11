@@ -1,4 +1,4 @@
-import * as zarr from "@zarrita/core";
+import * as zarr from "zarrita";
 import {
   Chunk,
   DataType,
@@ -6,9 +6,13 @@ import {
   Listable,
   TypedArray,
   CodecMetadata,
-} from "@zarrita/core";
-import { Mutable, AsyncReadable } from "@zarrita/storage";
-import { get, set, Slice, slice } from "@zarrita/indexing";
+  Mutable,
+  AsyncReadable,
+  get,
+  set,
+  Slice,
+  slice,
+} from "zarrita";
 import { BoolArray } from "zarrita";
 import { Table, DataType as ArrowDataType } from "apache-arrow";
 import { Geometry, Feature, FeatureCollection } from "geojson";

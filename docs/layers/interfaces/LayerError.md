@@ -6,7 +6,7 @@
 
 # Interface: LayerError
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:28](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L28)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:28](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L28)
 
 ## Indexable
 
@@ -18,7 +18,7 @@ Defined in: [packages/layers/src/oceanum-base-layer.ts:28](https://github.com/oc
 
 > `optional` **cause**: `Error`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:32](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L32)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:32](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L32)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/layers/src/oceanum-base-layer.ts:32](https://github.com/oc
 
 > `optional` **layerId**: `string`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:31](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L31)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:31](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L31)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/layers/src/oceanum-base-layer.ts:31](https://github.com/oc
 
 > **message**: `string`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:30](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L30)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:30](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L30)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [packages/layers/src/oceanum-base-layer.ts:30](https://github.com/oc
 
 > **type**: `string`
 
-Defined in: [packages/layers/src/oceanum-base-layer.ts:29](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/layers/src/oceanum-base-layer.ts#L29)
+Defined in: [packages/layers/src/oceanum-base-layer.ts:29](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/layers/src/oceanum-base-layer.ts#L29)

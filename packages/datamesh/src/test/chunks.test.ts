@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { Dataset, ChunkConfig } from "../lib/datamodel";
-import * as zarr from "@zarrita/core";
+import * as zarr from "zarrita";
 
 // Helper to create multi-dimensional typed arrays
 const create3DArray = (dims: [number, number, number], value: number) => {

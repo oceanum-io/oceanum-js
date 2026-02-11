@@ -8,4 +8,4 @@
 
 > **Scalar** = `string` \| `number` \| `boolean`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:34](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L34)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:38](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L38)

@@ -6,7 +6,7 @@
 
 # Class: DataVar\<S\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:437](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L437)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:441](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L441)
 
 Represents a data variable within a dataset.
 
@@ -22,7 +22,7 @@ Represents a data variable within a dataset.
 
 > **new DataVar**\<`S`\>(`id`, `dimensions`, `attributes`, `arr`): `DataVar`\<`DType`, `S`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:455](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L455)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:459](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L459)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:455](https://github.com/ocea
 
 > **arr**: `S` *extends* `TempZarr` ? `Array`\<`DType`, `Mutable`\> : `Array`\<`DType`, `AsyncReadable`\<`unknown`\>\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:452](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L452)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:456](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L456)
 
 ***
 
@@ -60,7 +60,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:452](https://github.com/ocea
 
 > **attributes**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:451](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L451)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:455](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L455)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:451](https://github.com/ocea
 
 > **dimensions**: `string`[]
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:450](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L450)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:454](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L454)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:450](https://github.com/ocea
 
 > **id**: `string`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:449](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L449)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:453](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L453)
 
 Creates an instance of DataVar.
 
@@ -102,7 +102,7 @@ The zarr array associated with the data variable.
 
 > **get**(`index?`): `Promise`\<[`Data`](../type-aliases/Data.md)\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:476](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L476)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:480](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L480)
 
 Retrieves the data from the zarr array. If the data is already cached, it returns the cached data.
 

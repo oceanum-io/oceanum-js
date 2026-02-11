@@ -10,7 +10,7 @@
 
 > **date2num**(`dates`, `units`, `calendar?`): `number`
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:285](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L285)
+Defined in: [packages/datamesh/src/lib/cftime.ts:285](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/cftime.ts#L285)
 
 Convert JavaScript Date object(s) to numeric time value(s).
 
@@ -60,7 +60,7 @@ const nums = date2num([new Date("1970-01-01"), new Date("1970-01-02")], "days si
 
 > **date2num**(`dates`, `units`, `calendar?`): `number`[]
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:290](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L290)
+Defined in: [packages/datamesh/src/lib/cftime.ts:290](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/cftime.ts#L290)
 
 Convert JavaScript Date object(s) to numeric time value(s).
 

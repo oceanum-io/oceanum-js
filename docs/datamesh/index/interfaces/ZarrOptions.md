@@ -6,7 +6,7 @@
 
 # Interface: ZarrOptions
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:536](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L536)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:540](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L540)
 
 Represents a dataset with dimensions, data variables, and attributes.
 Implements the DatasetApi interface.
@@ -17,7 +17,7 @@ Implements the DatasetApi interface.
 
 > `optional` **chunks**: `string`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:538](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L538)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:542](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L542)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:538](https://github.com/ocea
 
 > `optional` **coordkeys**: [`Coordkeys`](../type-aliases/Coordkeys.md)
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:540](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L540)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:544](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L544)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:540](https://github.com/ocea
 
 > `optional` **downsample**: `Record`\<`string`, `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:539](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L539)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:543](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L543)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:539](https://github.com/ocea
 
 > `optional` **group**: `string`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:559](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L559)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:563](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L563)
 
 Path to a specific group within the zarr hierarchy to open as a dataset.
 If not specified, the root group is used.
@@ -54,7 +54,7 @@ Example: "/group1" or "group1"
 
 > `optional` **nocache**: `boolean`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:545](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L545)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:549](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L549)
 
 #### Deprecated
 
@@ -66,7 +66,7 @@ Use `ttl: 0` instead to disable caching
 
 > `optional` **parameters**: `Record`\<`string`, `string` \| `number`\>
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:537](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L537)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:541](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L541)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:537](https://github.com/ocea
 
 > `optional` **timeout**: `number`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:541](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L541)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:545](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L545)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [packages/datamesh/src/lib/datamodel.ts:541](https://github.com/ocea
 
 > `optional` **ttl**: `number`
 
-Defined in: [packages/datamesh/src/lib/datamodel.ts:552](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/datamodel.ts#L552)
+Defined in: [packages/datamesh/src/lib/datamodel.ts:556](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/datamodel.ts#L556)
 
 Time to live for cache entries in seconds.
 - If undefined, cache never expires

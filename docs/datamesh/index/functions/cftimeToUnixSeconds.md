@@ -6,9 +6,9 @@
 
 # Function: cftimeToUnixSeconds()
 
-> **cftimeToUnixSeconds**(`data`, `units`, `calendar`): `Float64Array`\<`ArrayBufferLike`\>
+> **cftimeToUnixSeconds**(`data`, `units`, `calendar?`): `Float64Array`\<`ArrayBufferLike`\>
 
-Defined in: [packages/datamesh/src/lib/cftime.ts:364](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/cftime.ts#L364)
+Defined in: [packages/datamesh/src/lib/cftime.ts:364](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/cftime.ts#L364)
 
 Convert CF time values to Unix timestamp (seconds since 1970-01-01).
 Used for lazy conversion when accessing zarr data with CF time units.
@@ -27,7 +27,7 @@ Array of numeric time values
 
 CF time units string (e.g., "days since 1970-01-01")
 
-### calendar
+### calendar?
 
 `string` = `"standard"`
 

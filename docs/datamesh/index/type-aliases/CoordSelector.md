@@ -8,7 +8,7 @@
 
 > **CoordSelector** = `object`
 
-Defined in: [packages/datamesh/src/lib/query.ts:122](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L122)
+Defined in: [packages/datamesh/src/lib/query.ts:122](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/query.ts#L122)
 
 CoordSelector type representing coordinate selection.
 
@@ -18,7 +18,7 @@ CoordSelector type representing coordinate selection.
 
 > **coord**: `string`
 
-Defined in: [packages/datamesh/src/lib/query.ts:123](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L123)
+Defined in: [packages/datamesh/src/lib/query.ts:123](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/query.ts#L123)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: [packages/datamesh/src/lib/query.ts:123](https://github.com/oceanum-
 
 > **values**: (`string` \| `number`)[]
 
-Defined in: [packages/datamesh/src/lib/query.ts:124](https://github.com/oceanum-io/oceanum-js/blob/caaf80b4ce3f936efe18d2244930ed354860c5c1/packages/datamesh/src/lib/query.ts#L124)
+Defined in: [packages/datamesh/src/lib/query.ts:124](https://github.com/oceanum-io/oceanum-js/blob/9514fbe955f07e31f96f0c079698cb0d5ff4e241/packages/datamesh/src/lib/query.ts#L124)

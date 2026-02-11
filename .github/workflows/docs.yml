@@ -33,7 +33,13 @@ jobs:
           set -euo pipefail
           npm install --frozen-lockfile --legacy-peer-deps
 
-      - id: "build"
+      - id: "build-packages"
+        name: "Build packages"
+        run: |
+          set -euo pipefail
+          npx nx run-many -t build
+
+      - id: "build-docs"
         name: "Build typedoc documentation"
         run: |
           set -euo pipefail

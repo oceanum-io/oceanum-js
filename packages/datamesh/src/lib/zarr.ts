@@ -12,14 +12,12 @@ import {
   AsyncMutable,
   Readable,
   AbsolutePath,
-} from "@zarrita/storage";
-import {
   Array as ZArray,
   Location,
   ArrayMetadata,
   DataType,
   registry,
-} from "@zarrita/core";
+} from "zarrita";
 
 registry.set("msgpack2", async () => ({
   kind: "array_to_bytes",
