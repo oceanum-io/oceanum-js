@@ -37,7 +37,7 @@ jobs:
         name: "Build packages"
         run: |
           set -euo pipefail
-          npx nx run-many -t build
+          npx nx run-many -t build --projects=datamesh,layers,eidos
 
       - id: "build-docs"
         name: "Build typedoc documentation"
