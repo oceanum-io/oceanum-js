@@ -27,7 +27,6 @@ export default defineConfig({
       // External packages that should not be bundled into your library.
       external: ["react", "react/jsx-runtime"],
     },
-    watch: true,
   },
   optimizeDeps: {
     esbuildOptions: {
