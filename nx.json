@@ -59,7 +59,8 @@
       "options": {
         "command": "build:docs",
         "cwd": "{projectRoot}"
-      }
+      },
+      "dependsOn": ["build"]
     }
   }
 }
