@@ -66,7 +66,7 @@ Renders a scalar variable as coloured grid cells.
 ```javascript
 new OceanumPcolorLayer({
   id: 'sst',
-  serviceUrl: 'https://zarr.datamesh.oceanum.io',
+  serviceUrl: 'https://layers.app.oceanum.io',
   datasource: 'my_dataset',
   variable: 'temperature',
   time: '2024-01-15T00:00:00Z',
