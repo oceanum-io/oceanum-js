@@ -31,7 +31,7 @@ function App() {
     new OceanumPcolorLayer({
       id: "wave-height",
       serviceUrl: SERVICE_URL,
-      authHeaders: { Authorization: `Bearer ${token}` },
+      authHeaders: { "X-DATAMESH-TOKEN": DATAMESH_TOKEN },
       datasource: "oceanum_wave_glob05",
       variable: "hs",
       time,
