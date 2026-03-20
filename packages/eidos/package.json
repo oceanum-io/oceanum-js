@@ -8,7 +8,7 @@
     "dist/"
   ],
   "scripts": {
-    "generate-types": "node ./scripts/generate-interfaces.js"+
+    "generate-types": "node ./scripts/generate-interfaces.js"
   },
   "dependencies": {
     "ajv": "^8.17.1",
