@@ -21,6 +21,8 @@ npm install @oceanum/eidos
 
 ### React Usage (Recommended)
 
+{% raw %}
+
 ```tsx
 import { EidosProvider, useEidosSpec } from "@oceanum/eidos";
 
@@ -67,6 +69,8 @@ function YourComponent() {
   return <button onClick={addLayer}>Add Layer</button>;
 }
 ```
+
+{% endraw %}
 
 ### Vanilla JavaScript Usage
 
@@ -115,6 +119,8 @@ The React Context API allows you to easily manage multiple EIDOS instances in th
 
 **Option 1: Multiple Providers (Recommended)**
 
+{% raw %}
+
 ```tsx
 import { EidosProvider, useEidosSpec } from "@oceanum/eidos";
 
@@ -158,6 +164,8 @@ function ChartControls() {
   return <button onClick={updateData}>Update Data</button>;
 }
 ```
+
+{% endraw %}
 
 **Option 2: Low-Level Render API**
 
