@@ -1,7 +1,3 @@
-**@oceanum/layers**
-
----
-
 # @oceanum/layers
 
 deck.gl layers for visualising gridded data from [Oceanum Datamesh](https://oceanum.io/datamesh-environmental-data-platform/) zarr datasets.

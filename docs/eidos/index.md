@@ -1,6 +1,6 @@
-# EIDOS JavaScript Bindings
+# @oceanum/eidos
 
-A lightweight, reactive JavaScript library for embedding and controlling EIDOS visualizations in web applications. Built with Valtio for natural object mutations and AJV for comprehensive schema validation.
+A lightweight, reactive typescript library for embedding and controlling EIDOS visualizations in web applications or within node processes. Built with Valtio for natural object mutations and AJV for comprehensive schema validation.
 
 ## Features
 

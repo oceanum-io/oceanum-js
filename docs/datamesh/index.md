@@ -1,7 +1,3 @@
-**@oceanum/datamesh**
-
-***
-
 # @oceanum/datamesh
 
 A typescript library for interacting with the Oceanum.io Datamesh.
