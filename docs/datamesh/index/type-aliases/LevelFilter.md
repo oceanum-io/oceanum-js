@@ -1,8 +1,8 @@
-[**@oceanum/datamesh**](../../README.md)
+[**@oceanum/datamesh**](../../index.md)
 
 ***
 
-[@oceanum/datamesh](../../README.md) / [index](../README.md) / LevelFilter
+[@oceanum/datamesh](../../index.md) / [index](../index.md) / LevelFilter
 
 # Type Alias: LevelFilter
 

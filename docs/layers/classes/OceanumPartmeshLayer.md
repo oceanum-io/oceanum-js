@@ -1,8 +1,8 @@
-[**@oceanum/layers**](../README.md)
+[**@oceanum/layers**](../index.md)
 
 ***
 
-[@oceanum/layers](../README.md) / OceanumPartmeshLayer
+[@oceanum/layers](../index.md) / OceanumPartmeshLayer
 
 # Class: OceanumPartmeshLayer
 

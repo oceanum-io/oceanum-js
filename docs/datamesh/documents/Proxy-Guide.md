@@ -1,8 +1,8 @@
-[**@oceanum/datamesh**](../README.md)
+[**@oceanum/datamesh**](../index.md)
 
 ***
 
-[@oceanum/datamesh](../README.md) / Proxy Guide
+[@oceanum/datamesh](../index.md) / Proxy Guide
 
 # Using a Datamesh Proxy with @oceanum/datamesh
 

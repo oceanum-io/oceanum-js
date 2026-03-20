@@ -1,8 +1,8 @@
-[**@oceanum/datamesh**](../../README.md)
+[**@oceanum/datamesh**](../../index.md)
 
 ***
 
-[@oceanum/datamesh](../../README.md) / [index](../README.md) / num2date
+[@oceanum/datamesh](../../index.md) / [index](../index.md) / num2date
 
 # Function: num2date()
 

@@ -81,6 +81,8 @@ export function useEidos({ spec, onEvent, renderer }: UseEidosOptions) {
 
 ## Basic Component
 
+{% raw %}
+
 ```vue
 <!-- components/EidosViewer.vue -->
 <template>
@@ -154,7 +156,11 @@ const { container, loading, error } = useEidos({
 </style>
 ```
 
+{% endraw %}
+
 ## Interactive Example
+
+{% raw %}
 
 ```vue
 <!-- components/InteractiveEidos.vue -->
@@ -325,6 +331,8 @@ const clearEvents = () => {
 </style>
 ```
 
+{% endraw %}
+
 ## Pinia Store Integration
 
 ```typescript
@@ -407,6 +415,8 @@ export const useEidosStore = defineStore('eidos', {
 
 ## Vue Component with Pinia
 
+{% raw %}
+
 ```vue
 <!-- components/EidosWithPinia.vue -->
 <template>
@@ -483,6 +493,8 @@ defineExpose({
 }
 </style>
 ```
+
+{% endraw %}
 
 ## Options API Example
 

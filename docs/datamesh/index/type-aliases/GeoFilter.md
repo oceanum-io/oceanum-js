@@ -1,8 +1,8 @@
-[**@oceanum/datamesh**](../../README.md)
+[**@oceanum/datamesh**](../../index.md)
 
 ***
 
-[@oceanum/datamesh](../../README.md) / [index](../README.md) / GeoFilter
+[@oceanum/datamesh](../../index.md) / [index](../index.md) / GeoFilter
 
 # Type Alias: GeoFilter
 

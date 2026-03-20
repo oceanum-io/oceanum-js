@@ -1,8 +1,8 @@
-[**@oceanum/datamesh**](../../README.md)
+[**@oceanum/datamesh**](../../index.md)
 
 ***
 
-[@oceanum/datamesh](../../README.md) / [index](../README.md) / Data
+[@oceanum/datamesh](../../index.md) / [index](../index.md) / Data
 
 # Type Alias: Data
 

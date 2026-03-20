@@ -61,4 +61,4 @@ Deploy the example Worker at `proxy/cloudflare/index.js` and add a secret `DATAM
 
 ## Other
 
-- [index](index/README.md)
+- [index](index/)

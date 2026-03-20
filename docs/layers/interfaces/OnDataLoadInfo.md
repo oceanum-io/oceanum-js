@@ -1,8 +1,8 @@
-[**@oceanum/layers**](../README.md)
+[**@oceanum/layers**](../index.md)
 
 ***
 
-[@oceanum/layers](../README.md) / OnDataLoadInfo
+[@oceanum/layers](../index.md) / OnDataLoadInfo
 
 # Interface: OnDataLoadInfo
 

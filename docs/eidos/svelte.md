@@ -665,6 +665,8 @@ export function eidosAction(
 
 Using the action:
 
+{% raw %}
+
 ```svelte
 <script lang="ts">
   import { eidosAction } from '../actions/eidos';
@@ -681,6 +683,8 @@ Using the action:
   style="width: 100%; height: 400px;"
 />
 ```
+
+{% endraw %}
 
 ## TypeScript Support
 

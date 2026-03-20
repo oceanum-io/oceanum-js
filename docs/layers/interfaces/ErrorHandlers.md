@@ -1,8 +1,8 @@
-[**@oceanum/layers**](../README.md)
+[**@oceanum/layers**](../index.md)
 
 ***
 
-[@oceanum/layers](../README.md) / ErrorHandlers
+[@oceanum/layers](../index.md) / ErrorHandlers
 
 # Interface: ErrorHandlers
 

@@ -77,6 +77,8 @@ export function useEidos({ spec, onEvent, renderer }: UseEidosOptions) {
 
 ## Basic Component
 
+{% raw %}
+
 ```typescript
 // components/EidosViewer.tsx
 import { CSSProperties } from 'react';
@@ -112,7 +114,11 @@ export function EidosViewer({ spec, onEvent, className }: EidosViewerProps) {
 }
 ```
 
+{% endraw %}
+
 ## Interactive Example
+
+{% raw %}
 
 ```typescript
 // components/InteractiveEidos.tsx
@@ -188,6 +194,8 @@ export function InteractiveEidos() {
   );
 }
 ```
+
+{% endraw %}
 
 ## State Management Integration
 
@@ -296,6 +304,8 @@ export const useEidosStore = create<EidosStore>((set, get) => ({
 
 ## Error Boundaries
 
+{% raw %}
+
 ```typescript
 // components/EidosErrorBoundary.tsx
 import { ErrorBoundary, ReactNode, ComponentType } from 'react';
@@ -326,6 +336,8 @@ export function EidosErrorBoundary({
   );
 }
 ```
+
+{% endraw %}
 
 ## TypeScript Types
 

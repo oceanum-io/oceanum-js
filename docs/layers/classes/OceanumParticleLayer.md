@@ -1,8 +1,8 @@
-[**@oceanum/layers**](../README.md)
+[**@oceanum/layers**](../index.md)
 
 ***
 
-[@oceanum/layers](../README.md) / OceanumParticleLayer
+[@oceanum/layers](../index.md) / OceanumParticleLayer
 
 # Class: OceanumParticleLayer
 

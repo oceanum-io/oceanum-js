@@ -1,8 +1,8 @@
-[**@oceanum/layers**](../README.md)
+[**@oceanum/layers**](../index.md)
 
 ***
 
-[@oceanum/layers](../README.md) / OceanumLayerProps
+[@oceanum/layers](../index.md) / OceanumLayerProps
 
 # Interface: OceanumLayerProps
 

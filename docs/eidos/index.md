@@ -171,6 +171,8 @@ function ChartControls() {
 
 For more control, use the `render()` function directly:
 
+{% raw %}
+
 ```tsx
 import { render } from "@oceanum/eidos";
 import { useEffect, useRef, useState } from "react";
@@ -211,6 +213,8 @@ function MultiInstance() {
   );
 }
 ```
+
+{% endraw %}
 
 **Key Points for Multiple Instances:**
 
