@@ -95,7 +95,10 @@ function zarrSlice(start: number, stop: number): ZarrSlice {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type DatasetVariable = { dimensions: string[]; get: (spec: any) => Promise<any> };
+type DatasetVariable = {
+  dimensions: string[];
+  get: (spec: any) => Promise<any>;
+};
 interface DatasetLike {
   variables: Record<string, DatasetVariable>;
 }

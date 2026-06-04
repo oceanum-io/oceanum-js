@@ -1,11 +1,13 @@
 import { assertType, expect } from "vitest";
-import { Dataset, IDataVar } from "../lib/datamodel";
+import { FeatureCollection } from "geojson";
+import { Dataset } from "../lib/datamodel";
+import { Schema } from "../lib/datasource";
 import { Connector } from "../lib/connector";
 import { datameshTest, DATAMESH_GATEWAY, HEADERS } from "./fixtures";
 
 datameshTest("dataset init", async ({ dataset }) => {
   const coordkeys = { t: "time", x: "lon", y: "lat" };
-  const ds = {
+  const ds: Schema = {
     attributes: dataset.attrs,
     dimensions: dataset.dims,
     variables: {},
@@ -26,16 +28,17 @@ datameshTest("dataset init", async ({ dataset }) => {
   }
   const dstest = await Dataset.init(ds, coordkeys);
   assertType<Record<string, unknown>>(dstest.attributes);
-  assertType<Record<string, IDataVar>>(dstest.variables);
-  const datatest = await dstest.variables.temperature.get();
+  assertType<Record<string, unknown>>(dstest.variables);
+  const datatest =
+    (await dstest.variables.temperature.get()) as Float32Array[][];
   expect(datatest).toBeInstanceOf(Array);
   expect(datatest.length).toBe(10);
   expect(datatest[0].length).toBe(30);
   expect(datatest[0][0].length).toBe(20);
   expect(datatest[3][4][5]).toEqual(
-    dataset.data_vars.temperature.data[3][4][5]
+    (dataset.data_vars.temperature.data as number[][][])[3][4][5],
   );
-  const datatest0 = await dstest.variables.scalar.get();
+  const datatest0 = (await dstest.variables.scalar.get()) as Float32Array;
   expect(datatest0[0]).closeTo(10.1, 0.0001);
 });
 
@@ -44,38 +47,39 @@ datameshTest("dataset zarr", { timeout: 200000 }, async ({ dataset }) => {
   const dstest = await Dataset.zarr(
     DATAMESH_GATEWAY + "/zarr/" + dataset.attrs.id,
     HEADERS,
-    { nocache: true }
+    { nocache: true },
   );
   assertType<Record<string, unknown>>(dstest.attributes);
-  assertType<Record<string, IDataVar>>(dstest.variables);
-  let datatest = await dstest.variables.temperature.get();
+  assertType<Record<string, unknown>>(dstest.variables);
+  let datatest = (await dstest.variables.temperature.get()) as Float32Array[][];
   expect(datatest).toBeInstanceOf(Array);
   expect(datatest.length).toBe(10);
   expect(datatest[0].length).toBe(30);
   expect(datatest[0][0].length).toBe(20);
   expect(datatest[3][4][5]).toEqual(
-    dataset.data_vars.temperature.data[3][4][5]
+    (dataset.data_vars.temperature.data as number[][][])[3][4][5],
   );
-  datatest = await dstest.variables.scalar.get();
-  expect(datatest[0]).closeTo(10.1, 0.0001);
+  let scalarData = (await dstest.variables.scalar.get()) as Float32Array;
+  expect(scalarData[0]).closeTo(10.1, 0.0001);
 
   //Now test with the connector
   const datamesh = new Connector(process.env.DATAMESH_TOKEN, {
     nocache: true,
   });
   const dstest2 = await datamesh.loadDatasource(dataset.attrs.id);
+  if (!dstest2) throw new Error("No dataset returned");
   assertType<Record<string, unknown>>(dstest2.attributes);
-  assertType<Record<string, IDataVar>>(dstest2.variables);
-  datatest = await dstest2.variables.temperature.get();
+  assertType<Record<string, unknown>>(dstest2.variables);
+  datatest = (await dstest2.variables.temperature.get()) as Float32Array[][];
   expect(datatest).toBeInstanceOf(Array);
   expect(datatest.length).toBe(10);
   expect(datatest[0].length).toBe(30);
   expect(datatest[0][0].length).toBe(20);
   expect(datatest[3][4][5]).toEqual(
-    dataset.data_vars.temperature.data[3][4][5]
+    (dataset.data_vars.temperature.data as number[][][])[3][4][5],
   );
-  datatest = await dstest2.variables.scalar.get();
-  expect(datatest[0]).closeTo(10.1, 0.0001);
+  scalarData = (await dstest2.variables.scalar.get()) as Float32Array;
+  expect(scalarData[0]).closeTo(10.1, 0.0001);
 });
 
 datameshTest("dataset fromGeojson", async () => {
@@ -83,21 +87,21 @@ datameshTest("dataset fromGeojson", async () => {
   const invalidGeoJson = {
     type: "FeatureCollection",
   };
-  await expect(Dataset.fromGeojson(invalidGeoJson)).rejects.toThrow(
-    "Invalid FeatureCollection: features array is required"
-  );
+  await expect(
+    Dataset.fromGeojson(invalidGeoJson as unknown as FeatureCollection),
+  ).rejects.toThrow("Invalid FeatureCollection: features array is required");
 
   // Test empty FeatureCollection
   const emptyGeoJson = {
     type: "FeatureCollection",
     features: [],
   };
-  await expect(Dataset.fromGeojson(emptyGeoJson)).rejects.toThrow(
-    "FeatureCollection contains no features"
-  );
+  await expect(
+    Dataset.fromGeojson(emptyGeoJson as unknown as FeatureCollection),
+  ).rejects.toThrow("FeatureCollection contains no features");
 
   // Test valid GeoJSON with multiple features and property types
-  const validGeoJson = {
+  const validGeoJson: FeatureCollection = {
     type: "FeatureCollection",
     features: [
       {
@@ -139,7 +143,7 @@ datameshTest("dataset fromGeojson", async () => {
   // Test that Dataset was created with correct structure
   expect(ds).toBeInstanceOf(Dataset);
   assertType<Record<string, unknown>>(ds.attributes);
-  assertType<Record<string, IDataVar>>(ds.variables);
+  assertType<Record<string, unknown>>(ds.variables);
 
   // Test that all properties were correctly extracted
   expect(Object.keys(ds.variables)).toContain("temperature");
@@ -148,19 +152,19 @@ datameshTest("dataset fromGeojson", async () => {
   expect(Object.keys(ds.variables)).toContain("active");
 
   // Test property values
-  const names = await ds.variables.name.get();
+  const names = (await ds.variables.name.get()) as string[];
   expect(names).toBeInstanceOf(Array);
   expect(names).toHaveLength(2);
   expect(names[0]).toBe("Location A");
   expect(names[1]).toBe("Path B");
 
-  const active = await ds.variables.active.get();
+  const active = (await ds.variables.active.get()) as boolean[];
   expect(active).toBeInstanceOf(Array);
   expect(active).toHaveLength(2);
   expect(active[0]).toBe(true);
   expect(active[1]).toBe(false);
 
-  const temp = await ds.variables.temperature.get();
+  const temp = (await ds.variables.temperature.get()) as Float32Array;
   expect(temp).toBeInstanceOf(Float32Array);
   expect(temp).toHaveLength(2);
   expect(temp[0]).toBe(15.5);
@@ -170,7 +174,7 @@ datameshTest("dataset fromGeojson", async () => {
   const customcoordkeys = { t: "time", g: "geometry" };
   const dsWithcoordkeys = await Dataset.fromGeojson(
     validGeoJson,
-    customcoordkeys
+    customcoordkeys,
   );
   expect(dsWithcoordkeys.coordkeys).toEqual(customcoordkeys);
 });

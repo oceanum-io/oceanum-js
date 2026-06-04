@@ -1,3 +1,4 @@
+import { Geometry } from "geojson";
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
 import { Dataset, HttpZarr, TempZarr } from "./datamodel";
@@ -152,8 +153,9 @@ export class Connector {
     if (response.status >= 400) {
       let message: string;
       try {
-        const errorJson = await response.json();
-        message = errorJson.detail;
+        const errorJson = (await response.json()) as { detail?: string };
+        message =
+          errorJson.detail ?? `Datamesh server error: ${response.status}`;
       } catch {
         message = `Datamesh server error: ${await response.text()}`;
       }
@@ -282,12 +284,12 @@ export class Connector {
       body: data,
     });
     if (response.status >= 400) {
-      const errorJson = await response.json();
+      const errorJson = (await response.json()) as { detail?: string };
       throw new Error(errorJson.detail);
     } else if (response.status === 204) {
       return null;
     } else {
-      return response.json();
+      return (await response.json()) as Stage;
     }
   }
 
@@ -356,12 +358,15 @@ export class Connector {
   //@measureTime
   async getDatasource(datasourceId: string): Promise<Datasource> {
     const meta = await this.metadataRequest(datasourceId);
-    const metaDict = await meta.json();
+    const metaDict = (await meta.json()) as {
+      geometry?: Geometry;
+      properties?: Record<string, unknown>;
+    };
     return {
       id: datasourceId,
       geom: metaDict.geometry,
       ...metaDict.properties,
-    };
+    } as Datasource;
   }
 
   /**

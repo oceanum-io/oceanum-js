@@ -62,7 +62,7 @@ export default class OceanumParticleLayer extends OceanumBaseLayer {
       npart: p.npart,
       size: p.size,
       length: p.length,
-      pickable: p.pickable,
+      pickable: false,
       visible: p.visible,
     });
   }

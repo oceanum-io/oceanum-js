@@ -2,9 +2,29 @@
 
 import { test } from "vitest";
 import { Datasource } from "../lib/datasource";
+import { Data } from "../lib/datamodel";
+
+export type DataframeRow = {
+  time: string;
+  temperature: number;
+  elevation: number;
+};
+export type DataframeFixture = { data: DataframeRow[] };
+
+export type DatasetFixtureVar = {
+  dims: string[];
+  attrs: Record<string, string | number>;
+  data: Data;
+};
+export type DatasetFixture = {
+  attrs: { id: string };
+  dims: Record<string, number>;
+  coords: Record<string, DatasetFixtureVar>;
+  data_vars: Record<string, DatasetFixtureVar>;
+};
 
 const DATAMESH_TOKEN: string = process.env.DATAMESH_TOKEN || "$DATAMESH_TOKEN";
-export const HEADERS: HeadersInit = {
+export const HEADERS: Record<string, string> = {
   Authorization: `Token ${DATAMESH_TOKEN}`,
   "X-DATAMESH-TOKEN": DATAMESH_TOKEN,
   Accept: "application/json",
@@ -32,7 +52,7 @@ const datasource: Datasource = {
 const createFloatArray = (
   dims: number[],
   depth = 0,
-  typed = false
+  typed = false,
 ): number[] | Float32Array | Float32Array[] => {
   const size = dims[depth];
   const array =
@@ -96,7 +116,7 @@ export const datameshTest = test.extend({
       headers: HEADERS,
     });
   },
-  dataset: async ({}, use: (ds: object) => Promise<void>) => {
+  dataset: async ({}, use: (ds: DatasetFixture) => Promise<void>) => {
     const ds = {
       attrs: { id: "oceanum-js-test-ds" },
       dims: { one: 1, time: 10, lon: 20, lat: 30 },
@@ -166,7 +186,7 @@ export const datameshTest = test.extend({
       headers: HEADERS,
     });
   },
-  dataframe: async ({}, use: (df: object) => Promise<void>) => {
+  dataframe: async ({}, use: (df: DataframeFixture) => Promise<void>) => {
     // setup the fixture before each test function
     const df = {
       schema: {

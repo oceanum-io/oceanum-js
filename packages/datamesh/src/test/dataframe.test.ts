@@ -1,4 +1,5 @@
 import { expect } from "vitest";
+import { Point } from "geojson";
 import { Connector } from "../lib/connector";
 import { datameshTest } from "./fixtures";
 
@@ -6,6 +7,7 @@ datameshTest("dataframe", { timeout: 100000 }, async ({ dataframe }) => {
   // Test with the connector
   const datamesh = new Connector(process.env.DATAMESH_TOKEN);
   const df = await datamesh.loadDatasource("oceanum-js-test-df");
+  if (!df) throw new Error("No dataset returned");
   const data = await df.asDataframe();
 
   // Test data structure
@@ -30,6 +32,7 @@ datameshTest("geodataframe", { timeout: 100000 }, async ({ geodataframe }) => {
   // Test with the connector
   const datamesh = new Connector(process.env.DATAMESH_TOKEN);
   const gdf = await datamesh.loadDatasource("oceanum-js-test-gdf");
+  if (!gdf) throw new Error("No dataset returned");
   const data = await gdf.asGeojson();
 
   // Test GeoJSON structure
@@ -41,15 +44,17 @@ datameshTest("geodataframe", { timeout: 100000 }, async ({ geodataframe }) => {
   const feature = data.features[0];
   expect(feature.type).toBe("Feature");
   expect(feature.geometry.type).toBe("Point");
-  expect(Array.isArray(feature.geometry.coordinates)).toBe(true);
+  expect(Array.isArray((feature.geometry as Point).coordinates)).toBe(true);
   expect(feature.properties).toBeDefined();
 
   // Test spatial progression
-  const coordinates = data.features.map((f) => f.geometry.coordinates[0]);
+  const coordinates = data.features.map(
+    (f) => (f.geometry as Point).coordinates[0],
+  );
   expect(coordinates).toEqual([174.0, 174.1, 174.2]);
 
   // Test time series
-  const times = data.features.map((f) => f.properties.time);
+  const times = data.features.map((f) => f.properties?.time);
   expect(times).toEqual([
     "1970-01-01T00:00:00.000Z",
     "1970-01-02T00:00:00.000Z",
@@ -57,7 +62,7 @@ datameshTest("geodataframe", { timeout: 100000 }, async ({ geodataframe }) => {
   ]);
 
   // Test numeric values
-  const temperatures = data.features.map((f) => f.properties.temperature);
+  const temperatures = data.features.map((f) => f.properties?.temperature);
   expect(temperatures).toEqual([15.5, 15.8, 15.3]);
 });
 
@@ -68,6 +73,7 @@ datameshTest(
     // Test with the connector
     const datamesh = new Connector(process.env.DATAMESH_TOKEN);
     const df = await datamesh.loadDatasource("oceanum-js-test-df");
+    if (!df) throw new Error("No dataset returned");
     const data = await df.asGeojson({
       type: "Point",
       coordinates: [174.0, -41.0],
@@ -82,19 +88,19 @@ datameshTest(
     const feature = data.features[0];
     expect(feature.type).toBe("Feature");
     expect(feature.geometry.type).toBe("Point");
-    expect(feature.geometry.coordinates).toEqual([174.0, -41.0]);
+    expect((feature.geometry as Point).coordinates).toEqual([174.0, -41.0]);
     expect(feature.properties).toBeDefined();
 
     // Test properties from dataframe
-    expect(feature.properties.temperature).toBeDefined();
-    expect(feature.properties.time).toBeDefined();
+    expect(feature.properties?.temperature).toBeDefined();
+    expect(feature.properties?.time).toBeDefined();
 
     // Test time series
-    const times = data.features.map((f) => f.properties.time);
+    const times = data.features.map((f) => f.properties?.time);
     expect(times).toEqual(dataframe.data.map((row) => row.time));
 
     // Test numeric values
-    const temperatures = data.features.map((f) => f.properties.temperature);
+    const temperatures = data.features.map((f) => f.properties?.temperature);
     expect(temperatures).toEqual(dataframe.data.map((row) => row.temperature));
-  }
+  },
 );

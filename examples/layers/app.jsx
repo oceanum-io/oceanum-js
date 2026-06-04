@@ -133,6 +133,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         opacity: 0.8,
         scale: 1.92,
         pickable: true,
+        tooltip: "{value:.1f} m/s",
         onDataLoad: handleDataLoad,
         errorHandlers: errorHooks,
       }),
@@ -251,6 +252,7 @@ const AUTH_HEADERS = { X-DATAMESH-TOKEN: 'YOUR_TOKEN' };`}</pre>
         controller={true}
         layers={layers}
         views={new MapView({ repeat: true })}
+        getTooltip={(info) => info.object?.tooltip ?? null}
       >
         {MAPBOX_TOKEN && (
           <Map

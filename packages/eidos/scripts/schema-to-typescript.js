@@ -330,16 +330,19 @@ export interface ${name} {
    */
   toPascalCase(str) {
     if (!str) return '';
-    
+
     // Replace non-alphanumeric characters with spaces
     const normalized = str.replace(/[^a-zA-Z0-9]/g, ' ');
-    
+
     // Convert to PascalCase
-    return normalized
+    const result = normalized
       .split(' ')
       .filter(word => word.length > 0)
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join('');
+
+    // Identifiers cannot start with a digit — prefix with _ if needed
+    return /^\d/.test(result) ? `_${result}` : result;
   }
 
   /**

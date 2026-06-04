@@ -115,7 +115,9 @@ export class CachedHTTPStore implements AsyncReadable {
       );
     }
     const disableCache =
-      options.ttl === 0 || options.nocache || typeof window === "undefined";
+      options.ttl === 0 ||
+      options.nocache ||
+      typeof (globalThis as { window?: unknown }).window === "undefined";
     if (disableCache) {
       this.cache = undefined;
     } else {

@@ -19,14 +19,14 @@ describe("fill_value and NaN handling", () => {
               attributes: {},
               dimensions: ["x"],
               // null values should be converted to NaN
-              data: [1.0, null, 3.0, null, 5.0],
+              data: [1.0, null, 3.0, null, 5.0] as unknown as number[],
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
-      const data = await ds.variables.data_with_nulls.get();
+      const data = (await ds.variables.data_with_nulls.get()) as Float32Array;
       expect(data).toBeInstanceOf(Float32Array);
       expect(data[0]).toBe(1.0);
       expect(Number.isNaN(data[1])).toBe(true);
@@ -55,10 +55,10 @@ describe("fill_value and NaN handling", () => {
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
-      const data = await ds.variables.data_with_nan.get();
+      const data = (await ds.variables.data_with_nan.get()) as Float64Array;
       expect(data).toBeInstanceOf(Float64Array);
       expect(data[0]).toBe(1.0);
       expect(Number.isNaN(data[1])).toBe(true);
@@ -90,11 +90,11 @@ describe("fill_value and NaN handling", () => {
               data: [
                 [1.0, null, 3.0],
                 [null, 5.0, null],
-              ],
+              ] as unknown as number[][],
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
       const data = (await ds.variables.grid.get()) as number[][];
@@ -123,11 +123,11 @@ describe("fill_value and NaN handling", () => {
             values: {
               attributes: { units: "test" },
               dimensions: ["x"],
-              data: [1.0, null, 3.0, null, 5.0],
+              data: [1.0, null, 3.0, null, 5.0] as unknown as number[],
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
       // Export to zarr format
@@ -162,10 +162,10 @@ describe("fill_value and NaN handling", () => {
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
-      const data = await ds.variables.test_data.get();
+      const data = (await ds.variables.test_data.get()) as Float32Array;
       expect(data[0]).toBe(1.0);
       expect(Number.isNaN(data[1])).toBe(true);
       expect(data[2]).toBe(3.0);
@@ -194,10 +194,10 @@ describe("fill_value and NaN handling", () => {
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
-      const data = await ds.variables.values.get();
+      const data = (await ds.variables.values.get()) as Float32Array;
       expect(data).toBeInstanceOf(Float32Array);
       expect(data[0]).toBe(1.0);
       expect(Number.isNaN(data[1])).toBe(true);
@@ -229,10 +229,10 @@ describe("fill_value and NaN handling", () => {
             },
           },
         },
-        coordkeys
+        coordkeys,
       );
 
-      const data = await ds.variables.values.get();
+      const data = (await ds.variables.values.get()) as Float64Array;
       expect(data).toBeInstanceOf(Float64Array);
       expect(data[0]).toBe(1.0);
       expect(Number.isNaN(data[1])).toBe(true);

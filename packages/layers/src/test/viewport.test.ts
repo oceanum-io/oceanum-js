@@ -1,12 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
-import { getViewportBbox, bboxContained, debounce } from "../utils/viewport";
+import {
+  getViewportBbox,
+  bboxContained,
+  bboxIntersects,
+  debounce,
+} from "../utils/viewport";
 
 describe("getViewportBbox", () => {
   const mockViewport = {
-    getBounds: (): [[number, number], [number, number]] => [
-      [170, -40], // [west, south]
-      [180, -30], // [east, north]
-    ],
+    getBounds: (): [number, number, number, number] => [170, -40, 180, -30],
   };
 
   it("extracts bbox with default padding", () => {
@@ -25,10 +27,7 @@ describe("getViewportBbox", () => {
 
   it("clamps latitude to [-90, 90]", () => {
     const polarViewport = {
-      getBounds: (): [[number, number], [number, number]] => [
-        [-180, -88],
-        [180, 88],
-      ],
+      getBounds: (): [number, number, number, number] => [-180, -88, 180, 88],
     };
     const bbox = getViewportBbox(polarViewport, 0.1);
     expect(bbox.south).toBeGreaterThanOrEqual(-90);
@@ -66,6 +65,59 @@ describe("bboxContained", () => {
     expect(bboxContained({ west: 0, south: 0, east: 1, north: 1 }, null)).toBe(
       false,
     );
+  });
+});
+
+describe("bboxIntersects", () => {
+  const extent = { west: 160, south: -50, east: 190, north: -20 };
+
+  it("returns true when boxes overlap", () => {
+    expect(
+      bboxIntersects({ west: 170, south: -40, east: 180, north: -30 }, extent),
+    ).toBe(true);
+  });
+
+  it("returns true when one box partially overlaps on the west side", () => {
+    expect(
+      bboxIntersects({ west: 150, south: -40, east: 165, north: -30 }, extent),
+    ).toBe(true);
+  });
+
+  it("returns false when box is entirely to the west", () => {
+    expect(
+      bboxIntersects({ west: 100, south: -40, east: 159, north: -30 }, extent),
+    ).toBe(false);
+  });
+
+  it("returns false when box is entirely to the east", () => {
+    expect(
+      bboxIntersects({ west: 191, south: -40, east: 200, north: -30 }, extent),
+    ).toBe(false);
+  });
+
+  it("returns false when box is entirely to the south", () => {
+    expect(
+      bboxIntersects({ west: 170, south: -80, east: 180, north: -51 }, extent),
+    ).toBe(false);
+  });
+
+  it("returns false when box is entirely to the north", () => {
+    expect(
+      bboxIntersects({ west: 170, south: -19, east: 180, north: 0 }, extent),
+    ).toBe(false);
+  });
+
+  it("returns false when second argument is null", () => {
+    expect(
+      bboxIntersects({ west: 170, south: -40, east: 180, north: -30 }, null),
+    ).toBe(false);
+  });
+
+  it("returns false when boxes only touch on an edge", () => {
+    // touching: a.west === b.east → a.west < b.east is false
+    expect(
+      bboxIntersects({ west: 190, south: -40, east: 200, north: -30 }, extent),
+    ).toBe(false);
   });
 });
 

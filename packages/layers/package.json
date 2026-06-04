@@ -1,6 +1,6 @@
 {
   "name": "@oceanum/layers",
-  "version": "0.1.6",
+  "version": "9.3.0",
   "description": "deck.gl layers for visualising gridded data from Oceanum datamesh zarr datasets",
   "scripts": {
     "build": "vite build",
@@ -14,19 +14,20 @@
   ],
   "dependencies": {
     "@oceanum/datamesh": "^0.8.1",
-    "@oceanum/deck-gl-grid": "^9.2.4"
+    "@oceanum/deck-gl-grid": "~9.3.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^9.2.6",
-    "@deck.gl/layers": "^9.2.6",
-    "@deck.gl/geo-layers": "^9.2.6",
-    "@luma.gl/core": "^9.2.6"
+    "@deck.gl/core": "~9.3.0",
+    "@deck.gl/layers": "~9.3.0",
+    "@deck.gl/geo-layers": "~9.3.0",
+    "@luma.gl/core": "~9.3.2"
   },
   "devDependencies": {
-    "@deck.gl/core": "^9.2.6",
-    "@deck.gl/layers": "^9.2.6",
-    "@deck.gl/geo-layers": "^9.2.6",
-    "@luma.gl/core": "^9.2.6"
+    "@deck.gl/core": "~9.3.0",
+    "@deck.gl/layers": "~9.3.0",
+    "@deck.gl/geo-layers": "~9.3.0",
+    "@luma.gl/core": "~9.3.2",
+    "@luma.gl/webgl": "~9.3.2"
   },
   "type": "module",
   "main": "./dist/index.js",
@@ -36,7 +37,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.js"
     }
   }
 }

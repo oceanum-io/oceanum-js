@@ -244,19 +244,18 @@ const get_strides = (shape: readonly number[]) => {
 };
 
 const unravel = <T extends DataType>(
-  data: TypedArray<T>,
+  data: TypedArray<T> | Scalar[],
   shape: number[],
   stride: number[],
   offset = 0,
 ): Data => {
-  // @ts-expect-error: Is array
+  // @ts-expect-error: TypedArrays and vanilla arrays are both indexable
   if (shape.length === 0) return data[0];
   if (shape.length === 1) {
-    // @ts-expect-error: Is array
-    const arr = new data.constructor(shape[0]);
-    // @ts-expect-error: Is array
-    arr.set(data.slice(offset, offset + shape[0]));
-    return arr;
+    // Both TypedArrays and vanilla arrays support slice, which returns the
+    // same kind (a typed array slice stays typed, an array slice stays an array).
+    // @ts-expect-error: TypedArrays and vanilla arrays both have a (start, end) slice
+    return data.slice(offset, offset + shape[0]);
   }
 
   const arr = new Array(shape[0]);
@@ -500,9 +499,9 @@ export class DataVar<
       _index as SliceDef,
     );
     if (this.arr.dtype == "v2:object" || !_data.shape) {
-      return _data.data as Data;
+      return unravel(_data.data, _data.shape, _data.stride) as Data;
     } else if (this.arr.dtype == "bool") {
-      return [..._data.data] as Data;
+      return unravel([..._data.data], _data.shape, _data.stride) as Data;
     } else {
       const attrs = this.arr.attrs as Record<string, unknown>;
       const dtype = this.arr.dtype as string;

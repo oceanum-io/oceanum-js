@@ -39,6 +39,9 @@
     "@oceanum/eidos": "^0.1.0",
     "@oceanum/layers": "^0.1.0"
   },
+  "overrides": {
+    "@luma.gl/webgl": "~9.2.6"
+  },
   "workspaces": [
     "packages/*"
   ],

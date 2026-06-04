@@ -1,8 +1,10 @@
 import { proxy, subscribe, snapshot, Proxy } from 'valtio/vanilla';
 import { validateSchema } from './eidosmodel';
 import { EidosSpec } from '../schema/interfaces';
+import { version } from '../../package.json';
 
-const DEFAULT_RENDERER = 'https://render.eidos.oceanum.io';
+const MINOR_VERSION = version.split('.').slice(0, 2).join('.');
+const DEFAULT_RENDERER = `https://render.eidos.oceanum.io/v${MINOR_VERSION}/index.html`;
 
 /**
  * Options for rendering an EIDOS spec
@@ -16,6 +18,8 @@ export interface RenderOptions {
   renderer?: string;
   /** Authentication token to pass to the renderer for data fetching */
   authToken?: string | (() => string | Promise<string>);
+  /** Optional callback when the spec proxy changes (for syncing to external state like Yjs) */
+  onChange?: (snapshot: EidosSpec) => void;
 }
 
 /**
@@ -32,6 +36,8 @@ export interface RenderResult {
   iframe: HTMLIFrameElement;
   /** Destroy the renderer and clean up resources */
   destroy: () => void;
+  /** Send an event action to the renderer's event bus */
+  triggerAction: (payload: unknown) => void;
 }
 
 /**
@@ -46,16 +52,19 @@ const render = async (
   spec: EidosSpec,
   options: RenderOptions = {},
 ): Promise<RenderResult> => {
-  const { id, eventListener, renderer = DEFAULT_RENDERER, authToken } = options;
+  const { id, eventListener, renderer = DEFAULT_RENDERER, authToken, onChange } = options;
 
   // Check if this container is already initialized
   // We check both for an existing iframe and a marker on the container itself
   // This prevents double-mounting even if destroy() was called but the container is being reused
   const existingIframe = element.querySelector('iframe[data-eidos-renderer]');
-  const isInitialized = element.getAttribute('data-eidos-initialized') === 'true';
+  const isInitialized =
+    element.getAttribute('data-eidos-initialized') === 'true';
 
   if (existingIframe || isInitialized) {
-    throw new Error('EIDOS renderer already mounted in this container. Call destroy() before re-rendering.');
+    throw new Error(
+      'EIDOS renderer already mounted in this container. Call destroy() before re-rendering.',
+    );
   }
 
   // Mark container as initialized
@@ -105,6 +114,11 @@ const render = async (
       };
 
       messageHandler = (event: MessageEvent) => {
+        // Debug: log all messages from iframe
+        if (event.source === win && event.data?.type) {
+          console.log('[EIDOS] Message from renderer:', event.data.type, event.data);
+        }
+
         if (event.source !== win) return;
 
         // Check ID only if both message and expected ID exist
@@ -134,14 +148,20 @@ const render = async (
 
       // Subscribe to changes and send patches to renderer
       unsubscribe = subscribe(eidos, () => {
+        const currentSnapshot = snapshot(eidos);
+
+        // Send to renderer iframe
         win?.postMessage(
           {
             id: _id,
             type: 'spec',
-            payload: snapshot(eidos),
+            payload: currentSnapshot,
           },
           '*',
         );
+
+        // Notify parent of changes (for Yjs sync, etc.)
+        onChange?.(currentSnapshot as EidosSpec);
       });
 
       // Send initial auth token if provided (in case init already happened)
@@ -149,9 +169,14 @@ const render = async (
         sendAuth(authToken);
       }
 
+      const triggerAction = (payload: unknown) => {
+        win?.postMessage({ id: _id, type: 'event', payload }, '*');
+      };
+
       resolve({
         spec: eidos,
         updateAuth: sendAuth,
+        triggerAction,
         iframe,
         destroy: () => {
           if (messageHandler) {

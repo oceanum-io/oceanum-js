@@ -46,7 +46,7 @@ export class Session {
       session._connection = connection;
 
       // Register cleanup function for when the process exits
-      if (typeof process !== "undefined" && process.on) {
+      if (typeof process !== "undefined" && typeof process.on === "function") {
         session._beforeExitHandler = () => {
           void session.close();
         };
@@ -71,7 +71,14 @@ export class Session {
         throw new Error(`Failed to create session: ${await response.text()}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as {
+        id: string;
+        user: string;
+        creation_time: string;
+        end_time: string;
+        write: boolean;
+        verified?: boolean;
+      };
       const session = new Session();
       session.id = data.id;
       session.user = data.user;
@@ -82,7 +89,7 @@ export class Session {
       session._connection = connection;
 
       // Register cleanup function for when the process exits
-      if (typeof process !== "undefined" && process.on) {
+      if (typeof process !== "undefined" && typeof process.on === "function") {
         session._beforeExitHandler = () => {
           void session.close();
         };

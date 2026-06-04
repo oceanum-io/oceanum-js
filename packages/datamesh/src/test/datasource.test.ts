@@ -13,10 +13,12 @@ test("datasource type", () => {
       dims: {},
       data_vars: {},
     },
+    coordinates: {},
+    driver: "onzarr",
   };
-  assertType<Record<string, unknown>>(datasource.schema.attrs);
+  assertType<Record<string, unknown> | undefined>(datasource.schema.attrs);
   assertType<Record<string, unknown>>(datasource.schema.dims);
-  assertType<Record<string, unknown>>(datasource.schema.data_vars);
+  assertType<Record<string, unknown> | undefined>(datasource.schema.data_vars);
 });
 
 datameshTest("datasource_metadata", async ({ metadata }) => {

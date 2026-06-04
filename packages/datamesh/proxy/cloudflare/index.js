@@ -1,7 +1,7 @@
 //Example cloudfalre worker reverse proxy
 //Add your datamesh token as a secret in the cloudflare worker environment
 
-const DATAMESH = "https://datamesh-v1.oceanum.io";
+const DATAMESH = "https://datamesh.oceanum.io";
 
 export default {
   async fetch(request, env, ctx) {

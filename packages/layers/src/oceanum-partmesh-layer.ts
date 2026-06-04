@@ -70,7 +70,7 @@ export default class OceanumPartmeshLayer extends OceanumBaseLayer {
         width: p.meshWidth,
         size: p.meshSize,
       },
-      pickable: p.pickable,
+      pickable: false,
       visible: p.visible,
     });
   }

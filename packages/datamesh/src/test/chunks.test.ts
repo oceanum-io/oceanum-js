@@ -56,12 +56,13 @@ test("dataset init with global chunk config", async () => {
   expect(dataset.variables.time.arr.chunks).toEqual([5]);
 
   // Verify data integrity
-  const timeData = await dataset.variables.time.get();
+  const timeData = (await dataset.variables.time.get()) as number[];
   expect(timeData).toHaveLength(10);
   expect(timeData[0]).toBe(0);
   expect(timeData[9]).toBe(9 * 86400);
 
-  const tempData = await dataset.variables.temperature.get();
+  const tempData =
+    (await dataset.variables.temperature.get()) as Float32Array[][];
   expect(tempData).toHaveLength(10);
   expect(tempData[0]).toHaveLength(20);
   expect(tempData[0][0]).toHaveLength(30);
