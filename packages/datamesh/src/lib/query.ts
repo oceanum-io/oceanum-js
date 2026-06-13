@@ -70,6 +70,17 @@ export type LevelFilter = {
 
 /**
  * TimeFilter type representing a temporal subset or interpolation.
+ *
+ * Each entry in `times` may be an absolute time (a `Date`, a dayjs object or an
+ * ISO8601 datetime string) or a period relative to the current time (a dayjs
+ * duration or an ISO8601 duration string such as `"P7D"`).
+ *
+ * Periods follow the ISO8601-2 convention where a leading minus sign denotes a
+ * negative period. A period is resolved relative to the current time: a
+ * positive period (e.g. `"P7D"`) resolves to a time *after* now, while a
+ * negative period (e.g. `"-P7D"`) resolves to a time *before* now. This applies
+ * equally to the start and end of a range, so e.g. `times: ["-P7D", "P1D"]`
+ * selects from 7 days before now to 1 day after now.
  */
 export type TimeFilter = {
   type?: TimeFilterType;
@@ -78,22 +89,35 @@ export type TimeFilter = {
   resample?: ResampleType;
 };
 
+/**
+ * Convert a time or period value into the string used in the query payload.
+ *
+ * Absolute times become ISO8601 datetime strings; periods become ISO8601
+ * duration strings, preserving the ISO8601-2 sign so that negative periods
+ * (e.g. `"-P7D"`) are sent through unchanged rather than being coerced to
+ * positive ones.
+ */
 const stringifyTime = (
-  t: Date | dayjs.Dayjs | duration.Duration | string
+  t: Date | dayjs.Dayjs | duration.Duration | string,
 ): string => {
   if (t instanceof Date) {
-    return dayjs(t as Date).toISOString();
-  } else if (t instanceof dayjs) {
-    return (t as dayjs.Dayjs).toISOString();
-  } else if (t instanceof dayjs.duration) {
-    return (t as duration.Duration).toISOString();
-  } else {
-    try {
-      return dayjs.duration(t as string).toISOString();
-    } catch {
-      return dayjs(t as string).toISOString();
-    }
+    return dayjs(t).toISOString();
+  } else if (dayjs.isDayjs(t)) {
+    return t.toISOString();
+  } else if (dayjs.isDuration(t)) {
+    // Duration objects already encode the sign in toISOString().
+    return t.toISOString();
   }
+  const s = t as string;
+  // ISO8601 duration: optional ISO8601-2 sign followed by 'P...'.
+  const match = s.match(/^([+-])?P/);
+  if (match) {
+    // dayjs.duration() drops the leading sign when parsing a string, so strip
+    // and re-apply it to preserve negative periods.
+    const sign = match[1] === "-" ? "-" : "";
+    return sign + dayjs.duration(s.replace(/^[+-]/, "")).toISOString();
+  }
+  return dayjs(s).toISOString();
 };
 
 const timeFilterValidate = (timefilter: TimeFilter): TimeFilter => {
