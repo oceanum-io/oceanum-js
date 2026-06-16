@@ -262,6 +262,29 @@ export class Connector {
   }
 
   /**
+   * Download a staged query's data in a given file format.
+   *
+   * Fetches the staged result from the gateway with the requested `f` format
+   * (e.g. "nc" for NetCDF, "csv", "geojson", "arrow") and returns the raw
+   * response bytes. Use {@link stageRequest} first to obtain the `qhash` (and
+   * to inspect `formats`/`coordkeys`).
+   *
+   * @param qhash - The hash of a staged query (from {@link stageRequest}).
+   * @param format - The `f` query parameter, e.g. "nc" for NetCDF.
+   * @returns The raw response body as an ArrayBuffer.
+   */
+  @measureTime
+  async getDataObject(qhash: string, format: string): Promise<ArrayBuffer> {
+    const headers = await this.getSessionHeaders();
+    const response = await fetch(
+      `${this._gateway}/oceanql/${qhash}?f=${encodeURIComponent(format)}`,
+      { headers },
+    );
+    await this.validateResponse(response);
+    return response.arrayBuffer();
+  }
+
+  /**
    * Stage a query to the datamesh.
    *
    * @param query - The query to stage.
