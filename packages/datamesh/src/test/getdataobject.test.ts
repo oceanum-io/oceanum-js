@@ -3,7 +3,6 @@ import { Connector } from "../lib/connector";
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  vi.restoreAllMocks();
 });
 
 // Mock fetch: /session → 404 (treat as API v0, no session handshake), and the
