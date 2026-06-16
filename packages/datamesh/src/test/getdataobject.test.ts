@@ -54,9 +54,16 @@ describe("Connector.getDataObject", () => {
     const calls = stubFetch();
     const c = await makeConnector();
     await c.getDataObject("Q", "application/x-netcdf");
-    expect(
-      calls.some((u) => u.endsWith("/oceanql/Q?f=application%2Fx-netcdf")),
-    ).toBe(true);
+    expect(calls).toContain(
+      "https://gw.test/oceanql/Q?f=application%2Fx-netcdf",
+    );
+  });
+
+  it("returns an empty ArrayBuffer for an empty 200 response", async () => {
+    stubFetch({ body: new Uint8Array([]) });
+    const c = await makeConnector();
+    const buf = await c.getDataObject("QHASH", "nc");
+    expect(buf.byteLength).toBe(0);
   });
 
   it("throws on a server error", async () => {

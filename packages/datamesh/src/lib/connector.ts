@@ -275,11 +275,14 @@ export class Connector {
    */
   @measureTime
   async getDataObject(qhash: string, format: string): Promise<ArrayBuffer> {
-    const headers = await this.getSessionHeaders();
-    const response = await fetch(
-      `${this._gateway}/oceanql/${qhash}?f=${encodeURIComponent(format)}`,
-      { headers },
+    // The gateway selects the response format from the `f` query parameter;
+    // we send Accept: */* so it is free to return any matching content type.
+    const headers = await this.getSessionHeaders({ Accept: "*/*" });
+    const url = new URL(
+      `${this._gateway}/oceanql/${encodeURIComponent(qhash)}`,
     );
+    url.searchParams.set("f", format);
+    const response = await fetch(url.toString(), { headers });
     await this.validateResponse(response);
     return response.arrayBuffer();
   }
