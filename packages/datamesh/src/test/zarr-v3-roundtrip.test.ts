@@ -48,7 +48,7 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
     vi.clearAllMocks();
   });
 
-  test("roundtrips a gridded dataset (dims, coords, variables)", async () => {
+  test("roundtrips a gridded dataset incl. multi-chunk + int64", async () => {
     const ds = await Dataset.init(
       {
         dimensions: { y: 2, x: 3 },
@@ -65,6 +65,8 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
             data: [1, 2],
             dtype: "float64",
           },
+          // Chunked 1 row at a time → the v3 chunk-key path (c/0/0, c/1/0) is
+          // exercised rather than a single full-shape chunk.
           temp: {
             dimensions: ["y", "x"],
             attributes: {},
@@ -73,6 +75,14 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
               [4.5, 5.5, 6.5],
             ],
             dtype: "float64",
+            chunks: [1, 3],
+          },
+          // int64 (BigInt64Array) survives the roundtrip.
+          id: {
+            dimensions: ["x"],
+            attributes: {},
+            data: new BigInt64Array([100n, 200n, 300n]),
+            dtype: "int64",
           },
         },
         attributes: {},
@@ -84,7 +94,12 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
     mockStoreData = consolidateV3(written);
 
     const read = await Dataset.zarr("http://example.com/data.zarr", {});
-    expect(Object.keys(read.variables).sort()).toEqual(["temp", "x", "y"]);
+    expect(Object.keys(read.variables).sort()).toEqual([
+      "id",
+      "temp",
+      "x",
+      "y",
+    ]);
     expect(read.dimensions).toEqual({ y: 2, x: 3 });
     expect(read.coordkeys).toEqual({ x: "x", y: "y" });
 
@@ -97,6 +112,36 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
       [1.5, 2.5, 3.5],
       [4.5, 5.5, 6.5],
     ]);
+
+    // int64 reads back as BigInt64Array; compare as numbers.
+    const id = (await read.variables.id.get()) as ArrayLike<bigint>;
+    expect(Array.from(id, Number)).toEqual([100, 200, 300]);
+  });
+
+  test("throws without consolidated metadata (proves the path is load-bearing)", async () => {
+    const ds = await Dataset.init(
+      {
+        dimensions: { x: 3 },
+        variables: {
+          x: {
+            dimensions: ["x"],
+            attributes: {},
+            data: [10, 20, 30],
+            dtype: "float64",
+          },
+        },
+        attributes: {},
+      },
+      { x: "x" },
+    );
+    mockStoreData = consolidateV3(await ds.toZarr());
+    // Drop the consolidated manifest: without it the store can't enumerate
+    // variables, so Dataset.zarr must reject (confirms the prior tests really
+    // exercise the consolidated path, not some fallback).
+    mockStoreData.delete("/.zmetadata");
+    await expect(
+      Dataset.zarr("http://example.com/data.zarr", {}),
+    ).rejects.toThrow(/consolidated metadata/i);
   });
 
   test("roundtrips a GeoJSON dataset (WKB geometry + mixed-dtype properties)", async () => {
@@ -129,7 +174,18 @@ describe("Dataset.zarr reads back a v3 store written by toZarr", () => {
     // The object/json2-coded columns survive the v3 roundtrip.
     const names = (await read.variables.name.get()) as ArrayLike<string>;
     expect(Array.from(names)).toEqual(["a", "b"]);
-    const geom = (await read.variables.geometry.get()) as ArrayLike<unknown>;
-    expect(Array.from(geom)).toHaveLength(2);
+    const n = (await read.variables.n.get()) as ArrayLike<number>;
+    expect(Array.from(n, Number)).toEqual([1, 2]);
+    // Geometry (json2-coded objects) round-trips with structure intact.
+    const geom = Array.from(
+      (await read.variables.geometry.get()) as ArrayLike<{
+        type?: string;
+        coordinates?: number[];
+      }>,
+    );
+    expect(geom).toEqual([
+      { type: "Point", coordinates: [1, 2] },
+      { type: "Point", coordinates: [3, 4] },
+    ]);
   });
 });
