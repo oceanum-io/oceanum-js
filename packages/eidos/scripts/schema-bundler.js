@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
-import crypto from "crypto";
-import https from "https";
-import fs from "fs";
+import crypto from 'crypto';
+import https from 'https';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 /**
  * Schema bundler for EIDOS schemas
- * 
+ *
  * Key objectives:
  * - Bundle: Combine a root schema and all its referenced external schemas into a single file
  * - Deduplicate: Each unique definition appears only once in the final $defs section
@@ -30,7 +31,10 @@ class SchemaBundler {
    */
   hashDefinition(definition) {
     // Create a stable hash by stringifying the definition in a consistent way
-    return crypto.createHash('md5').update(JSON.stringify(definition, Object.keys(definition).sort())).digest('hex');
+    return crypto
+      .createHash('md5')
+      .update(JSON.stringify(definition, Object.keys(definition).sort()))
+      .digest('hex');
   }
 
   /**
@@ -49,7 +53,7 @@ class SchemaBundler {
     }
 
     let baseName = '';
-    
+
     // First try to get the title from the definition
     if (definition && definition.title) {
       baseName = definition.title;
@@ -63,7 +67,7 @@ class SchemaBundler {
       .replace(/[^a-zA-Z0-9]/g, ' ')
       .split(' ')
       .filter(Boolean)
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join('');
 
     // Ensure it starts with a letter
@@ -73,7 +77,11 @@ class SchemaBundler {
 
     // Only add hash if we have a key name conflict (different definition, same name)
     if (this.seenKeys.has(pascalCase)) {
-      const pathHash = crypto.createHash('md5').update(path).digest('hex').substring(0, 8);
+      const pathHash = crypto
+        .createHash('md5')
+        .update(path)
+        .digest('hex')
+        .substring(0, 8);
       pascalCase = `${pascalCase}${pathHash.charAt(0).toUpperCase()}${pathHash.slice(1)}`;
     }
 
@@ -91,16 +99,18 @@ class SchemaBundler {
     if (typeof ref !== 'string') {
       return false;
     }
-    
+
     const lower = ref.toLowerCase();
-    return lower.includes('vega-lite') || 
-           lower.includes('vega/') || 
-           lower.includes('vega.json') || 
-           lower.includes('vega-schema') ||
-           lower.includes('vega-lite-schema') ||
-           lower.includes('/vega') ||
-           lower.includes('vegaspec') ||
-           lower.includes('spec') && lower.includes('vega');
+    return (
+      lower.includes('vega-lite') ||
+      lower.includes('vega/') ||
+      lower.includes('vega.json') ||
+      lower.includes('vega-schema') ||
+      lower.includes('vega-lite-schema') ||
+      lower.includes('/vega') ||
+      lower.includes('vegaspec') ||
+      (lower.includes('spec') && lower.includes('vega'))
+    );
   }
 
   /**
@@ -115,26 +125,26 @@ class SchemaBundler {
       properties: {
         $schema: {
           type: 'string',
-          description: 'The Vega/Vega-Lite schema URL'
+          description: 'The Vega/Vega-Lite schema URL',
         },
         data: {
           type: 'object',
-          description: 'The data specification'
+          description: 'The data specification',
         },
         mark: {
           type: ['string', 'object'],
-          description: 'The mark type or definition'
+          description: 'The mark type or definition',
         },
         encoding: {
           type: 'object',
-          description: 'The encoding specification'
+          description: 'The encoding specification',
         },
         config: {
           type: 'object',
-          description: 'The configuration options'
-        }
+          description: 'The configuration options',
+        },
       },
-      additionalProperties: true
+      additionalProperties: true,
     };
   }
 
@@ -149,7 +159,7 @@ class SchemaBundler {
     if (this.isVegaSchema(key) || this.isVegaSchema(path)) {
       return false;
     }
-    
+
     // Only recurse into EIDOS-specific definitions that might contain nested node types
     // This includes paths like /$defs/node which contains the oneOf with World, Plot, etc.
     return true;
@@ -168,7 +178,11 @@ class SchemaBundler {
 
     if (Array.isArray(obj)) {
       obj.forEach((item, index) => {
-        this.extractDefinitions(item, collectedDefs, `${currentPath}[${index}]`);
+        this.extractDefinitions(
+          item,
+          collectedDefs,
+          `${currentPath}[${index}]`,
+        );
       });
       return;
     }
@@ -178,12 +192,12 @@ class SchemaBundler {
       for (const [key, def] of Object.entries(obj.$defs)) {
         const defPath = `${currentPath}/$defs/${key}`;
         const normalizedKey = decodeURIComponent(key);
-        collectedDefs.set(defPath, { 
-          definition: def, 
+        collectedDefs.set(defPath, {
+          definition: def,
           originalKey: normalizedKey,
-          fullPath: defPath 
+          fullPath: defPath,
         });
-        
+
         // Only recursively extract from EIDOS-specific definitions
         if (this.shouldRecurseIntoDefinition(defPath, normalizedKey)) {
           this.extractDefinitions(def, collectedDefs, defPath);
@@ -195,12 +209,12 @@ class SchemaBundler {
       for (const [key, def] of Object.entries(obj.definitions)) {
         const defPath = `${currentPath}/definitions/${key}`;
         const normalizedKey = decodeURIComponent(key);
-        collectedDefs.set(defPath, { 
-          definition: def, 
+        collectedDefs.set(defPath, {
+          definition: def,
           originalKey: normalizedKey,
-          fullPath: defPath 
+          fullPath: defPath,
         });
-        
+
         // Only recursively extract from EIDOS-specific definitions
         if (this.shouldRecurseIntoDefinition(defPath, normalizedKey)) {
           this.extractDefinitions(def, collectedDefs, defPath);
@@ -227,7 +241,7 @@ class SchemaBundler {
     }
 
     if (Array.isArray(obj)) {
-      obj.forEach(item => this.collectRefs(item, refs));
+      obj.forEach((item) => this.collectRefs(item, refs));
       return;
     }
 
@@ -251,7 +265,7 @@ class SchemaBundler {
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.rewriteRefs(item));
+      return obj.map((item) => this.rewriteRefs(item));
     }
 
     const result = {};
@@ -259,7 +273,7 @@ class SchemaBundler {
       if (key === '$ref' && typeof value === 'string') {
         const normalizedRef = decodeURIComponent(value);
         const newKey = this.keyMapping.get(normalizedRef);
-        
+
         if (newKey) {
           result[key] = `#/$defs/${newKey}`;
         } else {
@@ -275,27 +289,57 @@ class SchemaBundler {
   }
 
   /**
+   * When EIDOS_SCHEMAS_URL points at a local directory, remap canonical
+   * https://schemas.oceanum.io/... references to that local tree (for reading
+   * only) so generation reflects local edits. Falls back to the original path
+   * when no local file exists (e.g. external geojson/datamesh schemas).
+   * @param {string} schemaPath
+   * @returns {string}
+   */
+  localizeSchemaPath(schemaPath) {
+    const base = process.env.EIDOS_SCHEMAS_URL;
+    const CANONICAL = 'https://schemas.oceanum.io';
+    if (!base || base.startsWith('http') || !schemaPath.startsWith(CANONICAL)) {
+      return schemaPath;
+    }
+    // base = <repo>/packages/schemas/src/eidos -> srcRoot = <repo>/packages/schemas/src
+    const eidosDir = base.replace(/\/+$/, '');
+    const srcRoot = eidosDir.replace(/\/eidos$/, '');
+    const rel = schemaPath.slice(CANONICAL.length).split('#')[0]; // /eidos/data.json
+    const candidate = srcRoot + rel;
+    return fs.existsSync(candidate) ? candidate : schemaPath;
+  }
+
+  /**
    * Fetch a schema from URL or file path
    * @param {string} schemaPath - URL or file path
    * @returns {Promise<Object>} - Parsed schema
    */
-  async fetchSchema(schemaPath) {
+  async fetchSchema(rawSchemaPath) {
+    const schemaPath = this.localizeSchemaPath(rawSchemaPath);
     if (schemaPath.startsWith('http://') || schemaPath.startsWith('https://')) {
       return new Promise((resolve, reject) => {
-        https.get(schemaPath, (res) => {
-          let data = '';
-          res.on('data', (chunk) => data += chunk);
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (err) {
-              reject(err);
-            }
-          });
-        }).on('error', reject);
+        https
+          .get(schemaPath, (res) => {
+            let data = '';
+            res.on('data', (chunk) => (data += chunk));
+            res.on('end', () => {
+              try {
+                resolve(JSON.parse(data));
+              } catch (err) {
+                reject(err);
+              }
+            });
+          })
+          .on('error', reject);
       });
     } else {
-      const data = fs.readFileSync(schemaPath, 'utf8');
+      // Local schema: $ref resolution against a local root yields file:// URLs,
+      // so normalise those to a filesystem path before reading.
+      const filePath = schemaPath.startsWith('file://')
+        ? fileURLToPath(schemaPath)
+        : schemaPath;
+      const data = fs.readFileSync(filePath, 'utf8');
       return JSON.parse(data);
     }
   }
@@ -321,16 +365,20 @@ class SchemaBundler {
     }
 
     for (const [key, value] of Object.entries(schema)) {
-      if (key === '$ref' && typeof value === 'string' && !value.startsWith('#/')) {
+      if (
+        key === '$ref' &&
+        typeof value === 'string' &&
+        !value.startsWith('#/')
+      ) {
         // External reference
         const refUrl = new URL(value, baseUrl).href;
-        
+
         // Skip Vega schemas entirely - don't even fetch them
         if (this.isVegaSchema(refUrl)) {
           console.log(`Skipping Vega schema: ${refUrl}`);
           continue;
         }
-        
+
         if (!visited.has(refUrl) && !schemas.has(refUrl)) {
           visited.add(refUrl);
           try {
@@ -375,26 +423,44 @@ class SchemaBundler {
    * @param {Set} visited - Set of visited URLs to prevent circular references
    * @returns {Object} - Schema with inlined references
    */
-  inlineExternalRefs(schema, baseUrl, allSchemas, inlinedDefs = new Map(), visited = new Set()) {
+  inlineExternalRefs(
+    schema,
+    baseUrl,
+    allSchemas,
+    inlinedDefs = new Map(),
+    visited = new Set(),
+  ) {
     if (!schema || typeof schema !== 'object') {
       return schema;
     }
 
     if (Array.isArray(schema)) {
-      return schema.map(item => this.inlineExternalRefs(item, baseUrl, allSchemas, inlinedDefs, visited));
+      return schema.map((item) =>
+        this.inlineExternalRefs(
+          item,
+          baseUrl,
+          allSchemas,
+          inlinedDefs,
+          visited,
+        ),
+      );
     }
 
     const result = {};
     for (const [key, value] of Object.entries(schema)) {
-      if (key === '$ref' && typeof value === 'string' && !value.startsWith('#/')) {
+      if (
+        key === '$ref' &&
+        typeof value === 'string' &&
+        !value.startsWith('#/')
+      ) {
         // External reference - replace with actual schema content
         const refUrl = new URL(value, baseUrl).href;
-        
+
         // Skip Vega schemas - replace with PlotSpec placeholder
         if (this.isVegaSchema(refUrl)) {
           return this.createVegaPlaceholder();
         }
-        
+
         // Prevent circular references
         if (visited.has(refUrl)) {
           console.warn(`Warning: Circular reference detected: ${refUrl}`);
@@ -402,19 +468,25 @@ class SchemaBundler {
           const typeName = this.extractTypeNameFromUrl(refUrl);
           return { $ref: `#/$defs/${typeName}` };
         }
-        
+
         if (allSchemas.has(refUrl)) {
           const referencedSchema = allSchemas.get(refUrl);
           const typeName = this.extractTypeNameFromUrl(refUrl);
-          
+
           // Store the inlined definition with the type name
           if (!inlinedDefs.has(typeName)) {
             const newVisited = new Set(visited);
             newVisited.add(refUrl);
-            const inlinedContent = this.inlineExternalRefs(referencedSchema, refUrl, allSchemas, inlinedDefs, newVisited);
+            const inlinedContent = this.inlineExternalRefs(
+              referencedSchema,
+              refUrl,
+              allSchemas,
+              inlinedDefs,
+              newVisited,
+            );
             inlinedDefs.set(typeName, inlinedContent);
           }
-          
+
           // Return a reference to the newly created definition
           return { $ref: `#/$defs/${typeName}` };
         } else {
@@ -423,7 +495,13 @@ class SchemaBundler {
           result[key] = value;
         }
       } else {
-        result[key] = this.inlineExternalRefs(value, baseUrl, allSchemas, inlinedDefs, visited);
+        result[key] = this.inlineExternalRefs(
+          value,
+          baseUrl,
+          allSchemas,
+          inlinedDefs,
+          visited,
+        );
       }
     }
 
@@ -440,10 +518,14 @@ class SchemaBundler {
 
     try {
       // First, load the root schema and collect all external schemas
-      console.log('📥 Loading root schema and collecting external references...');
+      console.log(
+        '📥 Loading root schema and collecting external references...',
+      );
       const rootSchema = await this.fetchSchema(rootSchemaPath);
-      const baseUrl = rootSchemaPath.startsWith('http') ? rootSchemaPath : new URL(rootSchemaPath, import.meta.url).href;
-      
+      const baseUrl = rootSchemaPath.startsWith('http')
+        ? rootSchemaPath
+        : new URL(rootSchemaPath, import.meta.url).href;
+
       const allSchemas = new Map();
       allSchemas.set(baseUrl, rootSchema);
       await this.collectSchemas(rootSchema, baseUrl, allSchemas);
@@ -453,26 +535,33 @@ class SchemaBundler {
       // Inline all external references into the root schema
       console.log('🔄 Inlining external references...');
       const inlinedDefs = new Map();
-      const inlinedSchema = this.inlineExternalRefs(rootSchema, baseUrl, allSchemas, inlinedDefs);
+      const inlinedSchema = this.inlineExternalRefs(
+        rootSchema,
+        baseUrl,
+        allSchemas,
+        inlinedDefs,
+      );
 
       // Extract ALL definitions from all schemas (original approach)
       console.log('🔄 Processing definitions from all schemas...');
-      
+
       const collectedDefs = new Map();
       for (const [schemaUrl, schema] of allSchemas) {
         this.extractDefinitions(schema, collectedDefs, schemaUrl);
       }
-      
+
       // Also add the inlined definitions (World, Plot, Document, etc.) as separate named definitions
       for (const [typeName, typeDef] of inlinedDefs) {
         collectedDefs.set(`/$defs/${typeName}`, {
           definition: typeDef,
           originalKey: typeName,
-          fullPath: `/$defs/${typeName}`
+          fullPath: `/$defs/${typeName}`,
         });
       }
 
-      console.log(`Found ${collectedDefs.size} definitions from all schemas + inlined types`);
+      console.log(
+        `Found ${collectedDefs.size} definitions from all schemas + inlined types`,
+      );
 
       // Collect all refs in the inlined schema (we'll rewrite these)
       const allRefs = new Set();
@@ -480,7 +569,10 @@ class SchemaBundler {
       console.log(`Found ${allRefs.size} total references in inlined schema`);
 
       // Process all definitions and create mappings
-      for (const [defPath, { definition, originalKey, fullPath }] of collectedDefs) {
+      for (const [
+        defPath,
+        { definition, originalKey, fullPath },
+      ] of collectedDefs) {
         if (this.isVegaSchema(originalKey)) {
           // Handle Vega schemas with PlotSpec placeholder
           if (!this.definitions.has('PlotSpec')) {
@@ -491,11 +583,11 @@ class SchemaBundler {
         } else {
           // Generate unique PascalCase key for this definition (handles deduplication)
           const newKey = this.generateKey(originalKey, definition, fullPath);
-          
+
           // Map all possible reference formats for this definition
           this.keyMapping.set(`#/$defs/${originalKey}`, newKey);
           this.keyMapping.set(`#/definitions/${originalKey}`, newKey);
-          
+
           // Only store the definition if it's not already stored (deduplication)
           if (!this.definitions.has(newKey)) {
             this.definitions.set(newKey, definition);
@@ -516,16 +608,22 @@ class SchemaBundler {
             const refParts = ref.split('/');
             const refKey = refParts[refParts.length - 1];
             const cleanRefKey = decodeURIComponent(refKey);
-            
+
             // Look for a matching definition
             let foundDef = null;
-            for (const [defPath, { definition, originalKey }] of collectedDefs) {
-              if (originalKey === cleanRefKey || decodeURIComponent(originalKey) === cleanRefKey) {
+            for (const [
+              defPath,
+              { definition, originalKey },
+            ] of collectedDefs) {
+              if (
+                originalKey === cleanRefKey ||
+                decodeURIComponent(originalKey) === cleanRefKey
+              ) {
                 foundDef = definition;
                 break;
               }
             }
-            
+
             if (foundDef) {
               const newKey = this.generateKey(cleanRefKey, foundDef, ref);
               this.keyMapping.set(ref, newKey);
@@ -538,15 +636,17 @@ class SchemaBundler {
         }
       }
 
-      console.log(`✅ Created ${this.definitions.size} unique definitions with ${this.keyMapping.size} reference mappings`);
+      console.log(
+        `✅ Created ${this.definitions.size} unique definitions with ${this.keyMapping.size} reference mappings`,
+      );
 
       // Create the final schema with rewritten references
       console.log('🔧 Rewriting references...');
-      
+
       const finalSchema = this.rewriteRefs({
         ...inlinedSchema,
-        $defs: undefined, // Remove original $defs  
-        definitions: undefined // Remove original definitions
+        $defs: undefined, // Remove original $defs
+        definitions: undefined, // Remove original definitions
       });
 
       // Add the new flattened $defs section with PascalCase keys
@@ -554,17 +654,18 @@ class SchemaBundler {
       for (const [key, definition] of this.definitions) {
         finalSchema.$defs[key] = this.rewriteRefs(definition);
       }
-      
+
       // Always ensure PlotSpec placeholder exists
       if (!finalSchema.$defs.PlotSpec) {
         console.log('Adding PlotSpec placeholder definition');
         finalSchema.$defs.PlotSpec = this.createVegaPlaceholder();
       }
 
-      console.log(`✅ Schema bundling completed! Generated ${Object.keys(finalSchema.$defs).length} definitions.`);
-      
-      return finalSchema;
+      console.log(
+        `✅ Schema bundling completed! Generated ${Object.keys(finalSchema.$defs).length} definitions.`,
+      );
 
+      return finalSchema;
     } catch (error) {
       console.error('❌ Error during schema bundling:', error);
       throw error;
@@ -583,17 +684,19 @@ export async function bundle(rootSchemaPath) {
 }
 
 // CLI support - run bundler if called directly
-if (import.meta.url === `file://${process.argv[1]}` || 
-    import.meta.url.endsWith(process.argv[1])) {
-  
-  const rootSchema = process.argv[2] || 'https://schemas.oceanum.io/eidos/root.json';
+if (
+  import.meta.url === `file://${process.argv[1]}` ||
+  import.meta.url.endsWith(process.argv[1])
+) {
+  const rootSchema =
+    process.argv[2] || 'https://schemas.oceanum.io/eidos/root.json';
   const outputFile = process.argv[3];
 
   console.log('🚀 Running schema bundler CLI...');
-  
+
   try {
     const result = await bundle(rootSchema);
-    
+
     if (outputFile) {
       const fs = await import('fs');
       fs.writeFileSync(outputFile, JSON.stringify(result, null, 2));
