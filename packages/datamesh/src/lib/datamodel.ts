@@ -208,9 +208,12 @@ const getDtype = (data: Data): DataType => {
 const arrowTypeToDType = (dtype: ArrowDataType): DataType => {
   //Convert arrow data type to zarr datatype
   let type: string = dtype.toString().toLowerCase();
-  if (dtype.typeId == 5) {
+  // Map string columns to the object dtype. LargeUtf8 must be handled alongside
+  // Utf8: pandas/polars pyarrow-backed strings serialize as Arrow large_string,
+  // which would otherwise fall through to an unrecognised "largeutf8" dtype.
+  if (ArrowDataType.isUtf8(dtype) || ArrowDataType.isLargeUtf8(dtype)) {
     type = "v2:object";
-  } else if (dtype.typeId == 1) {
+  } else if (ArrowDataType.isNull(dtype)) {
     type = "uint8";
   }
   return type as DataType;
@@ -767,7 +770,10 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         array = carray;
         dtype = "float64";
         attrs = { unit: `Unix timestamp (s)` };
-      } else if (ArrowDataType.isBinary(field.type)) {
+      } else if (
+        ArrowDataType.isBinary(field.type) ||
+        ArrowDataType.isLargeBinary(field.type)
+      ) {
         const carray = [];
         for (let i = 0; i < array.length; i++) {
           carray.push(new Buffer(array[i]).toString("base64"));
