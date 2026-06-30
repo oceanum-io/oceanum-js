@@ -208,9 +208,23 @@ const getDtype = (data: Data): DataType => {
 const arrowTypeToDType = (dtype: ArrowDataType): DataType => {
   //Convert arrow data type to zarr datatype
   let type: string = dtype.toString().toLowerCase();
-  if (dtype.typeId == 5) {
+  // Map string columns to the object dtype. Beyond plain Utf8 this must cover:
+  //  - LargeUtf8: pandas/polars pyarrow-backed strings serialize as large_string;
+  //  - Dictionary<_, Utf8 | LargeUtf8>: pandas `category` and polars
+  //    Categorical/Enum columns serialize dictionary-encoded.
+  // toArray() decodes all of these to plain strings, so they share one dtype;
+  // otherwise they fall through to an unrecognised dtype (e.g. "largeutf8").
+  const isStringDict =
+    ArrowDataType.isDictionary(dtype) &&
+    (ArrowDataType.isUtf8(dtype.dictionary) ||
+      ArrowDataType.isLargeUtf8(dtype.dictionary));
+  if (
+    ArrowDataType.isUtf8(dtype) ||
+    ArrowDataType.isLargeUtf8(dtype) ||
+    isStringDict
+  ) {
     type = "v2:object";
-  } else if (dtype.typeId == 1) {
+  } else if (ArrowDataType.isNull(dtype)) {
     type = "uint8";
   }
   return type as DataType;
@@ -767,7 +781,10 @@ export class Dataset<S extends HttpZarr | TempZarr> {
         array = carray;
         dtype = "float64";
         attrs = { unit: `Unix timestamp (s)` };
-      } else if (ArrowDataType.isBinary(field.type)) {
+      } else if (
+        ArrowDataType.isBinary(field.type) ||
+        ArrowDataType.isLargeBinary(field.type)
+      ) {
         const carray = [];
         for (let i = 0; i < array.length; i++) {
           carray.push(new Buffer(array[i]).toString("base64"));
