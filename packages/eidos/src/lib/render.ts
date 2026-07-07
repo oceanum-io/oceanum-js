@@ -126,12 +126,15 @@ const render = async (
         if (event.data.id && event.data.id !== _id) return;
 
         if (event.data.type === 'init') {
-          // Send initial spec
+          // Send initial spec. Snapshot first: the valtio proxy itself is
+          // not structured-cloneable (postMessage/structuredClone throw
+          // DataCloneError on any Proxy), so cloning `eidos` directly made
+          // this handler crash on every init and the spec never arrived.
           win?.postMessage(
             {
               id: _id,
               type: 'spec',
-              payload: structuredClone(eidos),
+              payload: snapshot(eidos),
             },
             '*',
           );
@@ -193,6 +196,11 @@ const render = async (
     };
 
     iframe.onerror = () => {
+      // Clean up the failed mount so the container can be retried —
+      // otherwise the data-eidos-initialized guard rejects every
+      // subsequent render() in this element.
+      iframe.remove();
+      element.removeAttribute('data-eidos-initialized');
       reject(new Error('Failed to load EIDOS renderer'));
     };
   });
