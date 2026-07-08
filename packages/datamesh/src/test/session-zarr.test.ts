@@ -5,12 +5,26 @@ import { CachedHTTPStore } from "../lib/zarr";
 
 // Helper: mock fetch for the session-acquire and stage endpoints. Session ids
 // are handed out sequentially (sess-1, sess-2, ...) with the given lifetime.
-const mockConnectorFetch = (sessionLifetimeMs = 3600e3) => {
+// sessionDelayMs delays the session response so concurrent acquisitions
+// genuinely overlap; failFirstSession makes the first acquisition return 500.
+const mockConnectorFetch = (
+  sessionLifetimeMs = 3600e3,
+  { sessionDelayMs = 0, failFirstSession = false } = {},
+) => {
   let sessions = 0;
   return vi.fn(async (url: string) => {
     const u = String(url);
     if (u.includes("/session/?")) {
       sessions += 1;
+      if (sessionDelayMs > 0) {
+        await new Promise((r) => setTimeout(r, sessionDelayMs));
+      }
+      if (failFirstSession && sessions === 1) {
+        return {
+          status: 500,
+          text: async () => "boom",
+        } as unknown as Response;
+      }
       return {
         status: 200,
         json: async () => ({
@@ -83,17 +97,31 @@ describe("datamesh v1 sessions", () => {
   });
 
   it("single-flights session acquisition across concurrent requests", async () => {
-    const fetchMock = mockConnectorFetch();
+    // Delay the session response so the acquisitions genuinely overlap.
+    const fetchMock = mockConnectorFetch(3600e3, { sessionDelayMs: 20 });
     vi.stubGlobal("fetch", fetchMock);
     const connector = new Connector("tok", { service: "https://gw.example" });
 
-    await Promise.all([
-      connector.query({ datasource: "test" }),
-      connector.query({ datasource: "test" }),
+    const [a, b] = await Promise.all([
+      connector.getSession(),
       connector.getSession(),
     ]);
+    await connector.query({ datasource: "test" });
 
     expect(sessionFetches(fetchMock).length).toBe(1);
+    expect(b).toBe(a);
+  });
+
+  it("retries acquisition after a failed attempt instead of caching the rejection", async () => {
+    const fetchMock = mockConnectorFetch(3600e3, { failFirstSession: true });
+    vi.stubGlobal("fetch", fetchMock);
+    const connector = new Connector("tok", { service: "https://gw.example" });
+
+    await expect(connector.getSession()).rejects.toThrow();
+    const session = await connector.getSession();
+
+    expect(session.id).toBe("sess-2");
+    expect(sessionFetches(fetchMock).length).toBe(2);
   });
 
   it("acquires a fresh session when the current one has expired", async () => {
