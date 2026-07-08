@@ -32,30 +32,6 @@ export class Session {
     connection: any,
     options: { duration?: number } = {},
   ): Promise<Session> {
-    // Check if the connection supports sessions (v1 API)
-    if (!connection._isV1) {
-      const session = new Session();
-      session.id = "dummy_session";
-      session.user = "dummy_user";
-      session.creationTime = new Date();
-      session.endTime = new Date(
-        Date.now() + (options.duration || 3600) * 1000,
-      );
-      session.write = false;
-      session.verified = false;
-      session._connection = connection;
-
-      // Register cleanup function for when the process exits
-      if (typeof process !== "undefined" && typeof process.on === "function") {
-        session._beforeExitHandler = () => {
-          void session.close();
-        };
-        process.once("beforeExit", session._beforeExitHandler);
-      }
-
-      return session;
-    }
-
     try {
       const headers = { ...connection._authHeaders };
       headers["Cache-Control"] = "no-store";
@@ -128,11 +104,6 @@ export class Session {
    * @throws {Error} - If the session cannot be closed and finaliseWrite is true.
    */
   async close(finaliseWrite = false): Promise<void> {
-    // Back-compatibility with beta version (ignoring)
-    if (!this._connection._isV1) {
-      return;
-    }
-
     if (this._closed) {
       return;
     }

@@ -5,7 +5,7 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-// Mock fetch: /session → 404 (treat as API v0, no session handshake), and the
+// Mock fetch: session acquisition returns a stub session, and the
 // staged-data endpoint returns the given bytes/status.
 function stubFetch(
   staged: { status?: number; body?: Uint8Array | string } = {},
@@ -16,7 +16,18 @@ function stubFetch(
     vi.fn(async (url: string) => {
       const u = String(url);
       calls.push(u);
-      if (u.includes("/session")) return new Response("", { status: 404 });
+      if (u.includes("/session/?")) {
+        return new Response(
+          JSON.stringify({
+            id: "sess-abc",
+            user: "u",
+            creation_time: new Date().toISOString(),
+            end_time: new Date(Date.now() + 3600e3).toISOString(),
+            write: false,
+          }),
+          { status: 200 },
+        );
+      }
       if (u.includes("/oceanql/")) {
         return new Response(staged.body ?? new Uint8Array([1, 2, 3, 4]), {
           status: staged.status ?? 200,
@@ -28,14 +39,8 @@ function stubFetch(
   return calls;
 }
 
-// The constructor kicks off an async _checkApiVersion() that hits /session.
-// Our stub answers 404, so the connector settles to API v0 (no session
-// handshake). Construct, then let that fetch resolve before exercising
-// getDataObject, otherwise the default _isV1=true races us into createSession.
 async function makeConnector(): Promise<Connector> {
-  const c = new Connector("test-token", { gateway: "https://gw.test" });
-  await new Promise((r) => setTimeout(r, 0));
-  return c;
+  return new Connector("test-token", { gateway: "https://gw.test" });
 }
 
 describe("Connector.getDataObject", () => {

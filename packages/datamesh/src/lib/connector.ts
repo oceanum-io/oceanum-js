@@ -24,7 +24,6 @@ export class Connector {
   private _authHeaders: Record<string, string>;
   private _gateway: string;
   private _nocache = false;
-  private _isV1 = true;
   private _sessionParams: Record<string, number> = {};
   private _currentSession: Session | null = null;
   service?: string;
@@ -90,35 +89,6 @@ export class Connector {
       typeof options.sessionDuration === "number"
     ) {
       this._sessionParams = { duration: options.sessionDuration };
-    }
-
-    // Check if the API is v1 (supports sessions)
-    this._checkApiVersion();
-  }
-
-  /**
-   * Check if the API version supports sessions.
-   *
-   * @private
-   */
-  private async _checkApiVersion(): Promise<void> {
-    try {
-      // Simply check to see if we can get a session
-      const response = await fetch(`${this._gateway}/session`, {
-        headers: this._authHeaders,
-      });
-
-      if (response.status === 200) {
-        this._isV1 = true;
-        console.info("Using datamesh API version 1");
-      } else {
-        this._isV1 = false;
-        console.info("Using datamesh API version 0");
-      }
-    } catch {
-      // If we can't connect to the gateway, assume it's not a v1 API
-      this._isV1 = false;
-      console.info("Using datamesh API version 0");
     }
   }
 
@@ -191,7 +161,7 @@ export class Connector {
   }
 
   /**
-   * Get headers with session information if available.
+   * Get headers with session information, creating a session if none exists.
    *
    * @param additionalHeaders - Additional headers to include.
    * @returns Headers with session information.
@@ -199,18 +169,11 @@ export class Connector {
   private async getSessionHeaders(
     additionalHeaders: Record<string, string> = {},
   ): Promise<Record<string, string>> {
-    if (this._isV1 && !this._currentSession) {
-      await this.createSession();
-    }
-
-    if (this._currentSession) {
-      return this._currentSession.addHeader({
-        ...this._authHeaders,
-        ...additionalHeaders,
-      });
-    }
-
-    return { ...this._authHeaders, ...additionalHeaders };
+    const session = this._currentSession ?? (await this.createSession());
+    return session.addHeader({
+      ...this._authHeaders,
+      ...additionalHeaders,
+    });
   }
 
   /**
@@ -348,7 +311,7 @@ export class Connector {
       return dataset;
     }
 
-    const url = `${this._gateway}/zarr/${this._isV1 ? "query/" : ""}${stage.qhash}`;
+    const url = `${this._gateway}/zarr/query/${stage.qhash}`;
     const params = query.parameters;
 
     // Get headers with session information if available
