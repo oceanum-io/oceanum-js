@@ -131,7 +131,7 @@ const connector = new Connector("proxy", {
 Notes:
 
 - The constructor requires a `token`. When using the proxy, the token you pass here is ignored by the upstream because the proxy overwrites the `x-DATAMESH-TOKEN` header with the secret.
-- The connector will probe `GET /session` on the `gateway` to detect the API version. Ensure your proxy forwards that path.
+- The connector acquires a session via `GET /session/?duration=...` on the `gateway` and sends `X-DATAMESH-SESSIONID` on subsequent requests. Ensure your proxy forwards the `/session/` path and that header.
 
 ## Security considerations
 

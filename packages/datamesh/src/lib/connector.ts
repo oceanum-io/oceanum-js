@@ -26,6 +26,7 @@ export class Connector {
   private _nocache = false;
   private _sessionParams: Record<string, number> = {};
   private _currentSession: Session | null = null;
+  private _sessionPromise: Promise<Session> | null = null;
   service?: string;
   gateway?: string;
 
@@ -149,15 +150,28 @@ export class Connector {
   }
 
   /**
-   * Get the current session or create a new one if none exists.
+   * Get the current session, or create a new one if none exists or the
+   * current one has expired.
    *
    * @returns The current session.
    */
   async getSession(): Promise<Session> {
-    if (!this._currentSession) {
-      return this.createSession();
+    // Reuse the live session, but not one at/past its server-side expiry
+    // (60s margin for clock skew and in-flight requests).
+    if (
+      this._currentSession &&
+      this._currentSession.endTime.getTime() - 60_000 > Date.now()
+    ) {
+      return this._currentSession;
     }
-    return this._currentSession;
+    // Single-flight: concurrent callers share one acquisition instead of
+    // each opening (and orphaning) a server-side session.
+    if (!this._sessionPromise) {
+      this._sessionPromise = this.createSession().finally(() => {
+        this._sessionPromise = null;
+      });
+    }
+    return this._sessionPromise;
   }
 
   /**
@@ -169,7 +183,7 @@ export class Connector {
   private async getSessionHeaders(
     additionalHeaders: Record<string, string> = {},
   ): Promise<Record<string, string>> {
-    const session = this._currentSession ?? (await this.createSession());
+    const session = await this.getSession();
     return session.addHeader({
       ...this._authHeaders,
       ...additionalHeaders,
@@ -314,7 +328,7 @@ export class Connector {
     const url = `${this._gateway}/zarr/query/${stage.qhash}`;
     const params = query.parameters;
 
-    // Get headers with session information if available
+    // Acquire session headers (a session is always created)
     const headers = await this.getSessionHeaders();
 
     // Pass the headers to the Dataset.zarr method

@@ -39,14 +39,14 @@ function stubFetch(
   return calls;
 }
 
-async function makeConnector(): Promise<Connector> {
+function makeConnector(): Connector {
   return new Connector("test-token", { gateway: "https://gw.test" });
 }
 
 describe("Connector.getDataObject", () => {
   it("downloads staged data with the requested format and returns bytes", async () => {
     const calls = stubFetch({ body: new Uint8Array([1, 2, 3, 4]) });
-    const c = await makeConnector();
+    const c = makeConnector();
 
     const buf = await c.getDataObject("QHASH", "nc");
 
@@ -56,7 +56,7 @@ describe("Connector.getDataObject", () => {
 
   it("url-encodes the format param", async () => {
     const calls = stubFetch();
-    const c = await makeConnector();
+    const c = makeConnector();
     await c.getDataObject("Q", "application/x-netcdf");
     expect(calls).toContain(
       "https://gw.test/oceanql/Q?f=application%2Fx-netcdf",
@@ -65,14 +65,14 @@ describe("Connector.getDataObject", () => {
 
   it("returns an empty ArrayBuffer for an empty 200 response", async () => {
     stubFetch({ body: new Uint8Array([]) });
-    const c = await makeConnector();
+    const c = makeConnector();
     const buf = await c.getDataObject("QHASH", "nc");
     expect(buf.byteLength).toBe(0);
   });
 
   it("throws on a server error", async () => {
     stubFetch({ status: 500, body: JSON.stringify({ detail: "boom" }) });
-    const c = await makeConnector();
+    const c = makeConnector();
     await expect(c.getDataObject("QHASH", "nc")).rejects.toThrow("boom");
   });
 });
