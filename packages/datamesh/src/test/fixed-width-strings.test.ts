@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import * as zarr from "zarrita";
 import { DataVar } from "../lib/datamodel";
-import type { DataType, HttpZarr } from "../lib/datamodel";
+import type { HttpZarr } from "../lib/datamodel";
+// `DataType` is zarrita's; datamodel.ts imports it but does not re-export it.
+import type { DataType } from "zarrita";
 
 // Regression: numpy fixed-width string columns (`|S<n>` bytes, `<U<n>` unicode)
 // open as zarrita dtypes `v2:S<n>` / `v2:U<n>` — NOT `v2:object`. Their chunk
