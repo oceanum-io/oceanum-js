@@ -1,7 +1,7 @@
 import { Geometry } from "geojson";
 import { Datasource } from "./datasource";
 import { IQuery, Stage } from "./query";
-import { Dataset, HttpZarr, TempZarr } from "./datamodel";
+import { Dataset, HttpZarr, TempZarr, ZarrOptions } from "./datamodel";
 import { isDatameshDebugEnabled, measureTime } from "./observe";
 import { tableFromIPC, Table } from "apache-arrow";
 import { Session } from "./session";
@@ -349,6 +349,28 @@ export class Connector {
       }
     }
     return dataset;
+  }
+
+  /**
+   * Open a staged query's zarr store with the connector's session attached.
+   *
+   * Use this for lazy or schema-only access to a staged result — e.g. reading
+   * dimensions and variables from `.zmetadata` without downloading chunks. It
+   * attaches the same session + auth headers as {@link query}, so callers never
+   * hand-roll zarr auth headers: the gateway requires a v1 session on every
+   * `/zarr/query` request and returns `401 "Session ID required"` without it.
+   *
+   * @param url - Full zarr store URL, e.g. `${gateway}${stage.zarr_endpoint}`.
+   * @param options - Zarr open options (coordkeys, parameters, ttl, timeout, …).
+   * @returns A lazily-opened Dataset backed by the staged zarr store.
+   */
+  @measureTime
+  async openZarr(
+    url: string,
+    options: ZarrOptions = {},
+  ): Promise<Dataset<HttpZarr>> {
+    const headers = await this.getSessionHeaders();
+    return Dataset.zarr(url, headers, options);
   }
 
   /**

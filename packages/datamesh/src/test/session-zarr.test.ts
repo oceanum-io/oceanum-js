@@ -164,4 +164,39 @@ describe("datamesh v1 sessions", () => {
 
     expect(seen[0]?.["X-DATAMESH-SESSIONID"]).toBe("sess-abc");
   });
+
+  it("openZarr attaches the session + auth headers to a directly-opened store", async () => {
+    vi.stubGlobal("fetch", mockConnectorFetch());
+    const connector = new Connector("tok", {
+      jwtAuth: "jwt-abc",
+      service: "https://gw.example",
+    });
+    await connector.openZarr("https://gw.example/zarr/query/hash123$", {
+      coordkeys: { x: "lon" },
+    });
+
+    const [url, headers, options] = (zarrCalls()[0] ?? []) as [
+      string,
+      Record<string, string>,
+      { coordkeys?: Record<string, string> },
+    ];
+    expect(url).toBe("https://gw.example/zarr/query/hash123$");
+    // The session header — its absence is the "Session ID required" 401.
+    expect(headers["X-DATAMESH-SESSIONID"]).toBe("sess-1");
+    expect(headers.Authorization).toBe("Bearer jwt-abc");
+    expect(options.coordkeys).toEqual({ x: "lon" });
+  });
+
+  it("openZarr sends the same session the query() zarr path sends (reused)", async () => {
+    vi.stubGlobal("fetch", mockConnectorFetch());
+    const connector = new Connector("tok", { service: "https://gw.example" });
+    await connector.query({ datasource: "test" });
+    await connector.openZarr("https://gw.example/zarr/query/hash123$");
+
+    const queryHeaders = zarrCalls()[0]?.[1] as Record<string, string>;
+    const openHeaders = zarrCalls()[1]?.[1] as Record<string, string>;
+    expect(openHeaders["X-DATAMESH-SESSIONID"]).toBe(
+      queryHeaders["X-DATAMESH-SESSIONID"],
+    );
+  });
 });
