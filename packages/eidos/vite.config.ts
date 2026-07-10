@@ -1,9 +1,14 @@
+/// <reference types="vitest/config" />
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
+  test: {
+    environment: "jsdom",
+    include: ["__tests__/**/*.test.ts"],
+  },
   define: {
     "process.env": {},
   },

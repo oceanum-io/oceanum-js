@@ -5,9 +5,11 @@ let validator: ValidateFunction | null = null;
 
 const loadSchema = async (uri: string) => {
   const res = await fetch(uri);
-  if (res.statusCode >= 400)
-    throw new Error("Loading error: " + res.statusCode);
-  return res.body;
+  // fetch Responses expose `status`/`ok`, not `statusCode` — the old check
+  // never fired. Returning `res.body` (a ReadableStream) handed ajv a
+  // non-schema, silently compiling an accept-everything validator.
+  if (!res.ok) throw new Error("Loading error: " + res.status);
+  return res.json();
 };
 
 const validateSchema = async (spec: any): Promise<boolean> => {
