@@ -26,6 +26,7 @@ vi.mock("../src/lib/eidosmodel", () => ({
 }));
 
 import { render } from "../src/lib/render";
+import { validateSchema } from "../src/lib/eidosmodel";
 
 const makeSpec = () => ({
   version: "0.11",
@@ -90,6 +91,27 @@ describe("render()", () => {
     iframe.dispatchEvent(new Event("error"));
 
     await expect(pending).rejects.toThrow("Failed to load EIDOS renderer");
+    expect(el.getAttribute("data-eidos-initialized")).toBeNull();
+    expect(el.querySelector("iframe")).toBeNull();
+
+    // A retry in the same container must not hit the already-mounted guard.
+    const retry = render(el, makeSpec());
+    const retryIframe = await waitForIframe(el);
+    retryIframe.dispatchEvent(new Event("load"));
+    const view = await retry;
+    expect(view.iframe).toBe(retryIframe);
+    view.destroy();
+  });
+
+  it("cleans up the container when spec validation fails, allowing retry", async () => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+
+    // e.g. a transient schema-fetch failure — must not poison the container.
+    vi.mocked(validateSchema).mockRejectedValueOnce(
+      new Error("Loading error: 503"),
+    );
+    await expect(render(el, makeSpec())).rejects.toThrow("Invalid Eidos Spec");
     expect(el.getAttribute("data-eidos-initialized")).toBeNull();
     expect(el.querySelector("iframe")).toBeNull();
 
