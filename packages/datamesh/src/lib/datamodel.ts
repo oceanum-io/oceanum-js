@@ -257,6 +257,14 @@ const get_strides = (shape: readonly number[]) => {
   return stride;
 };
 
+/**
+ * True for zarrita's numpy fixed-width string dtypes: `v2:S<n>` (bytes, from
+ * `|S<n>`) and `v2:U<n>` (unicode, from `<U<n>`). Unlike `v2:object` these are
+ * not decoded to a plain array, so they need materialising before `unravel`.
+ */
+const isFixedWidthString = (dtype: DataType): boolean =>
+  /^v2:[SU]\d+$/.test(dtype as string);
+
 const unravel = <T extends DataType>(
   data: TypedArray<T> | Scalar[],
   shape: number[],
@@ -514,7 +522,11 @@ export class DataVar<
     );
     if (this.arr.dtype == "v2:object" || !_data.shape) {
       return unravel(_data.data, _data.shape, _data.stride) as Data;
-    } else if (this.arr.dtype == "bool") {
+    } else if (this.arr.dtype == "bool" || isFixedWidthString(this.arr.dtype)) {
+      // Both are backed by a lazy array-like view rather than a TypedArray:
+      // bool by a BoolArray, and numpy fixed-width strings (`|S<n>` -> `v2:S<n>`,
+      // `<U<n>` -> `v2:U<n>`) by a Byte/UnicodeStringArray. They are iterable but
+      // have no `.slice`, which `unravel` needs — so materialise them first.
       return unravel([..._data.data], _data.shape, _data.stride) as Data;
     } else {
       const attrs = this.arr.attrs as Record<string, unknown>;
