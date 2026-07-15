@@ -1,6 +1,6 @@
 /**
  * Auto-generated TypeScript interfaces for EIDOS schemas
- * Generated from: https://schemas.oceanum.io/eidos/root.json
+ * Generated from: /home/dave/Dev/oceanum/eidos/packages/schemas/src/eidos/root.json
  * 
  * Each interface corresponds to a definition in the EIDOS schema bundle.
  * These interfaces can be used for type validation and IDE support.
@@ -15,8 +15,10 @@ const PlotNodeType = "plot" as const;
 const DocumentNodeType = "document" as const;
 const GridNodeType = "grid" as const;
 const MenuNodeType = "menu" as const;
+const PanelNodeType = "panel" as const;
 const WorldlayerNodeType = "worldlayer" as const;
 const ControlgroupNodeType = "controlgroup" as const;
+const DerivedNodeType = "derived" as const;
 
 /**
  * EIDOS specification
@@ -165,7 +167,7 @@ export interface World {
   /**
    * Array of world layers and controls to display on this map. Each layer represents a different data visualization (e.g., gridded data, vector features, tracks, 3D objects). Layers are rendered in order with later layers appearing on top.
    */
-  children: Worldlayer | ControlGroup[];
+  children: Worldlayer | ControlGroup | EidosPanel[];
   /**
    * Base map layer providing the background cartography. Can be a preset like 'oceanum' or 'terrain', or a custom tile layer configuration.
    */
@@ -175,8 +177,14 @@ export interface World {
    */
   viewState?: View;
   currentTime?: Geojson;
-  timeControl?: Geojson;
-  levelControl?: Geojson;
+  /**
+   * Time control configuration. Set to null to disable the time control, or provide an object to customize its appearance and behavior.
+   */
+  timeControl?: null | Geojson;
+  /**
+   * Level control configuration. Set to null to disable the level control, or provide an object to customize its appearance and behavior.
+   */
+  levelControl?: null | Geojson;
   /**
    * Current level value for the world view
    */
@@ -207,6 +215,10 @@ export interface Plot {
    * Actions to enable for the plot
    */
   actions?: object;
+  /**
+   * Resize the plot to fit its container. When true single/layer views fill the container and vconcat panes are distributed across it; when false (the default) the plot keeps its authored width/height and the container scrolls.
+   */
+  fitToContainer?: boolean;
   timezone?: Geojson;
   currentTime?: Geojson;
   timeControl?: Geojson;
@@ -260,9 +272,9 @@ export interface Grid {
    */
   gridLayout?: object[];
   /**
-   * Array of child nodes to display within the grid. Children are positioned automatically if gridLayout is not specified, or according to the gridLayout array if provided. Can contain any type of EIDOS node.
+   * Array of child nodes to display within the grid. Children are positioned automatically if gridLayout is not specified, or according to the gridLayout array if provided. Can contain any type of EIDOS node, including `derived` for reusing another node with patches.
    */
-  children: World | Plot | Document | Menu[];
+  children: World | Plot | Document | Menu | Derived[];
 }
 
 /**
@@ -283,40 +295,69 @@ export interface Menu {
    * Whether menu is open
    */
   open?: boolean;
-  children: World | Plot | Document | Grid[];
+  children: World | Plot | Document | Grid | Derived[];
   openOnMouseOver?: boolean;
   menuLayout: object[];
 }
 
 /**
  * Eidos panel
- * Spec for panel node (world, plot, document, grid or menu). A panel node is displayed as a modal window on top of the parent element. Opening can be triggered by an event.
+ * A panel is a floating window rendered on top of its parent element. It can contain any node type (world, plot, document, grid, or menu). Panels can be opened by a panelopen control button, by a spec patch, or automatically by an event trigger.
  */
 export interface EidosPanel {
   /**
-   * Unique ID of the panel
+   * Unique ID of the panel. Referenced by panelopen controls via config.panelId.
    */
   id: string;
+  nodeType?: PanelNodeType;
   /**
-   * If true, the panel is open. Can be set programmatically to force the panel open or have open on.
+   * Initial open state. Set to true to open the panel on load. Can also be set via specPatch at runtime to open or close the panel programmatically — the state is one-way (patching open:false closes the panel, but user-initiated closes do not write back to spec).
    */
   open?: boolean;
-  node: World | Plot | Document | Grid | Menu;
   /**
-   * event object that triggers panel
+   * The content node rendered inside the panel.
    */
-  trigger?: object;
+  node: World | Plot | Document | Grid | Menu | Derived;
   /**
-   * If true, this panel is exclusive and will close other panels when opened
+   * Event patterns that automatically open this panel. The panel opens when **any** pattern in the array matches the most recent event on the event bus (logical OR). Each pattern is compared as a deep subset against the event — the pattern matches when all fields it specifies are equal to the corresponding fields on the event. String values support glob pattern matching. Unspecified fields are ignored.
+
+Use a single-element array for a single trigger; use multiple elements when distinct event shapes (different actions, sources, or data filters) should all open the same panel.
+
+Event fields available to match against:
+- action (string): type of event — 'click', 'rightClick', 'doubleClick', 'drop', 'hover', 'viewStateChange', 'activateControl', etc.
+- source (string, glob-matched): path identifying what produced the event. Layer interaction sources follow the pattern '/{path}/children/#{layerId}' (e.g. '/root/children/#wave-height'). Use glob wildcards to match multiple sources (e.g. '/root/children/*').
+- data (object): event payload — subset-match any fields you care about.
+- coordinate ([number, number]): [longitude, latitude] of the interaction point.
+
+Examples:
+  Open on any click on a specific layer:
+    [ { "action": "click", "source": "/root/children/#my-layer" } ]
+
+  Open from either of two layers:
+    [
+      { "action": "click", "source": "/root/children/#layer-a" },
+      { "action": "click", "source": "/root/children/#layer-b" }
+    ]
+
+  Open when a specific control is activated:
+    [ { "action": "activateControl", "source": "/root/children/#controls/children/#draw-tool" } ]
+   */
+  trigger?: Triggerpattern[];
+  /**
+   * If true, opening this panel closes all other currently open panels. Useful for modal-style panels that should have the user's full attention.
    */
   exclusive?: boolean;
   height?: Geojson;
   width?: Geojson;
   position?: Geojson;
   /**
-   * Title of panel
+   * Title displayed in the panel header bar.
    */
   title?: string;
+  /**
+   * Whether the user can dismiss the panel. When false, the close button is hidden and the panel can only be closed programmatically (via specPatch or a closePanel event). Defaults to true.
+   */
+  closable?: boolean;
 }
 
 /**
@@ -355,7 +396,7 @@ export interface Dataset {
 
 /**
  * Transform
- * Specification for data transform. 
+ * Derives a new data source by running user-supplied JavaScript against one or more existing data sources. The code executes in a sandboxed Web Worker and is re-evaluated on every query, with the same query object propagated to each input source so the transform stays in sync with time/region selections elsewhere in the app. The result is validated against the schema for the declared outputType.
  */
 export interface Transform {
   /**
@@ -363,20 +404,20 @@ export interface Transform {
    */
   name?: string;
   /**
-   * Modules to add as key:<Module URL>
+   * ES modules to make available inside the transform function. Each entry maps an identifier name to a module URL; the URL is dynamically imported in the worker and the module's namespace object is bound to that identifier as an extra argument to the transform function. Example: { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } exposes the d3 namespace as `d3` inside `code`.
    */
   modules?: object;
   /**
-   * Source inputs
+   * IDs of other data sources in this specification whose results are passed to the transform. Each ID must match the `id` of another entry in `data`. At query time the inputs are resolved (in declaration order) and exposed inside `code` as the `$inputs` object, keyed by source ID.
    */
-  inputs: any[];
+  inputs: string[];
   /**
-   * Output data type
+   * Schema the transform's return value must conform to. `dataset` validates against the inline Dataset schema; `geojson` validates against a GeoJSON FeatureCollection. Validation runs on every query and a failure rejects the query.
    */
   outputType?: "dataset" | "geojson";
   /**
    * Transform code
-   * Transform code as body of function
+   * Body of the transform function (no `function` wrapper, no parameter list — just the body, with a `return` statement). The function is invoked as `($inputs, $query, $outputType, ...modules)` and may be async. Arguments: `$inputs` — object of resolved input data keyed by source ID (same keys as the `inputs` array); `$query` — the query object propagated from the caller (typically containing time/region selections); `$outputType` — the configured outputType string. After these, one positional argument is appended per entry in `modules` (in object-key order), each bound to that module's namespace. The return value must match the `outputType` schema.
    */
   code: string;
 }
@@ -535,6 +576,10 @@ export interface ControlGroup {
   nodeType?: ControlgroupNodeType;
   orientation?: "horizontal" | "vertical";
   /**
+   * Position of the control group within the map container. Specify top/left/right/bottom as pixel numbers. Defaults to top: 100, left: 10 if unset.
+   */
+  position?: any;
+  /**
    * Control list
    */
   children: Control[];
@@ -615,6 +660,60 @@ export interface LayerSelector {
  */
 export interface DocumentStyle {
   text?: any;
+}
+
+/**
+ * Derived
+ * A derived node references another node in the same spec by ID and applies a list of patches at render time. Use it to reuse a chart, document, panel, or other node with small variations (e.g. a different data source or field) without duplicating the source subtree. Resolution and patching happen lazily at render time — derived nodes inside unrendered branches cost nothing, and edits to the source node propagate naturally on the next render.
+ */
+export interface Derived {
+  /**
+   * Unique identifier for this derived node within the specification. Replaces the source node's root ID in the rendered subtree, and prefixes every descendant ID so multiple derivations of the same source do not collide.
+   * 
+   * @example
+   * "chart-copy-1"
+   * "panel-variant-a"
+   */
+  id: string;
+  /**
+   * Optional human-readable title for this derived node.
+   */
+  title?: string;
+  /**
+   * Node type identifier. Must be 'derived'.
+   */
+  nodeType: DerivedNodeType;
+  /**
+   * ID of the source node to derive from. The renderer looks up this ID in the current spec at render time, deep-clones the source subtree, prefixes descendant IDs with this derived node's ID, rewrites internal cross-references, applies the patches, and renders the result. The root of the spec cannot be a derived node, and the source itself cannot be a derived node.
+   * 
+   * @example
+   * "bar-chart-1"
+   * "main-panel"
+   */
+  source: string;
+  /**
+   * Ordered list of JSON Patch documents applied to the resolved source subtree after ID and reference rewriting. Paths are subtree-relative — they use RFC 6901 segment syntax (e.g. 'plotSpec/layer/0/data/name') and must NOT start with a leading '/'. The leading-slash form is the JSON Pointer 'absolute against document root' notation and is reserved for future cross-subtree patches; v1 rejects it so the convention mismatch surfaces immediately.
+   */
+  patches?: object[][];
+}
+
+/**
+ * TriggerPattern
+ * A single event-matching pattern. Deep subset-matched against the event; unspecified fields are wildcards.
+ */
+export interface Triggerpattern {
+  /**
+   * Event action to match (e.g. 'click', 'rightClick', 'doubleClick', 'hover', 'drop', 'activateControl'). Glob patterns supported.
+   */
+  action?: string;
+  /**
+   * Event source path to match. Layer interactions: '/root/children/#layerId'. Control activations: '/root/children/#controlGroupId/children/#controlId'. Glob patterns supported (e.g. '/root/children/*' matches any child layer).
+   */
+  source?: string;
+  /**
+   * Subset of event data fields to match against. Only the fields you specify need to be present and equal in the event.
+   */
+  data?: object;
 }
 
 /**
@@ -953,9 +1052,7 @@ export interface Levelselect {
  * Control
  * A map control button. Common properties are defined in controlBase; config is specific to each nodeType.
  */
-export interface Control {
-  [key: string]: ControlBase & any;
-}
+export type Control = any;
 
 /**
  * Base layer type

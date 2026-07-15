@@ -1,9 +1,8 @@
 # oceanum-js
 
-Typescript libraries for interacting with the Oceanum.io Datamesh and Eidos.
+Typescript libraries for interacting with the Oceanum.io Datamesh.
 
 ## Packages
 
 - [datamesh](datamesh/)
-- [eidos](eidos/)
 - [layers](layers/)
