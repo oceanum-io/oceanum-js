@@ -144,6 +144,18 @@ const gatewayMock = () => {
         status: 200,
       });
     }
+    if (u.includes("/oceanql/stage/")) {
+      return new Response(
+        JSON.stringify({
+          qhash: "abc",
+          size: 1e9, // >= LAZY_LOAD_SIZE -> zarr transport
+          container: "dataset",
+          coordkeys: {},
+          formats: ["zarr"],
+        }),
+        { status: 200 },
+      );
+    }
     if (u.includes(".zmetadata")) {
       const h = (init?.headers ?? {}) as Record<string, string>;
       zmetadataCalls.push({ ...h });
@@ -204,6 +216,25 @@ describe("Connector session renewal", () => {
 
     expect(dataset).toBeDefined();
     // first .zmetadata attempt used the killed session, retry used the fresh one
+    expect(zmetadataCalls[0]["X-DATAMESH-SESSIONID"]).toBe("s-1");
+    expect(
+      zmetadataCalls[zmetadataCalls.length - 1]["X-DATAMESH-SESSIONID"],
+    ).toBe("s-2");
+    expect(getSessionCount()).toBe(2);
+  });
+
+  it("query() datasets also recover from an idle-expired session", async () => {
+    const { fetchMock, zmetadataCalls, getSessionCount } = gatewayMock();
+    vi.stubGlobal("fetch", fetchMock);
+    const connector = new Connector("test-token", {
+      service: "https://gateway.test",
+    });
+
+    // stage -> zarr transport (size >= LAZY_LOAD_SIZE); the staged store's
+    // first .zmetadata request uses the killed session and must renew.
+    const dataset = await connector.query({ datasource: "test-ds" } as never);
+
+    expect(dataset).not.toBeNull();
     expect(zmetadataCalls[0]["X-DATAMESH-SESSIONID"]).toBe("s-1");
     expect(
       zmetadataCalls[zmetadataCalls.length - 1]["X-DATAMESH-SESSIONID"],

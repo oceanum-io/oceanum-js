@@ -295,8 +295,9 @@ export class CachedHTTPStore implements AsyncReadable {
           if (response.status === 401) {
             // A freshly-renewed session was rejected too: genuine auth
             // failure. Fail fast with the store's terminal semantics instead
-            // of falling into the generic retry loop below, which would
-            // hammer the gateway (and renew again) every 200ms until timeout.
+            // of falling into the generic catch-all retry below, which would
+            // pointlessly re-fetch (and re-renew) for its 2-3 bounded
+            // attempts with misleading retry logging.
             console.error(
               `Zarr request unauthorized after session renewal: ${this.url}${item}`,
             );
