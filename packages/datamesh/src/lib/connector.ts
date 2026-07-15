@@ -175,6 +175,24 @@ export class Connector {
   }
 
   /**
+   * Replace a session the gateway has rejected (401): oceanql sessions can be
+   * terminated server-side after inactivity, BEFORE their declared end time,
+   * so the endTime check in getSession() is not sufficient. Drops the cached
+   * session only if it is still the stale one (a concurrent caller may already
+   * have replaced it) and acquires a fresh session — concurrent renewals share
+   * one acquisition via getSession()'s single-flight.
+   *
+   * @param stale - The session that was rejected.
+   * @returns A fresh session.
+   */
+  async renewSession(stale?: Session): Promise<Session> {
+    if (!stale || this._currentSession?.id === stale.id) {
+      this._currentSession = null;
+    }
+    return this.getSession();
+  }
+
+  /**
    * Get headers with session information, creating a session if none exists.
    *
    * @param additionalHeaders - Additional headers to include.
@@ -369,8 +387,17 @@ export class Connector {
     url: string,
     options: ZarrOptions = {},
   ): Promise<Dataset<HttpZarr>> {
-    const headers = await this.getSessionHeaders();
-    return Dataset.zarr(url, headers, options);
+    let session = await this.getSession();
+    const headers = session.addHeader({ ...this._authHeaders });
+    // The zarr store outlives the session: after inactivity the gateway
+    // expires the session server-side and every request for the staged query
+    // 401s. Give the store a renewal path — swap in a fresh session and let
+    // it retry (single-flight on both sides).
+    const renewHeaders = async (): Promise<Record<string, string>> => {
+      session = await this.renewSession(session);
+      return session.addHeader({ ...this._authHeaders });
+    };
+    return Dataset.zarr(url, headers, { renewHeaders, ...options });
   }
 
   /**

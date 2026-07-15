@@ -563,6 +563,12 @@ export class DataVar<
  * Implements the DatasetApi interface.
  */
 export interface ZarrOptions {
+  /**
+   * Renew session headers after a gateway 401 (idle-expired oceanql session);
+   * the failed zarr request is retried once with the fresh headers. Wired
+   * automatically by Connector.openZarr.
+   */
+  renewHeaders?: () => Promise<Record<string, string>>;
   parameters?: Record<string, string | number>;
   chunks?: string;
   downsample?: Record<string, number>;
@@ -646,6 +652,7 @@ export class Dataset<S extends HttpZarr | TempZarr> {
       timeout: options.timeout,
       nocache: options.nocache,
       ttl: options.ttl,
+      renewHeaders: options.renewHeaders,
     }) as AsyncReadable;
 
     // Use tryWithConsolidated to gracefully handle stores without consolidated metadata

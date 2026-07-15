@@ -62,6 +62,13 @@ interface CachedHTTPStoreOptions {
    */
   ttl?: number;
   timeout?: number;
+  /**
+   * Called when the gateway rejects a request with 401 (an oceanql session can
+   * be terminated server-side after inactivity, before its declared expiry).
+   * Must return fresh auth/session headers; the failed request is retried once
+   * with them. Renewal is single-flight across concurrent chunk fetches.
+   */
+  renewHeaders?: () => Promise<Record<string, string>>;
 }
 
 // Special key suffix for tracking cache creation time
@@ -77,6 +84,8 @@ export class CachedHTTPStore implements AsyncReadable {
   ttl: number | undefined;
   _pending: Record<string, boolean> = {};
   _cacheValid: boolean | undefined;
+  private _renewHeaders?: () => Promise<Record<string, string>>;
+  private _renewPromise: Promise<void> | null = null;
 
   constructor(
     root: string,
@@ -134,6 +143,30 @@ export class CachedHTTPStore implements AsyncReadable {
     });
     this.timeout = options.timeout || 60000;
     this.ttl = options.ttl;
+    this._renewHeaders = options.renewHeaders;
+  }
+
+  /**
+   * Renew the session headers after a 401, single-flight: concurrent chunk
+   * fetches that all hit the expired session share one renewal. The renewed
+   * headers are merged over fetchOptions.headers so store-added headers
+   * (x-parameters, x-chunks, x-filtered, …) are preserved.
+   */
+  private async renewSessionHeaders(): Promise<void> {
+    if (!this._renewHeaders) throw new Error("no renewHeaders callback");
+    if (!this._renewPromise) {
+      this._renewPromise = this._renewHeaders()
+        .then((renewed) => {
+          this.fetchOptions.headers = {
+            ...(this.fetchOptions.headers || {}),
+            ...renewed,
+          };
+        })
+        .finally(() => {
+          this._renewPromise = null;
+        });
+    }
+    return this._renewPromise;
   }
 
   /**
@@ -239,10 +272,37 @@ export class CachedHTTPStore implements AsyncReadable {
           signal: AbortSignal.timeout(this.timeout),
         };
         const query = new URLSearchParams(this.params).toString();
-        const response = await fetch(
+        let response = await fetch(
           `${this.url}${item}?${query}`,
           requestOptions,
         );
+
+        // An oceanql session can expire server-side after inactivity, before
+        // its declared end time — every request for the staged query then
+        // returns 401. Renew the session once and retry with fresh headers; a
+        // second 401 is a genuine auth failure and falls through to the error
+        // path below.
+        if (response.status === 401 && this._renewHeaders) {
+          await this.renewSessionHeaders();
+          response = await fetch(`${this.url}${item}?${query}`, {
+            ...requestOptions,
+            headers: {
+              ...(this.fetchOptions.headers || {}),
+              ...(options?.headers || {}),
+            },
+            signal: AbortSignal.timeout(this.timeout),
+          });
+          if (response.status === 401) {
+            // A freshly-renewed session was rejected too: genuine auth
+            // failure. Fail fast with the store's terminal semantics instead
+            // of falling into the generic retry loop below, which would
+            // hammer the gateway (and renew again) every 200ms until timeout.
+            console.error(
+              `Zarr request unauthorized after session renewal: ${this.url}${item}`,
+            );
+            return undefined;
+          }
+        }
 
         if (response.status === 404) {
           // Item is not found
