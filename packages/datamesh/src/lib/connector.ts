@@ -175,6 +175,43 @@ export class Connector {
   }
 
   /**
+   * Session headers plus a renewal callback for LONG-LIVED zarr stores
+   * (query()/openZarr()): the store outlives the session, and the gateway can
+   * expire the session server-side after inactivity, so the store needs a way
+   * to swap in a fresh session and retry.
+   */
+  private async renewableSessionHeaders(): Promise<{
+    headers: Record<string, string>;
+    renewHeaders: () => Promise<Record<string, string>>;
+  }> {
+    let session = await this.getSession();
+    const headers = session.addHeader({ ...this._authHeaders });
+    const renewHeaders = async (): Promise<Record<string, string>> => {
+      session = await this.renewSession(session);
+      return session.addHeader({ ...this._authHeaders });
+    };
+    return { headers, renewHeaders };
+  }
+
+  /**
+   * Replace a session the gateway has rejected (401): oceanql sessions can be
+   * terminated server-side after inactivity, BEFORE their declared end time,
+   * so the endTime check in getSession() is not sufficient. Drops the cached
+   * session only if it is still the stale one (a concurrent caller may already
+   * have replaced it) and acquires a fresh session — concurrent renewals share
+   * one acquisition via getSession()'s single-flight.
+   *
+   * @param stale - The session that was rejected.
+   * @returns A fresh session.
+   */
+  async renewSession(stale?: Session): Promise<Session> {
+    if (!stale || this._currentSession?.id === stale.id) {
+      this._currentSession = null;
+    }
+    return this.getSession();
+  }
+
+  /**
    * Get headers with session information, creating a session if none exists.
    *
    * @param additionalHeaders - Additional headers to include.
@@ -328,14 +365,17 @@ export class Connector {
     const url = `${this._gateway}/zarr/query/${stage.qhash}`;
     const params = query.parameters;
 
-    // Acquire session headers (a session is always created)
-    const headers = await this.getSessionHeaders();
+    // Acquire session headers (a session is always created), with a renewal
+    // path: the returned Dataset is long-lived and its lazy chunk reads must
+    // survive server-side session expiry after inactivity.
+    const { headers, renewHeaders } = await this.renewableSessionHeaders();
 
     // Pass the headers to the Dataset.zarr method
     const dataset = await Dataset.zarr(url, headers, {
       parameters: params,
       timeout: options.timeout || 60000, // Default timeout value
       nocache: this._nocache,
+      renewHeaders,
     });
 
     if (query.variables) {
@@ -369,8 +409,8 @@ export class Connector {
     url: string,
     options: ZarrOptions = {},
   ): Promise<Dataset<HttpZarr>> {
-    const headers = await this.getSessionHeaders();
-    return Dataset.zarr(url, headers, options);
+    const { headers, renewHeaders } = await this.renewableSessionHeaders();
+    return Dataset.zarr(url, headers, { renewHeaders, ...options });
   }
 
   /**
