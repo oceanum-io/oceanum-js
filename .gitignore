@@ -119,10 +119,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-.nx/installation
-.nx/cache
-.nx/workspace-data
-
 .vscode
 vite.config.ts.timestamp*
 vitest.config.ts.timestamp*

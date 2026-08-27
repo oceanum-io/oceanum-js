@@ -9,7 +9,9 @@
   ],
   "scripts": {
     "generate-types": "node ./scripts/generate-interfaces.js",
+    "dev": "vite",
     "build": "vite build",
+    "test": "vitest run",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

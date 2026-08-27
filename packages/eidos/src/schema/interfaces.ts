@@ -1,12 +1,12 @@
 /**
  * Auto-generated TypeScript interfaces for EIDOS schemas
  * Generated from: /home/dave/Dev/oceanum/eidos/packages/schemas/src/eidos/root.json
- * 
+ *
  * Each interface corresponds to a definition in the EIDOS schema bundle.
  * These interfaces can be used for type validation and IDE support.
- * 
+ *
  * Do not modify this file directly - regenerate using:
- * npx nx run eidos:generate-types
+ * npm run generate-types -w @oceanum/eidos
  */
 
 const _011Constant = "0.11" as const;
@@ -31,7 +31,7 @@ export interface EidosSpec {
   version?: _011Constant;
   /**
    * Unique identifier for this specification. Must be URL-safe using only lowercase letters, numbers, hyphens, and underscores. This ID is used for referencing the specification in URLs, file systems, and databases. It should be descriptive but concise.
-   * 
+   *
    * @example
    * "seastate-demo"
    * "plot-demo"
@@ -40,7 +40,7 @@ export interface EidosSpec {
   id: string;
   /**
    * Human-readable display name for this specification. This is the name shown to users in lists, menus, and interfaces. It can contain spaces, special characters, and mixed case. Should be descriptive and meaningful to end users.
-   * 
+   *
    * @example
    * "DemoOverlay"
    * "DemoPlot"
@@ -49,7 +49,7 @@ export interface EidosSpec {
   name: string;
   /**
    * Detailed description of what this specification does and its purpose. This is primarily for documentation and metadata purposes - it's not typically displayed in the main interface but may be shown in tooltips, help text, or specification listings. Useful for developers and content creators.
-   * 
+   *
    * @example
    * "Demonstration overlay"
    * "Demonstration grid layout"
@@ -68,7 +68,7 @@ export interface EidosSpec {
   /**
    * Data Sources
    * Array of data source definitions that provide data to the visualization components. Each data source can be a static dataset, OceanQL query, Oceanum Datamesh source, or other supported data provider. Data sources are referenced by ID throughout the specification.
-   * 
+   *
    * @example
    * [{"id":"sig-wave-height-trki","dataType":"oceanumDatamesh","dataSpec":{"datasource":"oceanum_wave_trki_era5_v1_grid","variables":["hs","tps"],"geofilter":{"type":"feature","geom":{"type":"Feature","geometry":{"type":"Point","coordinates":[174.3,-38.5]}}},"timefilter":{"times":["2018-01-01 00:00:00Z","2019-01-01 00:00:00Z"]}}}]
    */
@@ -123,7 +123,7 @@ export interface EidosTheme {
 export interface EidosData {
   /**
    * Unique identifier for this data source within the specification. Must be alphanumeric with hyphens and underscores only. This ID is used to reference the data source from visualization layers and components.
-   * 
+   *
    * @example
    * "sig-wave-height-trki"
    * "ship-positions"
@@ -132,7 +132,7 @@ export interface EidosData {
   id: string;
   /**
    * Type of data source that determines how the data is accessed and processed. Each type requires different configuration in the dataSpec property.
-   * 
+   *
    * @example
    * "dataset"
    * "geojson"
@@ -149,7 +149,7 @@ export interface EidosData {
 export interface World {
   /**
    * Unique identifier for this world node within the specification. Used for referencing this node in events, interactions, and programmatic access.
-   * 
+   *
    * @example
    * "map-1"
    * "world-view"
@@ -252,7 +252,7 @@ export interface Document {
 export interface Grid {
   /**
    * Unique identifier for this grid node within the specification. Used for referencing this node in events, interactions, and programmatic access.
-   * 
+   *
    * @example
    * "main-grid"
    * "dashboard-layout"
@@ -504,7 +504,7 @@ export interface Zarr {
 export interface Worldlayer {
   /**
    * Unique identifier for this layer within the world node. Used for layer management, visibility control, and programmatic access.
-   * 
+   *
    * @example
    * "wave-height"
    * "ship-tracks"
@@ -513,7 +513,7 @@ export interface Worldlayer {
   id: string;
   /**
    * Display name for this layer shown in the layer selector and legend. Should be descriptive and user-friendly.
-   * 
+   *
    * @example
    * "Significant Wave Height"
    * "Ship Positions"
@@ -523,7 +523,7 @@ export interface Worldlayer {
   nodeType: WorldlayerNodeType;
   /**
    * Reference to a data source defined in the root 'data' array. This connects the layer to its data source for visualization.
-   * 
+   *
    * @example
    * "hs-1"
    * "sig-wave-height-trki"
@@ -601,7 +601,7 @@ export interface View {
   viewType?: "map" | "globe";
   /**
    * Longitude coordinate of the map center in decimal degrees (-180 to 180). Positive values are East, negative values are West.
-   * 
+   *
    * @example
    * 174.3
    * -122.4
@@ -610,7 +610,7 @@ export interface View {
   longitude: number;
   /**
    * Latitude coordinate of the map center in decimal degrees (-90 to 90). Positive values are North, negative values are South.
-   * 
+   *
    * @example
    * -38.5
    * 37.7
@@ -631,7 +631,7 @@ export interface View {
   maxZoom?: number;
   /**
    * Initial zoom level of the map. Higher values show more detail. Typically ranges from 0 (world view) to 20+ (street level).
-   * 
+   *
    * @example
    * 2
    * 8
@@ -669,7 +669,7 @@ export interface DocumentStyle {
 export interface Derived {
   /**
    * Unique identifier for this derived node within the specification. Replaces the source node's root ID in the rendered subtree, and prefixes every descendant ID so multiple derivations of the same source do not collide.
-   * 
+   *
    * @example
    * "chart-copy-1"
    * "panel-variant-a"
@@ -685,7 +685,7 @@ export interface Derived {
   nodeType: DerivedNodeType;
   /**
    * ID of the source node to derive from. The renderer looks up this ID in the current spec at render time, deep-clones the source subtree, prefixes descendant IDs with this derived node's ID, rewrites internal cross-references, applies the patches, and renders the result. The root of the spec cannot be a derived node, and the source itself cannot be a derived node.
-   * 
+   *
    * @example
    * "bar-chart-1"
    * "main-panel"
@@ -1008,7 +1008,14 @@ export interface MapHoverInfo {
 /**
  * Layer specification
  */
-export type Layerspec = Feature | Gridded | Label | Scenegraph | Seasurface | Track | Wmts;
+export type Layerspec =
+  | Feature
+  | Gridded
+  | Label
+  | Scenegraph
+  | Seasurface
+  | Track
+  | Wmts;
 
 /**
  * Time selection criteria for layer
@@ -1108,7 +1115,14 @@ export interface Feature {
  * Geometry
  * Geometry Model
  */
-export type Geometry = Point | Multipoint | Linestring | Multilinestring | Polygon | Multipolygon | Geometrycollection;
+export type Geometry =
+  | Point
+  | Multipoint
+  | Linestring
+  | Multilinestring
+  | Polygon
+  | Multipolygon
+  | Geometrycollection;
 
 /**
  * Point

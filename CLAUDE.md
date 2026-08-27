@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-OceanumJs is a TypeScript/JavaScript library for interacting with the Oceanum.io platform. It's organized as an Nx monorepo with two main packages:
+OceanumJs is a TypeScript/JavaScript library for interacting with the Oceanum.io platform. It's organized as an npm workspaces monorepo with two main packages:
 
 - **@oceanum/datamesh** - Library for interacting with the Oceanum.io Datamesh API, providing data query capabilities with session management
 - **@oceanum/eidos** - Reactive JavaScript bindings for embedding and controlling EIDOS visualizations using Valtio for state management and AJV for schema validation
@@ -14,37 +14,39 @@ OceanumJs is a TypeScript/JavaScript library for interacting with the Oceanum.io
 ### Building
 
 ```bash
-# Build all packages
-npx nx run-many -t build
+# Build all packages (datamesh first, as layers depends on it)
+npm run build
 
 # Build specific package
-npx nx build datamesh
-npx nx build eidos
+npm run build -w @oceanum/datamesh
+npm run build -w @oceanum/eidos
 ```
 
 ### Testing
 
 ```bash
-# Run tests for datamesh (only package with tests)
-npx nx test datamesh
+# Run tests for all packages
+npm test
+
+# Run tests for a specific package
+npm test -w @oceanum/datamesh
 
 # Run tests with coverage
-npx nx test datamesh --coverage
+npm test -w @oceanum/datamesh -- --coverage
 ```
 
 ### Linting and Type Checking
 
 ```bash
-# Lint all projects
-npx nx run-many -t lint
+# Lint the whole workspace
+npm run lint
 
-# Lint specific package
-npx nx lint datamesh
-npx nx lint eidos
+# Lint a specific package
+npx eslint packages/datamesh
+npx eslint packages/eidos
 
-# Type checking is handled by Nx TypeScript plugin
-npx nx typecheck datamesh
-npx nx typecheck eidos
+# Type check (builds TypeScript project references)
+npm run typecheck
 ```
 
 ### Documentation
@@ -56,18 +58,18 @@ npm run docs
 # Serve docs with watch mode
 npm run docs:serve
 
-# Generate docs for specific package
-npx nx build-docs datamesh
+# Generate docs for specific package (build all packages first)
+npm run build:docs -w @oceanum/datamesh
 ```
 
 ### EIDOS Development
 
 ```bash
 # Development server for EIDOS
-npx nx dev eidos
+npm run dev -w @oceanum/eidos
 
 # Generate TypeScript interfaces from schema
-npx nx run eidos:generate-types
+npm run generate-types -w @oceanum/eidos
 ```
 
 ## Architecture

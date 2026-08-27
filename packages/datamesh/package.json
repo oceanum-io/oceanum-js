@@ -1,8 +1,9 @@
 {
   "name": "@oceanum/datamesh",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "scripts": {
     "build": "vite build",
+    "test": "vitest run",
     "build:docs": "typedoc"
   },
   "publishConfig": {

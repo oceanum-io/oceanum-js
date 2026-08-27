@@ -6,23 +6,14 @@
   "devDependencies": {
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@eslint/js": "^9.39.1",
-    "@nx/eslint": "22.1.0",
-    "@nx/eslint-plugin": "22.1.0",
-    "@nx/js": "22.1.0",
-    "@nx/vite": "22.1.0",
-    "@nx/web": "22.1.0",
-    "@swc-node/register": "~1.11.1",
-    "@swc/core": "~1.15.2",
-    "@swc/helpers": "~0.5.17",
     "@types/node": "24.10.1",
     "@vitest/coverage-v8": "^4.0.10",
     "@vitest/ui": "^4.0.10",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.9.0",
     "jsdom": "~27.2.0",
-    "nx": "^22.1.0",
     "prettier": "^3.6.2",
-    "ts-node": "^10.9.2",
     "tslib": "^2.8.1",
     "typedoc": "^0.28.14",
     "typedoc-plugin-markdown": "^4.9.0",
@@ -34,7 +25,6 @@
     "vitest": "^4.0.10"
   },
   "dependencies": {
-    "@nx/node": "^22.1.0",
     "@oceanum/datamesh": "^0.5.1",
     "@oceanum/eidos": "^0.1.0",
     "@oceanum/layers": "^0.1.0"
@@ -46,6 +36,11 @@
     "packages/*"
   ],
   "scripts": {
+    "build": "npm run build -w @oceanum/datamesh && npm run build -w @oceanum/eidos && npm run build -w @oceanum/layers",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint .",
+    "typecheck": "tsc --build",
+    "build:docs": "npm run build:docs --workspaces --if-present",
     "docs": "typedoc",
     "docs:serve": "typedoc --watch"
   }

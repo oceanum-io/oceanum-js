@@ -42,6 +42,49 @@ registry.set("msgpack2", async () => ({
   },
 }));
 
+// Zarr v2 object columns written from Python `bytes` values carry the
+// numcodecs "vlen-bytes" filter, which zarrita does not register (it only
+// ships "vlen-utf8" — still true as of zarrita 0.7.3), so chunk decode fails
+// with "Unknown codec: vlen-bytes". Same wire format as vlen-utf8: uint32-LE
+// item count, then per item a uint32-LE byte length followed by the payload.
+// Items decode to UTF-8 strings for consistency with how fixed-width |S<n>
+// bytes columns are surfaced (see datamodel.ts isFixedWidthString).
+registry.set("vlen-bytes", async () => ({
+  kind: "array_to_bytes",
+  fromConfig: (_config, meta) => {
+    return {
+      kind: "array_to_bytes",
+      async encode(_data: any): Promise<Uint8Array> {
+        throw new Error("vlen-bytes encode not implemented");
+      },
+      async decode(bytes: Uint8Array): Promise<any> {
+        const view = new DataView(
+          bytes.buffer,
+          bytes.byteOffset,
+          bytes.byteLength,
+        );
+        const decoder = new TextDecoder();
+        const data = new Array(view.getUint32(0, true));
+        let pos = 4;
+        for (let i = 0; i < data.length; i++) {
+          const itemLength = view.getUint32(pos, true);
+          pos += 4;
+          data[i] = decoder.decode(bytes.subarray(pos, pos + itemLength));
+          pos += itemLength;
+        }
+        const { shape } = meta;
+        const stride = new Array(shape.length);
+        let s = 1;
+        for (let i = shape.length - 1; i >= 0; i--) {
+          stride[i] = s;
+          s *= shape[i];
+        }
+        return { data, shape, stride };
+      },
+    };
+  },
+}));
+
 function delay(t: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, t));
 }

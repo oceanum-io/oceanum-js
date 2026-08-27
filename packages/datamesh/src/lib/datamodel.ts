@@ -177,6 +177,11 @@ const getDtype = (data: Data): DataType => {
         return "bool";
       case "Number":
         return "float32";
+      // A plain Array of BigInt — the shape consumers produce when they
+      // index/filter an int64 column (BigInt64Array) into a vanilla array
+      // and hand it back to Dataset.init/assign.
+      case "BigInt":
+        return "int64";
       case "Int8Array":
         return "int8";
       case "Int16Array":
