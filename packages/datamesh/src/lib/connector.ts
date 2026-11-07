@@ -5,6 +5,7 @@ import { Dataset, HttpZarr, TempZarr, ZarrOptions } from "./datamodel";
 import { isDatameshDebugEnabled, measureTime } from "./observe";
 import { tableFromIPC, Table } from "apache-arrow";
 import { Session } from "./session";
+import { Notice } from "./notices";
 
 /**
  * Datamesh connector class.
@@ -17,6 +18,20 @@ const DATAMESH_SERVICE =
     ? process.env.DATAMESH_SERVICE
     : "https://datamesh.oceanum.io";
 
+/** Admin service host for each Datamesh service host whose notices it serves. */
+const ADMIN_SERVICES = new Map([
+  ["datamesh.oceanum.io", "https://admin.oceanum.io"],
+  ["datamesh.oceanum.tech", "https://admin.oceanum.tech"],
+]);
+/** Milliseconds a notices request may take before it is abandoned. */
+const NOTICES_TIMEOUT = 3000;
+/** Milliseconds a datasource's notices are cached for, per connector. */
+const NOTICES_CACHE_TTL = 10 * 60 * 1000;
+/** Datasources whose notices each connector caches (and warns about) at most. */
+const NOTICES_CACHE_SIZE = 100;
+/** Severities that are warned about when a datasource is loaded. */
+const WARN_SEVERITIES = new Set(["action_required", "outage"]);
+
 export class Connector {
   static LAZY_LOAD_SIZE = 1e8;
   private _token: string;
@@ -27,6 +42,14 @@ export class Connector {
   private _sessionParams: Record<string, number> = {};
   private _currentSession: Session | null = null;
   private _sessionPromise: Promise<Session> | null = null;
+  private _adminService: string | null;
+  private _noticeHeaders: Record<string, string>;
+  private _warnNotices: boolean;
+  private _noticesCache = new Map<
+    string,
+    { time: number; notices: Promise<Notice[]> }
+  >();
+  private _noticesWarned = new Set<string>();
   service?: string;
   gateway?: string;
 
@@ -40,6 +63,8 @@ export class Connector {
    * @param options.jwtAuth - JWT for Oceanum service.
    * @param options.nocache - Disable caching of datamesh results.
    * @param options.sessionDuration - The desired length of time for acquired datamesh sessions in hours. Will be 1 hour by default.
+   * @param options.adminService - URL of the oceanum.io admin service that serves notices about datasources. Defaults to "https://admin.oceanum.io" for the Datamesh service "https://datamesh.oceanum.io" ("https://admin.oceanum.tech" for "https://datamesh.oceanum.tech"); for any other service, notices are not fetched unless this is set.
+   * @param options.notices - Set to false to not check for notices when a datasource is loaded (see {@link getNotices}). Defaults to true.
    *
    * @throws {Error} - If a valid token is not provided.
    */
@@ -53,6 +78,8 @@ export class Connector {
       jwtAuth?: string;
       nocache?: boolean;
       sessionDuration?: number;
+      adminService?: string;
+      notices?: boolean;
     },
   ) {
     if (!token && !options?.jwtAuth) {
@@ -73,6 +100,18 @@ export class Connector {
           Authorization: `Token ${this._token}`,
           "X-DATAMESH-TOKEN": this._token,
         };
+
+    // Notices are fetched with the connector's own credential: admin forwards it
+    // to Datamesh to decide whether the caller may see the datasource.
+    this._noticeHeaders = options?.jwtAuth
+      ? { Authorization: `Bearer ${options.jwtAuth}` }
+      : { "X-DATAMESH-TOKEN": this._token };
+    this._adminService =
+      (options?.adminService || ADMIN_SERVICES.get(url.hostname) || "").replace(
+        /\/+$/,
+        "",
+      ) || null;
+    this._warnNotices = options?.notices ?? true;
 
     /* This is for testing  the gateway service is not always the same as the service domain */
     this._gateway = options?.gateway || this._host;
@@ -349,6 +388,8 @@ export class Connector {
       console.debug(`@oceanum/datamesh debug: query called`, query);
     }
 
+    if (query.datasource) this.warnNotices(query.datasource);
+
     //Stage the query
     const stage = await this.stageRequest(query);
     if (!stage) {
@@ -449,6 +490,110 @@ export class Connector {
     const query = { datasource: datasourceId, parameters };
     const dataset = await this.query(query);
     return dataset;
+  }
+
+  /**
+   * Get the published, unexpired oceanum.io notices about a datasource, such
+   * as deprecations, changes or outages, newest first.
+   *
+   * Notices are requested from the admin service (see the `adminService`
+   * constructor option) with this connector's own credential, and are only
+   * returned for datasources that credential can read. Results are cached per
+   * datasource for 10 minutes.
+   *
+   * This never throws: if no admin service is known for the Datamesh service,
+   * the request fails or takes longer than 3 seconds, or the datasource is
+   * unknown or not readable, it resolves to an empty list.
+   *
+   * @param datasourceId - Unique datasource ID.
+   * @returns The datasource's notices, newest first; empty if there are none.
+   */
+  async getNotices(datasourceId: string): Promise<Notice[]> {
+    if (!this._adminService) return [];
+    const cached = this._noticesCache.get(datasourceId);
+    if (cached && Date.now() - cached.time < NOTICES_CACHE_TTL) {
+      return cached.notices;
+    }
+    this._noticesCache.delete(datasourceId);
+    if (this._noticesCache.size >= NOTICES_CACHE_SIZE) {
+      // Evict the oldest entry: Map iterates in insertion order.
+      this._noticesCache.delete(this._noticesCache.keys().next().value!);
+    }
+    const notices = this.fetchNotices(this._adminService, datasourceId);
+    this._noticesCache.set(datasourceId, { time: Date.now(), notices });
+    return notices;
+  }
+
+  /**
+   * Request a datasource's notices from the admin service. Resolves to an
+   * empty list on any failure; never logs the credential.
+   */
+  private async fetchNotices(
+    adminService: string,
+    datasourceId: string,
+  ): Promise<Notice[]> {
+    const url = new URL(`${adminService}/notices/active`);
+    url.searchParams.set("datasource", datasourceId);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), NOTICES_TIMEOUT);
+    try {
+      const response = await fetch(url.toString(), {
+        headers: { ...this._noticeHeaders, Accept: "application/json" },
+        signal: controller.signal,
+      });
+      if (response.status !== 200) {
+        // 404 is "no notices" (or no access); anything else is a failure
+        // that must not affect the caller.
+        if (isDatameshDebugEnabled()) {
+          console.debug(
+            `@oceanum/datamesh debug: notices for ${datasourceId}: HTTP ${response.status}`,
+          );
+        }
+        return [];
+      }
+      const body = (await response.json()) as { items?: unknown };
+      return Array.isArray(body?.items) ? (body.items as Notice[]) : [];
+    } catch (error) {
+      if (isDatameshDebugEnabled()) {
+        console.debug(
+          `@oceanum/datamesh debug: notices for ${datasourceId} failed: ${error instanceof Error ? error.name : "error"}`,
+        );
+      }
+      return [];
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /**
+   * Warn (console.warn), once per datasource per connector, about the
+   * datasource's action_required and outage notices. Fire-and-forget: never
+   * throws or delays the caller.
+   */
+  private warnNotices(datasourceId: string): void {
+    if (
+      !this._warnNotices ||
+      !this._adminService ||
+      this._noticesWarned.has(datasourceId)
+    ) {
+      return;
+    }
+    if (this._noticesWarned.size >= NOTICES_CACHE_SIZE) {
+      this._noticesWarned.delete(this._noticesWarned.values().next().value!);
+    }
+    this._noticesWarned.add(datasourceId);
+    this.getNotices(datasourceId)
+      .then((notices) => {
+        for (const notice of notices) {
+          if (WARN_SEVERITIES.has(notice.severity)) {
+            console.warn(
+              `Datamesh notice for datasource ${datasourceId} (${notice.severity}): ${notice.title}. ` +
+                `See connector.getNotices("${datasourceId}") for details.`,
+            );
+          }
+        }
+      })
+      .catch(() => undefined);
   }
 
   /**

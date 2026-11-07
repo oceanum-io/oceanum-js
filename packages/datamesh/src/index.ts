@@ -3,3 +3,4 @@ export * from "./lib/datasource";
 export * from "./lib/query";
 export * from "./lib/datamodel";
 export * from "./lib/cftime";
+export * from "./lib/notices";
