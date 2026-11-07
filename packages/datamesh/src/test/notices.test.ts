@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { createServer, Server } from "node:http";
+import { AddressInfo } from "node:net";
 import { Connector } from "../lib/connector";
 import { Notice } from "../lib/notices";
 
@@ -189,12 +191,80 @@ describe("Connector.getNotices", () => {
     expect(noticeCalls(calls)).toHaveLength(2);
   });
 
-  it("caches failures too, so a failing admin service is not hammered", async () => {
+  it("caches failures for 30 seconds only", async () => {
     const calls = stubFetch(() => new Response("", { status: 503 }));
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
     const c = connector();
     await c.getNotices("ds");
+    now.mockReturnValue(1_000_000 + 30 * 1000 - 1);
     await c.getNotices("ds");
     expect(noticeCalls(calls)).toHaveLength(1);
+    now.mockReturnValue(1_000_000 + 30 * 1000);
+    await c.getNotices("ds");
+    expect(noticeCalls(calls)).toHaveLength(2);
+  });
+
+  it("asks fetch never to follow redirects", async () => {
+    let redirect: RequestRedirect | undefined;
+    stubFetch((_url, init) => {
+      redirect = init?.redirect;
+      return Response.json({ items: [] });
+    });
+    await connector().getNotices("ds");
+    expect(redirect).toBe("error");
+  });
+
+  it("returns [] for an invalid adminService, without throwing", async () => {
+    const calls = stubFetch();
+    const c = connector({ adminService: "not a url" });
+    await expect(c.getNotices("ds")).resolves.toEqual([]);
+    await expect(c.getNotices("ds")).resolves.toEqual([]);
+    expect(calls).toHaveLength(0);
+  });
+
+  it("skips malformed notices", async () => {
+    const good = notice("outage", "good");
+    stubFetch(() =>
+      Response.json({
+        items: [
+          null,
+          "text",
+          { ...good, id: 7 },
+          { ...good, type: "app" },
+          { ...good, severity: "critical" },
+          { ...good, title: undefined },
+          { ...good, body: null },
+          { ...good, publish_at: "not a date" },
+          { ...good, expires_at: 5 },
+          { ...good, extra: "dropped" },
+        ],
+      }),
+    );
+    expect(await connector().getNotices("ds")).toEqual([good]);
+  });
+
+  it("sorts notices newest first and returns copies", async () => {
+    const at = (title: string, publish_at: string) => ({
+      ...notice("info", title),
+      publish_at,
+    });
+    stubFetch(() =>
+      Response.json({
+        items: [
+          at("old", "2026-01-01T00:00:00Z"),
+          at("new", "2026-03-01T00:00:00+00:00"),
+          at("mid", "2026-02-01T12:00:00+13:00"),
+        ],
+      }),
+    );
+    const c = connector();
+    const first = await c.getNotices("ds");
+    expect(first.map((n) => n.title)).toEqual(["new", "mid", "old"]);
+
+    first[0].title = "mutated";
+    first.pop();
+    const second = await c.getNotices("ds");
+    expect(second.map((n) => n.title)).toEqual(["new", "mid", "old"]);
   });
 
   it("refetches after the cache expires", async () => {
@@ -219,6 +289,43 @@ describe("Connector.getNotices", () => {
     expect(noticeCalls(calls)).toHaveLength(101);
     await c.getNotices("ds0"); // evicted
     expect(noticeCalls(calls)).toHaveLength(102);
+  });
+});
+
+describe("notices requests over HTTP", () => {
+  const servers: Server[] = [];
+  afterEach(async () => {
+    await Promise.all(
+      servers.splice(0).map((s) => new Promise((r) => s.close(r))),
+    );
+  });
+
+  const listen = async (
+    handler: Parameters<typeof createServer>[1],
+  ): Promise<string> => {
+    const server = createServer(handler);
+    servers.push(server);
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    return `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  };
+
+  it("never follows a redirect, so the credential stays with admin", async () => {
+    const elsewhere: Array<string | undefined> = [];
+    const other = await listen((req, res) => {
+      elsewhere.push(req.headers["x-datamesh-token"] as string | undefined);
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ items: [notice("outage")] }));
+    });
+    const admin = await listen((_req, res) => {
+      res.statusCode = 302;
+      res.setHeader("Location", `${other}/notices/active?datasource=ds`);
+      res.end();
+    });
+
+    const notices = await connector({ adminService: admin }).getNotices("ds");
+
+    expect(notices).toEqual([]);
+    expect(elsewhere).toEqual([]);
   });
 });
 
@@ -293,5 +400,99 @@ describe("notices on loadDatasource", () => {
     stubFetch(() => Promise.reject(new Error("boom")));
     await expect(connector().loadDatasource("ds")).resolves.toBeNull();
     await flush();
+  });
+
+  const noticeWarnings = (warn: { mock: { calls: unknown[][] } }) =>
+    warn.mock.calls
+      .map((args) => String(args[0]))
+      .filter((m) => m.startsWith("Datamesh notice"));
+
+  it("warns after a transient failure once a later check succeeds", async () => {
+    let fail = true;
+    stubFetch(() =>
+      fail
+        ? new Response("", { status: 503 })
+        : Response.json({ items: [notice("outage", "down")] }),
+    );
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    const c = connector();
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeWarnings(warn)).toHaveLength(0);
+
+    fail = false;
+    now.mockReturnValue(1_000_000 + 30 * 1000);
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeWarnings(warn)).toHaveLength(1);
+    expect(noticeWarnings(warn)[0]).toContain("down");
+  });
+
+  it("warns about a notice published after the first load, once", async () => {
+    let items = [notice("outage", "first")];
+    const calls = stubFetch(() => Response.json({ items }));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000_000);
+    const c = connector();
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeWarnings(warn)).toHaveLength(1);
+
+    items = [notice("action_required", "second"), notice("outage", "first")];
+    // Within the cache TTL: no new request, no new warning.
+    now.mockReturnValue(1_000_000 + 10 * 60 * 1000 - 1);
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeCalls(calls)).toHaveLength(1);
+    expect(noticeWarnings(warn)).toHaveLength(1);
+
+    // After it: re-checked, and only the new notice is warned about.
+    now.mockReturnValue(1_000_000 + 10 * 60 * 1000);
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeCalls(calls)).toHaveLength(2);
+    expect(noticeWarnings(warn)).toHaveLength(2);
+    expect(noticeWarnings(warn)[1]).toContain("second");
+
+    // And again later: nothing new, nothing warned twice.
+    now.mockReturnValue(1_000_000 + 20 * 60 * 1000);
+    await c.loadDatasource("ds");
+    await flush();
+    expect(noticeCalls(calls)).toHaveLength(3);
+    expect(noticeWarnings(warn)).toHaveLength(2);
+  });
+
+  it("does not warn twice for concurrent loads", async () => {
+    stubFetch(() => Response.json({ items: [notice("outage")] }));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const c = connector();
+    await Promise.all([c.loadDatasource("ds"), c.loadDatasource("ds")]);
+    await flush();
+    expect(noticeWarnings(warn)).toHaveLength(1);
+  });
+
+  it("sanitises titles in warnings", async () => {
+    const title =
+      "Line one\nFAKE: log line\r\u001b[31mred\u001b[0m\u2028\u202eevil " +
+      "x".repeat(300);
+    stubFetch(() => Response.json({ items: [notice("outage", title)] }));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await connector().loadDatasource("ds");
+    await flush();
+
+    const [message] = noticeWarnings(warn);
+    expect(message).toBeDefined();
+    expect(message).not.toMatch(
+      // eslint-disable-next-line no-control-regex
+      /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e]/,
+    );
+    expect(message).toContain("Line one FAKE: log line [31mred [0m evil x");
+    const shown = message.slice(
+      message.indexOf("): ") + 3,
+      message.indexOf(". See"),
+    );
+    expect(shown).toHaveLength(200);
+    expect(shown.endsWith("\u2026")).toBe(true);
   });
 });

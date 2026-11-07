@@ -27,10 +27,75 @@ const ADMIN_SERVICES = new Map([
 const NOTICES_TIMEOUT = 3000;
 /** Milliseconds a datasource's notices are cached for, per connector. */
 const NOTICES_CACHE_TTL = 10 * 60 * 1000;
-/** Datasources whose notices each connector caches (and warns about) at most. */
+/** Milliseconds a failed notices request is cached for, per connector. */
+const NOTICES_FAILURE_TTL = 30 * 1000;
+/** Datasources whose notices each connector caches at most. */
 const NOTICES_CACHE_SIZE = 100;
+/** Notice IDs warned about that each cache entry remembers at most. */
+const NOTICES_WARNED_SIZE = 100;
+/** Characters of a notice title a warning shows at most. */
+const NOTICE_TITLE_LENGTH = 200;
+const NOTICE_SEVERITIES = new Set<unknown>([
+  "info",
+  "change",
+  "action_required",
+  "outage",
+]);
 /** Severities that are warned about when a datasource is loaded. */
-const WARN_SEVERITIES = new Set(["action_required", "outage"]);
+const WARN_SEVERITIES = new Set<string>(["action_required", "outage"]);
+
+/** One datasource's notices, as cached by a connector. */
+interface NoticesEntry {
+  /** The notices, or null if the request failed. */
+  request: Promise<Notice[] | null>;
+  /** When to request them again (ms since epoch); Infinity while in flight. */
+  expires: number;
+  /** IDs of the notices already warned about, oldest first. */
+  warned: Set<string>;
+}
+
+/** The item if it is a well-formed notice, else null. */
+function parseNotice(item: unknown): Notice | null {
+  if (!item || typeof item !== "object") return null;
+  const n = item as Record<string, unknown>;
+  if (
+    typeof n.id !== "string" ||
+    n.type !== "datasource" ||
+    !NOTICE_SEVERITIES.has(n.severity) ||
+    typeof n.title !== "string" ||
+    typeof n.body !== "string" ||
+    typeof n.publish_at !== "string" ||
+    Number.isNaN(Date.parse(n.publish_at)) ||
+    (n.expires_at !== null && typeof n.expires_at !== "string")
+  ) {
+    return null;
+  }
+  return {
+    id: n.id,
+    type: n.type,
+    severity: n.severity as Notice["severity"],
+    title: n.title,
+    body: n.body,
+    publish_at: n.publish_at,
+    expires_at: n.expires_at,
+  };
+}
+
+/** Control, line separator and bidi override characters. */
+const UNSAFE_TITLE_CHARS =
+  // eslint-disable-next-line no-control-regex
+  /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g;
+
+/** A notice title made safe for one log line: no control or bidi characters. */
+function sanitiseTitle(title: string): string {
+  const clean = title
+    .replace(UNSAFE_TITLE_CHARS, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return clean.length > NOTICE_TITLE_LENGTH
+    ? `${clean.slice(0, NOTICE_TITLE_LENGTH - 1)}\u2026`
+    : clean;
+}
 
 export class Connector {
   static LAZY_LOAD_SIZE = 1e8;
@@ -45,11 +110,7 @@ export class Connector {
   private _adminService: string | null;
   private _noticeHeaders: Record<string, string>;
   private _warnNotices: boolean;
-  private _noticesCache = new Map<
-    string,
-    { time: number; notices: Promise<Notice[]> }
-  >();
-  private _noticesWarned = new Set<string>();
+  private _noticesCache = new Map<string, NoticesEntry>();
   service?: string;
   gateway?: string;
 
@@ -64,7 +125,7 @@ export class Connector {
    * @param options.nocache - Disable caching of datamesh results.
    * @param options.sessionDuration - The desired length of time for acquired datamesh sessions in hours. Will be 1 hour by default.
    * @param options.adminService - URL of the oceanum.io admin service that serves notices about datasources. Defaults to "https://admin.oceanum.io" for the Datamesh service "https://datamesh.oceanum.io" ("https://admin.oceanum.tech" for "https://datamesh.oceanum.tech"); for any other service, notices are not fetched unless this is set.
-   * @param options.notices - Set to false to not check for notices when a datasource is loaded (see {@link getNotices}). Defaults to true.
+   * @param options.notices - Check for notices when a datasource is queried or loaded, and console.warn about action_required and outage notices (see {@link getNotices}). Defaults to true: the first query of each datasource then sends this connector's credential (Datamesh token or JWT) to the admin service, which forwards it to Datamesh to check access. Set to false to turn this off.
    *
    * @throws {Error} - If a valid token is not provided.
    */
@@ -497,100 +558,133 @@ export class Connector {
    * as deprecations, changes or outages, newest first.
    *
    * Notices are requested from the admin service (see the `adminService`
-   * constructor option) with this connector's own credential, and are only
-   * returned for datasources that credential can read. Results are cached per
-   * datasource for 10 minutes.
+   * constructor option) with this connector's own credential, which the admin
+   * service forwards to Datamesh to check access: notices are only returned
+   * for datasources that credential can read. Results are cached per
+   * datasource for 10 minutes (a failed request for 30 seconds).
    *
    * This never throws: if no admin service is known for the Datamesh service,
    * the request fails or takes longer than 3 seconds, or the datasource is
-   * unknown or not readable, it resolves to an empty list.
+   * unknown or not readable, it resolves to an empty list. Malformed notices
+   * are left out.
    *
    * @param datasourceId - Unique datasource ID.
    * @returns The datasource's notices, newest first; empty if there are none.
    */
   async getNotices(datasourceId: string): Promise<Notice[]> {
-    if (!this._adminService) return [];
-    const cached = this._noticesCache.get(datasourceId);
-    if (cached && Date.now() - cached.time < NOTICES_CACHE_TTL) {
-      return cached.notices;
-    }
-    this._noticesCache.delete(datasourceId);
-    if (this._noticesCache.size >= NOTICES_CACHE_SIZE) {
-      // Evict the oldest entry: Map iterates in insertion order.
-      this._noticesCache.delete(this._noticesCache.keys().next().value!);
-    }
-    const notices = this.fetchNotices(this._adminService, datasourceId);
-    this._noticesCache.set(datasourceId, { time: Date.now(), notices });
-    return notices;
+    const notices = await this.noticesEntry(datasourceId)?.request;
+    return notices ? notices.map((notice) => ({ ...notice })) : [];
   }
 
   /**
-   * Request a datasource's notices from the admin service. Resolves to an
-   * empty list on any failure; never logs the credential.
+   * The cache entry for a datasource's notices, requesting them if they are
+   * not cached or have expired; undefined if no admin service is known.
+   */
+  private noticesEntry(datasourceId: string): NoticesEntry | undefined {
+    const adminService = this._adminService;
+    if (!adminService) return undefined;
+    let entry = this._noticesCache.get(datasourceId);
+    if (entry && Date.now() < entry.expires) return entry;
+    if (entry) {
+      // Move to the end of the eviction order, keeping its warned IDs.
+      this._noticesCache.delete(datasourceId);
+    } else {
+      if (this._noticesCache.size >= NOTICES_CACHE_SIZE) {
+        // Evict the oldest entry: Map iterates in insertion order.
+        const oldest = this._noticesCache.keys().next().value;
+        if (oldest !== undefined) this._noticesCache.delete(oldest);
+      }
+      entry = { request: Promise.resolve(null), expires: 0, warned: new Set() };
+    }
+    const current = entry;
+    current.expires = Infinity;
+    current.request = this.fetchNotices(adminService, datasourceId).then(
+      (notices) => {
+        current.expires =
+          Date.now() + (notices ? NOTICES_CACHE_TTL : NOTICES_FAILURE_TTL);
+        return notices;
+      },
+    );
+    this._noticesCache.set(datasourceId, current);
+    return current;
+  }
+
+  /**
+   * Request a datasource's notices from the admin service, newest first.
+   * Resolves to null on any failure and [] for a 404 ("No notices"); never
+   * throws, follows a redirect or logs the credential.
    */
   private async fetchNotices(
     adminService: string,
     datasourceId: string,
-  ): Promise<Notice[]> {
-    const url = new URL(`${adminService}/notices/active`);
-    url.searchParams.set("datasource", datasourceId);
+  ): Promise<Notice[] | null> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), NOTICES_TIMEOUT);
     try {
+      const url = new URL(`${adminService}/notices/active`);
+      url.searchParams.set("datasource", datasourceId);
       const response = await fetch(url.toString(), {
         headers: { ...this._noticeHeaders, Accept: "application/json" },
         signal: controller.signal,
+        // Never forward the credential elsewhere: a cross-origin redirect
+        // would drop Authorization but keep X-DATAMESH-TOKEN.
+        redirect: "error",
       });
+      if (response.status === 404) return []; // No access, or unknown.
       if (response.status !== 200) {
-        // 404 is "no notices" (or no access); anything else is a failure
-        // that must not affect the caller.
         if (isDatameshDebugEnabled()) {
           console.debug(
             `@oceanum/datamesh debug: notices for ${datasourceId}: HTTP ${response.status}`,
           );
         }
-        return [];
+        return null;
       }
-      const body = (await response.json()) as { items?: unknown };
-      return Array.isArray(body?.items) ? (body.items as Notice[]) : [];
+      const body = (await response.json()) as { items?: unknown } | null;
+      if (!Array.isArray(body?.items)) return null;
+      return body.items
+        .map(parseNotice)
+        .filter((notice): notice is Notice => notice !== null)
+        .sort((a, b) => Date.parse(b.publish_at) - Date.parse(a.publish_at));
     } catch (error) {
       if (isDatameshDebugEnabled()) {
         console.debug(
           `@oceanum/datamesh debug: notices for ${datasourceId} failed: ${error instanceof Error ? error.name : "error"}`,
         );
       }
-      return [];
+      return null;
     } finally {
       clearTimeout(timer);
     }
   }
 
   /**
-   * Warn (console.warn), once per datasource per connector, about the
-   * datasource's action_required and outage notices. Fire-and-forget: never
-   * throws or delays the caller.
+   * Warn (console.warn) about the datasource's action_required and outage
+   * notices, each once per connector: notices published later are warned
+   * about once the cached list expires. Fire-and-forget: never throws or
+   * delays the caller.
    */
   private warnNotices(datasourceId: string): void {
-    if (
-      !this._warnNotices ||
-      !this._adminService ||
-      this._noticesWarned.has(datasourceId)
-    ) {
-      return;
-    }
-    if (this._noticesWarned.size >= NOTICES_CACHE_SIZE) {
-      this._noticesWarned.delete(this._noticesWarned.values().next().value!);
-    }
-    this._noticesWarned.add(datasourceId);
-    this.getNotices(datasourceId)
+    if (!this._warnNotices) return;
+    const entry = this.noticesEntry(datasourceId);
+    if (!entry) return;
+    entry.request
       .then((notices) => {
-        for (const notice of notices) {
-          if (WARN_SEVERITIES.has(notice.severity)) {
-            console.warn(
-              `Datamesh notice for datasource ${datasourceId} (${notice.severity}): ${notice.title}. ` +
-                `See connector.getNotices("${datasourceId}") for details.`,
-            );
+        for (const notice of notices ?? []) {
+          if (
+            !WARN_SEVERITIES.has(notice.severity) ||
+            entry.warned.has(notice.id)
+          ) {
+            continue;
           }
+          if (entry.warned.size >= NOTICES_WARNED_SIZE) {
+            const oldest = entry.warned.values().next().value;
+            if (oldest !== undefined) entry.warned.delete(oldest);
+          }
+          entry.warned.add(notice.id);
+          console.warn(
+            `Datamesh notice for datasource ${datasourceId} (${notice.severity}): ${sanitiseTitle(notice.title)}. ` +
+              `See connector.getNotices("${datasourceId}") for details.`,
+          );
         }
       })
       .catch(() => undefined);

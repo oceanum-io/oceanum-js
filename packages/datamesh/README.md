@@ -41,9 +41,9 @@ for (const notice of notices) {
 }
 ```
 
-Notices are fetched from the Oceanum.io admin service with the connector's own credential, and only for datasources that credential can read. The admin service is derived from the Datamesh service (`https://datamesh.oceanum.io` uses `https://admin.oceanum.io`); for any other service (a proxy, for example) set it with the `adminService` connector option, or no notices are fetched. `getNotices` never throws: on any failure, or after 3 seconds, it resolves to an empty list. Results are cached per datasource for 10 minutes.
+Notices are fetched from the Oceanum.io admin service with the connector's own credential, and only for datasources that credential can read. The admin service is derived from the Datamesh service (`https://datamesh.oceanum.io` uses `https://admin.oceanum.io`); for any other service (a proxy, for example) set it with the `adminService` connector option, or no notices are fetched. `getNotices` never throws: on any failure, or after 3 seconds, it resolves to an empty list. Results are cached per datasource for 10 minutes (a failed request for 30 seconds).
 
-When you query or load a datasource, the connector also checks its notices in the background, once per datasource, and logs a `console.warn` for each `action_required` or `outage` notice. This never delays or fails the query. To turn it off:
+By default, when you query or load a datasource, the connector also checks its notices in the background and logs a `console.warn` for each `action_required` or `outage` notice, once per notice. This never delays or fails the query. It means the first query of each datasource sends the connector's credential (your Datamesh token or JWT) to the admin service, which forwards it to Datamesh to check that you can read the datasource; the credential is not sent anywhere else (redirects are refused). To turn the check off:
 
 ```ts
 const datamesh = new Connector("my_datamesh_token", { notices: false });

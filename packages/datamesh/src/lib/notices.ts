@@ -9,19 +9,14 @@
 export type NoticeSeverity = "info" | "change" | "action_required" | "outage";
 
 /**
- * Kind of resource an oceanum.io notice is about.
- */
-export type NoticeType = "general" | "datasource" | "app";
-
-/**
  * A published, unexpired oceanum.io notice about a datasource, as returned by
- * {@link Connector.getNotices}.
+ * `Connector.getNotices`.
  */
 export interface Notice {
   /** Notice ID (a UUID). */
   id: string;
-  /** Kind of resource the notice is about. */
-  type: NoticeType;
+  /** Kind of resource the notice is about: always "datasource" here. */
+  type: "datasource";
   /** Notice severity. */
   severity: NoticeSeverity;
   /** Short title. */
