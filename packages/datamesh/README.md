@@ -30,6 +30,25 @@ const data = await datamesh.query(query);
 [!WARNING]
 DO NOT put your Datamesh token directly into browser code. For use in an SPA, you should forward your Datamesh request through a reverse proxy to conceal your token.
 
+## Datasource notices
+
+Oceanum.io publishes notices about datasources, such as deprecations, changes and outages. Get the current notices about a datasource with `getNotices`:
+
+```ts
+const notices = await datamesh.getNotices("oceanum-sizing_giants");
+for (const notice of notices) {
+  console.log(notice.severity, notice.title); // notice.body is markdown
+}
+```
+
+Notices are fetched from the Oceanum.io admin service with the connector's own credential, and only for datasources that credential can read. The admin service is derived from the Datamesh service (`https://datamesh.oceanum.io` uses `https://admin.oceanum.io`); for any other service (a proxy, for example) set it with the `adminService` connector option, or no notices are fetched. `getNotices` never throws: on any failure, or after 3 seconds, it resolves to an empty list. Results are cached per datasource for 10 minutes.
+
+When you query or load a datasource, the connector also checks its notices in the background, once per datasource, and logs a `console.warn` for each `action_required` or `outage` notice. This never delays or fails the query. To turn it off:
+
+```ts
+const datamesh = new Connector("my_datamesh_token", { notices: false });
+```
+
 ## Using a Datamesh Proxy
 
 If you are building a browser application, we recommend using a reverse proxy to keep your Datamesh token secret and to simplify CORS. This package includes an example Cloudflare Worker you can deploy quickly and configure the `Connector` to use.
