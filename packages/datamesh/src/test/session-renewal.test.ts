@@ -42,7 +42,7 @@ describe("CachedHTTPStore 401 renewal", () => {
     expect(calls[1]["X-DATAMESH-SESSIONID"]).toBe("fresh-session");
     // ...and preserves the store-added zarr headers
     expect(calls[1]["x-parameters"]).toBe(JSON.stringify({ x: 1 }));
-    expect(calls[1]["x-filtered"]).toBe("True");
+    expect(calls[1]["x-filtered"]).toBeUndefined();
   });
 
   it("single-flights renewal across concurrent chunk fetches", async () => {
