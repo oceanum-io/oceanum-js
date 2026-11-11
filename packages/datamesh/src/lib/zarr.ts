@@ -145,7 +145,6 @@ export class CachedHTTPStore implements AsyncReadable {
     if (options.chunks) headers["x-chunks"] = options.chunks;
     if (options.downsample)
       headers["x-downsample"] = JSON.stringify(options.downsample);
-    headers["x-filtered"] = "True";
 
     this.params = {};
     if (authHeaders["x-datamesh-auth"]) {
@@ -193,7 +192,7 @@ export class CachedHTTPStore implements AsyncReadable {
    * Renew the session headers after a 401, single-flight: concurrent chunk
    * fetches that all hit the expired session share one renewal. The renewed
    * headers are merged over fetchOptions.headers so store-added headers
-   * (x-parameters, x-chunks, x-filtered, …) are preserved.
+   * (x-parameters, x-chunks, …) are preserved.
    */
   private async renewSessionHeaders(): Promise<void> {
     if (!this._renewHeaders) throw new Error("no renewHeaders callback");
